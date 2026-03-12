@@ -1224,7 +1224,10 @@ async function callGemini(userText, system, fileBase64, fileMime){
 
 const res = await fetch("https://vfylzwrijfxcojbrpopf.supabase.co/functions/v1/quick-handler", {
   method: "POST",
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + SUPABASE_KEY
+  },
   body: JSON.stringify(body)
 });
 
@@ -1377,29 +1380,6 @@ function fmtChat(text){
     .replace(/^#{1,3}\s+(.+)$/gm,`<div style="font-weight:700;font-size:14px;color:#00c8ff;margin:10px 0 4px">$1</div>`)
     .replace(/^[\-\*]\s+(.+)$/gm,`<div style="display:flex;gap:8px;margin-bottom:4px"><div style="width:6px;height:6px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:6px"></div><span>$1</span></div>`)
     .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
-}
-
-// Função segura que chama backend
-const res = await fetch(
-  "https://vfylzwrijfxcojbrpopf.supabase.co/functions/v1/quick-handler",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      userText: mensagem
-    })
-  }
-);
-
-const data = await res.json();
-  if(!res.ok){
-    const err = await res.json().catch(()=>({}));
-    throw new Error(err.error || 'Erro ao acessar IA');
-  }
-  const data = await res.json();
-  return data.text || '';
 }
 
 // Função principal de envio do chat
