@@ -1222,13 +1222,11 @@ async function callGemini(userText, system, fileBase64, fileMime){
     fileMime
   };
 
-  const res = await fetch("/api/ia", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
+const res = await fetch("https://vfylzwrijfxcojbrpopf.supabase.co/functions/v1/quick-handler", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(body)
+});
 
   if(!res.ok){
     const err = await res.json().catch(()=>({}));
@@ -1384,11 +1382,11 @@ function fmtChat(text){
 // Função segura que chama backend
 async function callGemini(userText){
   const body = { userText, chatHistory };
-  const res = await fetch('/api/ia', {  // seu endpoint seguro
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  });
+ const res = await fetch("https://vfylzwrijfxcojbrpopf.supabase.co/functions/v1/quick-handler", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(body)
+});
   if(!res.ok){
     const err = await res.json().catch(()=>({}));
     throw new Error(err.error || 'Erro ao acessar IA');
