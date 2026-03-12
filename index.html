@@ -1213,44 +1213,30 @@ function updateExtraNav(){
 // ══════════════════════════════════════════════════════════════
 // 10. CHECKLIST — TOGGLE + UPLOAD IA
 // ══════════════════════════════════════════════════════════════
-
-// Chave da API Google Gemini — salva no localStorage do navegador
-const GEMINI_KEY_FIXED='AIzaSyBi0EthjRgprTtOjAhqFpjweyKNZ23JTDY';
-function getApiKey(){ return localStorage.getItem('sgq_gemini_key')||GEMINI_KEY_FIXED; }
-function setApiKey(k){ localStorage.setItem('sgq_gemini_key',k.trim()); }
-
 async function callGemini(userText, system, fileBase64, fileMime){
-  const key=getApiKey();
-  const parts=[];
-  if(system) parts.push({text:system+'\n\n'});
-  if(fileBase64 && fileMime){
-    parts.push({inline_data:{mime_type:fileMime,data:fileBase64}});
-  }
-  parts.push({text:userText});
-  const body={contents:[{role:'user',parts}],generationConfig:{temperature:0.3,maxOutputTokens:1500}};
-  const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  });
-  if(!res.ok){
-    const err=await res.json().catch(()=>({}));
-    throw new Error(err.error?.message||'Erro Gemini: '+res.status);
-  }
-  const data=await res.json();
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text||'';
-}
 
-function configurarChaveAPI(){
-  const atual=getApiKey();
-  const nova=prompt('🔑 Chave da API Google Gemini:\n\n'+(atual?'Chave atual: '+atual.substring(0,20)+'...\n\nDigite nova chave para substituir, ou cancele para manter.':'Cole sua chave:\n\nObtena em: aistudio.google.com → Get API Key')+'\n\nA chave fica salva apenas no seu navegador.');
-  if(nova===null) return;
-  if(nova.trim()){
-    setApiKey(nova.trim());
-    alert('✅ Chave salva com sucesso!');
-  } else if(atual){
-    if(confirm('Remover a chave salva?')){localStorage.removeItem('sgq_gemini_key');alert('Chave removida.');}
+  const body = {
+    userText,
+    system,
+    fileBase64,
+    fileMime
+  };
+
+  const res = await fetch("/api/ia", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error(err.error || "Erro ao acessar IA");
   }
+
+  const data = await res.json();
+  return data.text || "";
 }
 
 async function toggleDone(id){
