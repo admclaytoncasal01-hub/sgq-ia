@@ -1357,6 +1357,7 @@ async function registrarLog(acao, detalhe){
 // ── ANOS via Supabase ──
 const anoData={};
 let anoAtual=2025;
+let docList = [];  
 
 async function carregarAnos(){
   try{
@@ -1765,11 +1766,14 @@ function doLogout(){
 
 function initAno(ano){
   if(!anoData[ano]){
-    anoData[ano]={
-      done:{}, results:{}, openSubs:{}, docList: ano===2025 ? JSON.parse(JSON.stringify(docList)) : []
+    anoData[ano] = {
+      done:{},
+      results:{},
+      openSubs:{},
+      docList: ano === 2025 
+        ? JSON.parse(JSON.stringify(docListDefault))
+        : []
     };
-    // primeiro subitem aberto por padrão
-    anoData[ano].openSubs['4.1']=true;
   }
 }
 
