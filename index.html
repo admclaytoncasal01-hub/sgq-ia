@@ -1764,20 +1764,6 @@ function alterarSenha(){
   setTimeout(()=>msgEl.textContent='',3000);
 }
 
-// ── LOGIN ──
-const USERS = [
-  {user:'admin',     pass:'sgq2025', nome:'Administrador',      perfil:'Administrador',       depto:'Diretoria', email:'admin@empresa.com',    ativo:true},
-  {user:'qualidade', pass:'iso9001', nome:'Gestor da Qualidade', perfil:'Gestor da Qualidade', depto:'Qualidade', email:'qualidade@empresa.com', ativo:true},
-];
-
-const USERS = [
-  {
-    user: "admin@admin.com",
-    pass: "123456",
-    nome: "Administrador",
-    ativo: true
-  }
-];
 
 function doLogin(){
   const u=document.getElementById('loginUser').value.trim();
