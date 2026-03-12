@@ -879,7 +879,11 @@ async function sb(path, opts={}){
   const session=JSON.parse(localStorage.getItem('sgq_session')||'null');
   if(session?.access_token) headers['Authorization']='Bearer '+session.access_token;
   const res=await fetch(SUPABASE_URL+path,{...opts,headers});
-  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||e.error_description||res.status);}
+  if(!res.ok){
+    const e=await res.json().catch(()=>({}));
+    const msg=e.msg||e.message||e.error_description||e.error||JSON.stringify(e)||res.status;
+    throw new Error(msg);
+  }
   const ct=res.headers.get('content-type')||'';
   return ct.includes('json')?res.json():null;
 }
@@ -894,8 +898,30 @@ async function doLogin(){
   const btn=document.getElementById('loginBtn');
   if(!email||!pass){errEl.textContent='Preencha email e senha.';return;}
   btn.textContent='Entrando...';btn.disabled=true;
+  errEl.textContent='';
   try{
-    const data=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password:pass})});
+    // Chama diretamente com fetch para capturar o erro bruto do Supabase
+    const res=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
+      body:JSON.stringify({email,password:pass})
+    });
+    const data=await res.json();
+    if(!res.ok){
+      // Mensagens amigáveis para cada código de erro do Supabase
+      const msg=data.msg||data.message||data.error_description||data.error||'Erro desconhecido';
+      if(msg.includes('Email not confirmed')||msg.includes('email not confirmed'))
+        errEl.textContent='⚠️ Email não confirmado. Vá ao Supabase → Authentication → Users → clique no seu usuário → "Confirm email".';
+      else if(msg.includes('Invalid login')||msg.includes('invalid')||msg.includes('Wrong'))
+        errEl.textContent='❌ Email ou senha incorretos.';
+      else if(msg.includes('rate limit')||msg.includes('too many'))
+        errEl.textContent='⏳ Muitas tentativas. Aguarde alguns minutos.';
+      else
+        errEl.textContent='Erro: '+msg;
+      btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
+      document.getElementById('loginPass').value='';
+      return;
+    }
     sbSession=data;
     localStorage.setItem('sgq_session',JSON.stringify(data));
     const perfis=await sb('/rest/v1/perfis?id=eq.'+data.user.id+'&select=*');
@@ -910,9 +936,8 @@ async function doLogin(){
     await registrarLog('login','Acesso ao sistema SGQ');
     abrirSistema();
   }catch(e){
-    errEl.textContent=e.message.includes('Invalid')||e.message.includes('invalid')?'Email ou senha incorretos.':'Erro: '+e.message;
+    errEl.textContent='Erro de conexão: '+e.message;
     document.getElementById('loginPass').value='';
-    setTimeout(()=>errEl.textContent='',4000);
   }
   btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
 }
