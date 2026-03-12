@@ -1883,7 +1883,64 @@ function syncAno(){
 renderYearPills();
 // Foca no campo de usuário ao carregar
 setTimeout(()=>{ const el=document.getElementById('loginUser'); if(el) el.focus(); },100);
+<script>
 
+// usuário logado
+let loggedUser = null;
+
+// usuários do sistema (teste)
+const USERS = [
+  {
+    user: "admin@admin.com",
+    pass: "123456",
+    nome: "Administrador",
+    ativo: true
+  }
+];
+
+// função de login
+function doLogin(){
+
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+
+  const found = USERS.find(
+    x => x.user === u && x.pass === p && x.ativo !== false
+  );
+
+  if(found){
+
+    loggedUser = found;
+
+    document.getElementById('loginScreen').style.display = 'none';
+
+    if(document.getElementById('sidebarUser')){
+      document.getElementById('sidebarUser').textContent = found.nome;
+    }
+
+    document.getElementById('loginError').textContent = '';
+
+    if(typeof renderYearPills === "function") renderYearPills();
+    if(typeof updateExtraNav === "function") updateExtraNav();
+    if(typeof render === "function") render();
+
+  } else {
+
+    const err = document.getElementById('loginError');
+
+    err.textContent = 'Usuário ou senha inválidos.';
+
+    document.getElementById('loginPass').value = '';
+
+    document.getElementById('loginPass').focus();
+
+    setTimeout(()=>{
+      err.textContent='';
+    },3000);
+
+  }
+
+}
 </script>
 </body>
 </html>
