@@ -623,7 +623,14 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
 
 <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx" style="display:none">
 
+
 <script>
+// ══════════════════════════════════════════════════════════════
+// 1. CONSTANTES GLOBAIS — devem vir PRIMEIRO
+// ══════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://vfylzwrijfxcojbrpopf.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmeWx6d3JpamZ4Y29qYnJwb3BmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMjIyOTYsImV4cCI6MjA4ODg5ODI5Nn0.67IDxCF4ef0ejJHsShcCsH3Ztxh-_USlLxfa_vHjxrY';
+
 const CHECKLIST = {
   4:{title:"Contexto da Organização",sub:"Partes interessadas · Escopo · Processos do SGQ",
     subitems:[
@@ -812,34 +819,236 @@ const SYSTEM_PROMPT = `Você é auditor ISO 9001 especialista. Analise o documen
 Responda APENAS com JSON válido, sem texto adicional, sem markdown:
 {"aprovado":true,"conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}`;
 
-// STATE
+const CHAT_SYSTEM = `Você é o Assistente Inteligente do SGQ, especialista em ISO 9001.
+Apoie a organização na manutenção, análise e melhoria do Sistema de Gestão da Qualidade.
+Sempre que analisar dados apresente: nível de conformidade, riscos, observações e recomendações.
+Ao criar documentos SGQ use: Objetivo, Escopo, Referências, Definições, Responsabilidades, Descrição do processo, Registros gerados, Indicadores, Riscos, Melhoria contínua.
+Responda em português do Brasil. Seja técnico e estruturado.`;
+
+const EXTRA_MODULES = [
+  {id:'chat',     icon:'🤖', label:'Assistente IA',         badge:''},
+  {id:'auditInt', icon:'🔍', label:'Auditoria Interna',     badge:''},
+  {id:'auditExt', icon:'🏅', label:'Pré-Auditoria Externa', badge:''},
+  {id:'docs',     icon:'📄', label:'Documentos',            badge:''},
+  {id:'alertas',  icon:'🔔', label:'Alertas',               badge:'3'},
+  {id:'usuarios', icon:'👥', label:'Usuários',              badge:''},
+];
+
+const MAIN_IDS = {
+  req:'mainReq', chat:'mainChat', auditInt:'mainAuditInt',
+  auditExt:'mainAuditExt', docs:'mainDocs', alertas:'mainAlertas',
+  usuarios:'mainUsuarios'
+};
+
+const docListDefault = [
+  {cod:'POL-001',titulo:'Política da Qualidade',tipo:'Política',req:'5',versao:'v3.0',resp:'Diretoria',aprv:'2024-01-10',val:'2025-06-30',status:'vigente',desc:'Define os compromissos da organização com a qualidade.',arquivo:''},
+  {cod:'POP-001',titulo:'Controle de Documentos',tipo:'Procedimento',req:'7',versao:'v2.1',resp:'Qualidade',aprv:'2024-03-01',val:'2025-09-01',status:'vigente',desc:'Estabelece o controle de criação, revisão e aprovação de documentos.',arquivo:''},
+  {cod:'POP-002',titulo:'Controle de Registros',tipo:'Procedimento',req:'7',versao:'v2.0',resp:'Qualidade',aprv:'2024-03-01',val:'2025-09-01',status:'vigente',desc:'Define o controle e retenção de registros do SGQ.',arquivo:''},
+  {cod:'POP-003',titulo:'Atendimento ao Cliente',tipo:'Procedimento',req:'8',versao:'v1.4',resp:'Comercial',aprv:'2024-04-15',val:'2025-04-15',status:'revisao',desc:'Padroniza o processo de atendimento e tratamento de reclamações.',arquivo:''},
+  {cod:'POP-004',titulo:'Avaliação de Fornecedores',tipo:'Procedimento',req:'8',versao:'v2.2',resp:'Compras',aprv:'2024-07-10',val:'2025-07-10',status:'vigente',desc:'Critérios e processo de qualificação e avaliação de fornecedores.',arquivo:''},
+  {cod:'POP-007',titulo:'Controle de Equipamentos',tipo:'Procedimento',req:'7',versao:'v1.8',resp:'Manutenção',aprv:'2023-03-01',val:'2025-03-01',status:'vencido',desc:'Controle, manutenção e calibração de equipamentos.',arquivo:''},
+  {cod:'IT-012',titulo:'Calibração de Instrumentos',tipo:'Instrução',req:'7',versao:'v1.2',resp:'Qualidade',aprv:'2023-02-28',val:'2025-02-28',status:'vencido',desc:'Instrução para calibração dos instrumentos de medição.',arquivo:''},
+  {cod:'IT-018',titulo:'Auditorias Internas',tipo:'Instrução',req:'9',versao:'v3.1',resp:'Qualidade',aprv:'2024-12-01',val:'2025-12-01',status:'vigente',desc:'Procedimento para planejamento e execução de auditorias internas.',arquivo:''},
+];
+
+// ══════════════════════════════════════════════════════════════
+// 2. ESTADO GLOBAL
+// ══════════════════════════════════════════════════════════════
 let currentReq = 4;
 let done = {};
 let results = {};
 let openSubs = {"4.1":true};
 let uploading = null;
 let pendingUpload = null;
+let activeModule = 'req';
+let docFiltro = 'todos';
+let docList = [];
+let chatHistory = [];
+let chatLoading = false;
+let loggedUser = null;
+let sbSession = null;
+let sbUsers = [];
+const anoData = {};
+let anoAtual = 2025;
 
-function pctColor(p){ return p>=85?'#00e676':p>=50?'#ffea00':p>0?'#ff5252':'#607080'; }
-
-function allCriterios(rn){
-  return CHECKLIST[rn].subitems.flatMap(s=>s.criterios);
-}
-function reqPct(rn){
-  const all=allCriterios(rn);
-  if(!all.length) return 0;
-  return Math.round(all.filter(c=>done[c.id]).length/all.length*100);
-}
-function subPct(sub){
-  if(!sub.criterios.length) return 0;
-  return Math.round(sub.criterios.filter(c=>done[c.id]).length/sub.criterios.length*100);
-}
-function totalPct(){
-  const all=Object.values(CHECKLIST).flatMap(r=>r.subitems.flatMap(s=>s.criterios));
-  if(!all.length) return 0;
-  return Math.round(all.filter(c=>done[c.id]).length/all.length*100);
+// ══════════════════════════════════════════════════════════════
+// 3. SUPABASE HELPER
+// ══════════════════════════════════════════════════════════════
+async function sb(path, opts={}){
+  const headers={'Content-Type':'application/json','apikey':SUPABASE_KEY,...(opts.headers||{})};
+  const session=JSON.parse(localStorage.getItem('sgq_session')||'null');
+  if(session?.access_token) headers['Authorization']='Bearer '+session.access_token;
+  const res=await fetch(SUPABASE_URL+path,{...opts,headers});
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||e.error_description||res.status);}
+  const ct=res.headers.get('content-type')||'';
+  return ct.includes('json')?res.json():null;
 }
 
+// ══════════════════════════════════════════════════════════════
+// 4. AUTH — LOGIN / LOGOUT
+// ══════════════════════════════════════════════════════════════
+async function doLogin(){
+  const email=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const errEl=document.getElementById('loginError');
+  const btn=document.getElementById('loginBtn');
+  if(!email||!pass){errEl.textContent='Preencha email e senha.';return;}
+  btn.textContent='Entrando...';btn.disabled=true;
+  try{
+    const data=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password:pass})});
+    sbSession=data;
+    localStorage.setItem('sgq_session',JSON.stringify(data));
+    const perfis=await sb('/rest/v1/perfis?id=eq.'+data.user.id+'&select=*');
+    const perfil=perfis&&perfis[0]?perfis[0]:{nome:email,perfil:'Colaborador',email};
+    if(perfil.ativo===false){
+      errEl.textContent='Conta desativada. Contate o administrador.';
+      localStorage.removeItem('sgq_session');
+      btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
+      return;
+    }
+    loggedUser={...perfil,id:data.user.id};
+    await registrarLog('login','Acesso ao sistema SGQ');
+    abrirSistema();
+  }catch(e){
+    errEl.textContent=e.message.includes('Invalid')||e.message.includes('invalid')?'Email ou senha incorretos.':'Erro: '+e.message;
+    document.getElementById('loginPass').value='';
+    setTimeout(()=>errEl.textContent='',4000);
+  }
+  btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
+}
+
+async function doLogout(){
+  if(!confirm('Deseja sair do sistema?')) return;
+  try{await registrarLog('logout','Saiu do sistema');await sb('/auth/v1/logout',{method:'POST'});}catch{}
+  loggedUser=null;sbSession=null;
+  localStorage.removeItem('sgq_session');
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginScreen').style.display='flex';
+}
+
+function abrirSistema(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('sidebarUser').textContent=loggedUser.nome||loggedUser.email;
+  document.getElementById('loginError').textContent='';
+  carregarAnos().then(()=>{
+    renderYearPills();
+    carregarAno(anoAtual).then(()=>{updateExtraNav();render();});
+  });
+}
+
+async function registrarLog(acao, detalhe){
+  try{await sb('/rest/v1/log_acesso',{method:'POST',body:JSON.stringify({usuario_id:loggedUser?.id,email:loggedUser?.email,acao,detalhe,criado_em:new Date().toISOString()})});}catch{}
+}
+
+// ══════════════════════════════════════════════════════════════
+// 5. ANOS
+// ══════════════════════════════════════════════════════════════
+async function carregarAnos(){
+  try{
+    const rows=await sb('/rest/v1/anos_sgq?select=ano&order=ano.asc');
+    if(rows&&rows.length){
+      rows.forEach(r=>{if(!anoData[r.ano]) anoData[r.ano]={done:{},results:{},openSubs:{'4.1':true},docList:[]};});
+      anoAtual=rows[0].ano;
+    }else{
+      await sb('/rest/v1/anos_sgq',{method:'POST',body:JSON.stringify({ano:2025})});
+      anoData[2025]={done:{},results:{},openSubs:{'4.1':true},docList:[]};
+      anoAtual=2025;
+    }
+  }catch{anoData[2025]={done:{},results:{},openSubs:{'4.1':true},docList:[]};anoAtual=2025;}
+}
+
+async function carregarAno(ano){
+  if(!anoData[ano]) anoData[ano]={done:{},results:{},openSubs:{'4.1':true},docList:[]};
+  try{
+    const ck=await sb('/rest/v1/checklist?ano=eq.'+ano+'&select=criterio_id,feito');
+    if(ck) ck.forEach(r=>{anoData[ano].done[r.criterio_id]=r.feito;});
+    const ri=await sb('/rest/v1/resultados_ia?ano=eq.'+ano+'&select=*');
+    if(ri) ri.forEach(r=>{anoData[ano].results[r.criterio_id]={aprovado:r.aprovado,conformidade:r.conformidade,pontos_atendidos:r.pontos_atendidos||[],pontos_faltando:r.pontos_faltando||[],recomendacao:r.recomendacao,filename:r.filename,erro:r.erro};});
+    const docs=await sb('/rest/v1/documentos?ano=eq.'+ano+'&select=*&order=criado_em.asc');
+    if(docs&&docs.length) anoData[ano].docList=docs.map(d=>(({cod:d.codigo,titulo:d.titulo,tipo:d.tipo,req:d.requisito_iso,versao:d.versao,resp:d.responsavel,aprv:d.data_aprovacao,val:d.data_validade,status:d.status,desc:d.descricao,arquivo:d.arquivo||'',_id:d.id})));
+    else if(ano===2025) anoData[ano].docList=JSON.parse(JSON.stringify(docListDefault));
+  }catch(e){console.warn('carregarAno:',e);}
+  done=anoData[ano].done;
+  results=anoData[ano].results;
+  openSubs=anoData[ano].openSubs;
+  docList=anoData[ano].docList;
+}
+
+async function trocarAno(ano){
+  anoAtual=ano;
+  await carregarAno(ano);
+  currentReq=4;
+  renderYearPills();
+  render();
+  if(activeModule==='docs') renderDocs();
+}
+
+async function adicionarAno(){
+  const anos=Object.keys(anoData).map(Number);
+  const proximo=Math.max(...anos)+1;
+  if(anos.length>=10){alert('Máximo de 10 anos.');return;}
+  try{await sb('/rest/v1/anos_sgq',{method:'POST',body:JSON.stringify({ano:proximo})});}catch{}
+  anoData[proximo]={done:{},results:{},openSubs:{'4.1':true},docList:[]};
+  await trocarAno(proximo);
+}
+
+function renderYearPills(){
+  const container=document.getElementById('yearPills');
+  if(!container) return;
+  const anos=Object.keys(anoData).map(Number).sort();
+  container.innerHTML='';
+  container.style.cssText='display:flex;gap:5px;flex-wrap:wrap;flex:1';
+  anos.forEach(a=>{
+    const btn=document.createElement('button');
+    btn.className='year-pill'+(a===anoAtual?' active':'');
+    btn.textContent=a;
+    btn.onclick=()=>trocarAno(a);
+    container.appendChild(btn);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// 6. SUPABASE SAVE HELPERS
+// ══════════════════════════════════════════════════════════════
+async function saveCriterio(id, feito){
+  try{await sb('/rest/v1/checklist',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({ano:anoAtual,criterio_id:id,feito,usuario_id:loggedUser?.id,atualizado_em:new Date().toISOString()})});}catch(e){console.warn('saveCriterio:',e);}
+}
+
+async function saveResultadoIA(id, resultado){
+  try{
+    await sb('/rest/v1/resultados_ia',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({
+      ano:anoAtual,criterio_id:id,aprovado:resultado.aprovado,conformidade:resultado.conformidade,
+      pontos_atendidos:resultado.pontos_atendidos,pontos_faltando:resultado.pontos_faltando,
+      recomendacao:resultado.recomendacao,filename:resultado.filename,erro:resultado.erro||false,
+      usuario_id:loggedUser?.id,criado_em:new Date().toISOString()
+    })});
+  }catch(e){console.warn('saveResultadoIA:',e);}
+}
+
+async function salvarDocumentoSb(doc){
+  try{
+    if(doc._id){
+      await sb('/rest/v1/documentos?id=eq.'+doc._id,{method:'PATCH',body:JSON.stringify({status:doc.status,atualizado_em:new Date().toISOString()})});
+    }else{
+      const res=await sb('/rest/v1/documentos',{method:'POST',headers:{'Prefer':'return=representation'},body:JSON.stringify({ano:anoAtual,codigo:doc.cod,titulo:doc.titulo,tipo:doc.tipo,requisito_iso:doc.req,versao:doc.versao,responsavel:doc.resp,data_aprovacao:doc.aprv||null,data_validade:doc.val||null,status:doc.status,descricao:doc.desc,arquivo:doc.arquivo||'',usuario_id:loggedUser?.id})});
+      if(res&&res[0]) doc._id=res[0].id;
+    }
+  }catch(e){console.warn('salvarDocumentoSb:',e);}
+}
+
+// ══════════════════════════════════════════════════════════════
+// 7. FUNÇÕES DE CÁLCULO
+// ══════════════════════════════════════════════════════════════
+function pctColor(p){return p>=85?'#00e676':p>=50?'#ffea00':p>0?'#ff5252':'#607080';}
+function allCriterios(rn){return CHECKLIST[rn].subitems.flatMap(s=>s.criterios);}
+function reqPct(rn){const all=allCriterios(rn);if(!all.length) return 0;return Math.round(all.filter(c=>done[c.id]).length/all.length*100);}
+function subPct(sub){if(!sub.criterios.length) return 0;return Math.round(sub.criterios.filter(c=>done[c.id]).length/sub.criterios.length*100);}
+function totalPct(){const all=Object.values(CHECKLIST).flatMap(r=>r.subitems.flatMap(s=>s.criterios));if(!all.length) return 0;return Math.round(all.filter(c=>done[c.id]).length/all.length*100);}
+
+// ══════════════════════════════════════════════════════════════
+// 8. RENDER — TOPBAR, SIDEBAR, CONTEÚDO ISO
+// ══════════════════════════════════════════════════════════════
 function updateTopbar(){
   const req=CHECKLIST[currentReq];
   const pct=reqPct(currentReq);
@@ -855,10 +1064,8 @@ function updateTopbar(){
   document.getElementById('topBarFill').style.width=pct+'%';
   document.getElementById('topBarFill').style.background=col;
   const falta=all.length-dc;
-  document.getElementById('topHint').textContent= pct===100
-    ? '✅ Requisito '+currentReq+' 100% conforme com a ISO 9001!'
-    : 'Faltam '+falta+' critério'+(falta>1?'s':'')+' para 100% — clique em 📎 Enviar doc em cada critério pendente.';
-  document.getElementById('topHint').style.color= pct===100?'#00e676':'#607080';
+  document.getElementById('topHint').textContent=pct===100?'✅ Requisito '+currentReq+' 100% conforme com a ISO 9001!':'Faltam '+falta+' critério'+(falta>1?'s':'')+' para 100% — clique em 📎 Enviar doc em cada critério pendente.';
+  document.getElementById('topHint').style.color=pct===100?'#00e676':'#607080';
 }
 
 function updateSidebar(){
@@ -868,9 +1075,7 @@ function updateSidebar(){
   document.getElementById('totalPctLabel').style.color=tCol;
   document.getElementById('totalBarFill').style.width=tp+'%';
   document.getElementById('totalBarFill').style.background=tCol;
-
   updateExtraNav();
-
   const nav=document.getElementById('navItems');
   nav.innerHTML='';
   Object.entries(CHECKLIST).forEach(([n,d])=>{
@@ -879,13 +1084,8 @@ function updateSidebar(){
     const active=activeModule==='req'&&currentReq===parseInt(n);
     const div=document.createElement('div');
     div.className='nav-item'+(active?' active':'');
-    div.innerHTML=`
-      <div class="nav-item-row">
-        <span class="nav-item-name">Req. ${n} · ${d.title}</span>
-        <span class="nav-item-pct" style="color:${p===0?'#607080':col}">${p}%</span>
-      </div>
-      <div class="nav-mini-bar"><div style="width:${p}%;height:100%;background:${p===0?'#1e2d3d':col};border-radius:2px;transition:width .5s"></div></div>`;
-    div.onclick=()=>{ currentReq=parseInt(n); showModule('req'); render(); };
+    div.innerHTML=`<div class="nav-item-row"><span class="nav-item-name">Req. ${n} · ${d.title}</span><span class="nav-item-pct" style="color:${p===0?'#607080':col}">${p}%</span></div><div class="nav-mini-bar"><div style="width:${p}%;height:100%;background:${p===0?'#1e2d3d':col};border-radius:2px;transition:width .5s"></div></div>`;
+    div.onclick=()=>{currentReq=parseInt(n);showModule('req');render();};
     nav.appendChild(div);
   });
 }
@@ -894,298 +1094,74 @@ function renderContent(){
   const req=CHECKLIST[currentReq];
   const content=document.getElementById('content');
   content.innerHTML='';
-
   req.subitems.forEach(sub=>{
     const sp=subPct(sub);
     const col=pctColor(sp);
     const isOpen=!!openSubs[sub.num];
     const pending=sub.criterios.filter(c=>!done[c.id]);
     const doneCnt=sub.criterios.filter(c=>done[c.id]).length;
-
     const card=document.createElement('div');
     card.className='sub-card';
     card.id='subcard-'+sub.num;
-
-    // Header
     const header=document.createElement('div');
     header.className='sub-header';
-    header.innerHTML=`
-      <div class="sub-num">${sub.num}</div>
-      <div style="flex:1">
-        <div class="sub-name">${sub.name}</div>
-        <div class="sub-meta">${doneCnt}/${sub.criterios.length} critérios${pending.length>0?' · <span style="color:#ffea00">'+pending.length+' pendente'+(pending.length>1?'s':'')+'</span>':''}${sp===100?' · <span style="color:#00e676">✅ Completo</span>':''}</div>
-      </div>
-      <div class="sub-pct" style="color:${sp===0?'#607080':col}">${sp}%</div>
-      <div class="sub-chevron" style="transform:${isOpen?'rotate(180deg)':'rotate(0)'}"">▼</div>`;
-    header.onclick=()=>{
-      openSubs[sub.num]=!openSubs[sub.num];
-      render();
-    };
+    header.innerHTML=`<div class="sub-num">${sub.num}</div><div style="flex:1"><div class="sub-name">${sub.name}</div><div class="sub-meta">${doneCnt}/${sub.criterios.length} critérios${pending.length>0?' · <span style="color:#ffea00">'+pending.length+' pendente'+(pending.length>1?'s':'')+'</span>':''}${sp===100?' · <span style="color:#00e676">✅ Completo</span>':''}</div></div><div class="sub-pct" style="color:${sp===0?'#607080':col}">${sp}%</div><div class="sub-chevron" style="transform:${isOpen?'rotate(180deg)':'rotate(0)'}">▼</div>`;
+    header.onclick=()=>{openSubs[sub.num]=!openSubs[sub.num];render();};
     card.appendChild(header);
-
-    // Mini bar
     const miniBar=document.createElement('div');
     miniBar.className='sub-minibar';
     miniBar.innerHTML=`<div style="height:3px;width:${sp}%;background:${sp===0?'#1e2d3d':col};transition:width .5s;border-radius:2px"></div>`;
     card.appendChild(miniBar);
-
-    // Criterios
     if(isOpen){
       const criteriosDiv=document.createElement('div');
       criteriosDiv.className='criterios';
-
       sub.criterios.forEach(c=>{
         const isDone=!!done[c.id];
         const result=results[c.id];
         const isUp=uploading===c.id;
-
         const cDiv=document.createElement('div');
         cDiv.className='criterio'+(isDone?' done':'');
         cDiv.id='crit-'+c.id;
-
         let resultHTML='';
         if(result&&!result.erro){
           const rClass=result.aprovado?'ok':'warn';
           const rColor=result.aprovado?'#00e676':'#ffea00';
           const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');
           const falta=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');
-          resultHTML=`<div class="ia-result ${rClass}">
-            <div class="ia-result-header" style="color:${rColor}">
-              <span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span>
-              <span class="ia-result-filename">📄 ${result.filename||''}</span>
-            </div>
-            ${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}
-            ${falta?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falta}`:''}
-            ${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}
-          </div>`;
-        } else if(result&&result.erro){
+          resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span></div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falta?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falta}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
+        }else if(result&&result.erro){
           resultHTML=`<div class="ia-result err"><span style="color:#ff5252">❌ Erro ao analisar. Tente novamente.</span></div>`;
         }
-
-        cDiv.innerHTML=`
-          <div class="criterio-row">
-            <div class="checkbox${isDone?' checked':''}" onclick="toggleDone('${c.id}')">
-              ${isDone?'<span class="checkbox-tick">✓</span>':''}
-            </div>
-            <div style="flex:1">
-              <div class="criterio-label"><span class="criterio-id">${c.id}</span>${c.label}</div>
-              ${resultHTML}
-            </div>
-            <button class="upload-btn ${isDone?'done':'pending'}" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')" ${isUp?'disabled':''}>
-              ${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}
-            </button>
-          </div>`;
+        cDiv.innerHTML=`<div class="criterio-row"><div class="checkbox${isDone?' checked':''}" onclick="toggleDone('${c.id}')">${isDone?'<span class="checkbox-tick">✓</span>':''}</div><div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id}</span>${c.label}</div>${resultHTML}</div><button class="upload-btn ${isDone?'done':'pending'}" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button></div>`;
         criteriosDiv.appendChild(cDiv);
       });
-
-      // Falta resumo
       if(pending.length>0){
         const faltaDiv=document.createElement('div');
         faltaDiv.className='falta-box';
-        faltaDiv.innerHTML=`<div class="falta-title">📋 Para chegar a 100% neste subitem, ainda falta:</div>`+
-          pending.map(c=>`
-            <div class="falta-item">
-              <span>• ${c.label}</span>
-              <button class="falta-btn" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')">📎 Enviar →</button>
-            </div>`).join('');
+        faltaDiv.innerHTML=`<div class="falta-title">📋 Para chegar a 100% neste subitem, ainda falta:</div>`+pending.map(c=>`<div class="falta-item"><span>• ${c.label}</span><button class="falta-btn" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')">📎 Enviar →</button></div>`).join('');
         criteriosDiv.appendChild(faltaDiv);
       }
-
       if(sp===100){
         const completeDiv=document.createElement('div');
         completeDiv.className='complete-box';
         completeDiv.textContent='✅ Subitem '+sub.num+' 100% conforme com a ISO 9001!';
         criteriosDiv.appendChild(completeDiv);
       }
-
       card.appendChild(criteriosDiv);
     }
-
     content.appendChild(card);
   });
 }
 
-function render(){
-  updateTopbar();
-  updateSidebar();
-  renderContent();
-}
+function render(){updateTopbar();updateSidebar();renderContent();}
 
-// ── GESTÃO DOCUMENTAL ──
-let docFiltro = 'todos';
-let docList = JSON.parse(JSON.stringify(docListDefault));
-
-function fmtDate(d){ if(!d) return '—'; const p=d.split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d; }
-
-function statusClass(s){ return s==='vigente'?'ds-vigente':s==='revisao'?'ds-revisao':s==='vencido'?'ds-vencido':'ds-vencido'; }
-function statusLabel(s){ return s==='vigente'?'Vigente':s==='revisao'?'Em Revisão':s==='vencido'?'Vencido':'Obsoleto'; }
-
-function renderDocs(){
-  // Stats
-  const stats=document.getElementById('docStats');
-  if(!stats) return;
-  const total=docList.length;
-  const vig=docList.filter(d=>d.status==='vigente').length;
-  const rev=docList.filter(d=>d.status==='revisao').length;
-  const venc=docList.filter(d=>d.status==='vencido'||d.status==='obsoleto').length;
-  stats.innerHTML=`
-    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #00c8ff;border-radius:10px;padding:14px;text-align:center">
-      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#00c8ff">${total}</div>
-      <div style="font-size:11px;color:#607080;margin-top:3px">Total de Documentos</div>
-    </div>
-    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #00e676;border-radius:10px;padding:14px;text-align:center">
-      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#00e676">${vig}</div>
-      <div style="font-size:11px;color:#607080;margin-top:3px">Vigentes</div>
-    </div>
-    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #ffea00;border-radius:10px;padding:14px;text-align:center">
-      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ffea00">${rev}</div>
-      <div style="font-size:11px;color:#607080;margin-top:3px">Em Revisão</div>
-    </div>
-    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #ff5252;border-radius:10px;padding:14px;text-align:center">
-      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ff5252">${venc}</div>
-      <div style="font-size:11px;color:#607080;margin-top:3px">Vencidos / Obsoletos</div>
-    </div>`;
-
-  // Tabela
-  const tbody=document.getElementById('docTbody');
-  if(!tbody) return;
-  const lista=docFiltro==='todos'?docList:docList.filter(d=>d.status===docFiltro);
-  tbody.innerHTML='';
-  if(lista.length===0){
-    tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;color:#607080;padding:24px">Nenhum documento encontrado.</td></tr>`;
-    return;
-  }
-  lista.forEach((d,i)=>{
-    const idx=docList.indexOf(d);
-    const sc=statusClass(d.status);
-    const sl=statusLabel(d.status);
-    const row=document.createElement('tr');
-    row.innerHTML=`
-      <td style="color:#00c8ff;font-weight:600">${d.cod}</td>
-      <td>
-        <div style="font-weight:500">${d.titulo}</div>
-        ${d.desc?`<div style="font-size:11px;color:#607080;margin-top:2px">${d.desc}</div>`:''}
-        ${d.arquivo?`<div style="font-size:11px;color:#00e676;margin-top:2px">📎 ${d.arquivo}</div>`:''}
-      </td>
-      <td style="color:#607080">${d.tipo}</td>
-      <td><span style="background:rgba(0,200,255,.08);color:#00c8ff;border:1px solid rgba(0,200,255,.2);padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600">Req.${d.req}</span></td>
-      <td style="color:#607080">${d.versao}</td>
-      <td>${d.resp}</td>
-      <td style="color:#607080">${fmtDate(d.aprv)}</td>
-      <td style="color:${d.status==='vencido'||d.status==='obsoleto'?'#ff5252':d.status==='revisao'?'#ffea00':'#607080'}">${fmtDate(d.val)}</td>
-      <td><span class="doc-status ${sc}">${sl}</span></td>
-      <td>
-        <div style="display:flex;gap:6px">
-          <button onclick="editarStatus(${idx})" title="Alterar status" style="padding:4px 9px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:11px;cursor:pointer">✏️</button>
-          <button onclick="excluirDoc(${idx})" title="Excluir" style="padding:4px 9px;border-radius:6px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:11px;cursor:pointer">🗑</button>
-        </div>
-      </td>`;
-    tbody.appendChild(row);
-  });
-}
-
-function toggleDocForm(){
-  const box=document.getElementById('docFormBox');
-  box.style.display=box.style.display==='none'?'block':'none';
-  if(box.style.display==='block'){
-    const hoje=new Date().toISOString().split('T')[0];
-    document.getElementById('df_aprv').value=hoje;
-    // validade padrão = 1 ano
-    const val=new Date(); val.setFullYear(val.getFullYear()+1);
-    document.getElementById('df_val').value=val.toISOString().split('T')[0];
-  }
-}
-
-function docFileSelected(inp){
-  const name=inp.files[0]?inp.files[0].name:'Nenhum arquivo selecionado';
-  document.getElementById('df_filename').textContent=name;
-  document.getElementById('df_filename').style.color=inp.files[0]?'#00e676':'#607080';
-}
-
-async function salvarDocumento(){
-  const cod=document.getElementById('df_cod').value.trim();
-  const titulo=document.getElementById('df_titulo').value.trim();
-  if(!cod||!titulo){alert('Código e Título são obrigatórios.');return;}
-  const fileInp=document.getElementById('df_file');
-  const arquivo=fileInp.files[0]?fileInp.files[0].name:'';
-  const newDoc={
-    cod, titulo,
-    tipo:document.getElementById('df_tipo').value,
-    req:document.getElementById('df_req').value,
-    versao:document.getElementById('df_versao').value||'v1.0',
-    resp:document.getElementById('df_resp').value,
-    aprv:document.getElementById('df_aprv').value,
-    val:document.getElementById('df_val').value,
-    status:document.getElementById('df_status').value,
-    desc:document.getElementById('df_desc').value,
-    arquivo
-  };
-  await salvarDocumentoSb(newDoc);
-  docList.push(newDoc);
-  ['df_cod','df_titulo','df_versao','df_resp','df_desc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('df_versao').value='v1.0';
-  document.getElementById('df_filename').textContent='Nenhum arquivo selecionado';
-  document.getElementById('df_filename').style.color='#607080';
-  document.getElementById('docFormBox').style.display='none';
-  renderDocs();
-}
-
-function filtrarDocs(tipo){
-  docFiltro=tipo;
-  ['todos','vigente','revisao','vencido','obsoleto'].forEach(t=>{
-    const btn=document.getElementById('filt_'+t);
-    if(!btn) return;
-    if(t===tipo){
-      btn.style.background='rgba(0,200,255,.1)';btn.style.borderColor='#00c8ff';btn.style.color='#00c8ff';
-    } else {
-      btn.style.background='transparent';btn.style.borderColor='#1e2d3d';btn.style.color='#607080';
-    }
-  });
-  renderDocs();
-}
-
-async function editarStatus(idx){
-  const d=docList[idx];
-  const opts=['vigente','revisao','vencido','obsoleto'];
-  const atual=opts.indexOf(d.status);
-  docList[idx].status=opts[(atual+1)%opts.length];
-  await salvarDocumentoSb(docList[idx]);
-  renderDocs();
-}
-
-function excluirDoc(idx){
-  if(confirm('Excluir o documento "'+docList[idx].titulo+'"?')){
-    docList.splice(idx,1);
-    renderDocs();
-  }
-}
-
-// Render docs when module is shown — hook into showModule
-const _origShowModule = typeof showModule === 'function' ? null : null;
-
-// ── MÓDULOS EXTRAS ──
-const EXTRA_MODULES = [
-  {id:'chat',     icon:'🤖', label:'Assistente IA',         badge:''},
-  {id:'auditInt', icon:'🔍', label:'Auditoria Interna',     badge:''},
-  {id:'auditExt', icon:'🏅', label:'Pré-Auditoria Externa', badge:''},
-  {id:'docs',     icon:'📄', label:'Documentos',            badge:''},
-  {id:'alertas',  icon:'🔔', label:'Alertas',               badge:'3'},
-  {id:'usuarios', icon:'👥', label:'Usuários',              badge:''},
-];
-const MAIN_IDS = {
-  req:'mainReq', chat:'mainChat', auditInt:'mainAuditInt',
-  auditExt:'mainAuditExt', docs:'mainDocs', alertas:'mainAlertas',
-  usuarios:'mainUsuarios'
-};
-let activeModule = 'req'; // 'req' or one of extra ids
-
+// ══════════════════════════════════════════════════════════════
+// 9. MÓDULOS — NAVEGAÇÃO
+// ══════════════════════════════════════════════════════════════
 function showModule(id){
-  activeModule = id;
-  Object.values(MAIN_IDS).forEach(mid=>{
-    const el=document.getElementById(mid);
-    if(el) el.style.display='none';
-  });
-  const target = id==='req' ? MAIN_IDS.req : (MAIN_IDS[id]||MAIN_IDS.req);
+  activeModule=id;
+  Object.values(MAIN_IDS).forEach(mid=>{const el=document.getElementById(mid);if(el) el.style.display='none';});
+  const target=id==='req'?MAIN_IDS.req:(MAIN_IDS[id]||MAIN_IDS.req);
   const el=document.getElementById(target);
   if(el) el.style.display='flex';
   if(id==='docs') renderDocs();
@@ -1208,416 +1184,20 @@ function updateExtraNav(){
   });
 }
 
-// ── CHAT IA ──
-const CHAT_SYSTEM = `Você é o Assistente Inteligente do SGQ, especialista em ISO 9001.
-Apoie a organização na manutenção, análise e melhoria do Sistema de Gestão da Qualidade.
-Sempre que analisar dados apresente: nível de conformidade, riscos, observações e recomendações.
-Ao criar documentos SGQ use: Objetivo, Escopo, Referências, Definições, Responsabilidades, Descrição do processo, Registros gerados, Indicadores, Riscos, Melhoria contínua.
-Responda em português do Brasil. Seja técnico e estruturado.`;
-
-let chatHistory = [];
-let chatLoading = false;
-
-function autoResize(el){
-  el.style.height='auto';
-  el.style.height=Math.min(el.scrollHeight,100)+'px';
-}
-function chatKey(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
-}
-function fillChat(text){
-  const el=document.getElementById('chatInput');
-  el.value=text; autoResize(el); el.focus();
-}
-function askChat(text){
-  showModule('chat');
-  setTimeout(()=>{fillChat(text);sendChat();},100);
-}
-function fmtChat(text){
-  return text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/^#{1,3}\s+(.+)$/gm,`<div style="font-weight:700;font-size:14px;color:#00c8ff;margin:10px 0 4px">$1</div>`)
-    .replace(/^[\-\*]\s+(.+)$/gm,`<div style="display:flex;gap:8px;margin-bottom:4px"><div style="width:6px;height:6px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:6px"></div><span>$1</span></div>`)
-    .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
-}
-async function sendChat(){
-  const inp=document.getElementById('chatInput');
-  const txt=inp.value.trim();
-  if(!txt||chatLoading) return;
-  inp.value=''; inp.style.height='auto';
-  chatLoading=true;
-  document.getElementById('chatSendBtn').disabled=true;
-  chatHistory.push({role:'user',content:txt});
-  const msgs=document.getElementById('chatMessages');
-  msgs.insertAdjacentHTML('beforeend',`<div class="chat-msg user"><div class="chat-avatar user">👤</div><div style="flex:1"><div class="chat-sender user">Usuário</div><div class="chat-text">${txt.replace(/</g,'&lt;')}</div></div></div>`);
-  const loadId='load-'+Date.now();
-  msgs.insertAdjacentHTML('beforeend',`<div class="chat-msg ai" id="${loadId}"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`);
-  document.getElementById('chatArea').scrollTop=99999;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:CHAT_SYSTEM,messages:chatHistory})
-    });
-    const data=await res.json();
-    const reply=(data.content||[]).map(b=>b.text||'').join('')||'Sem resposta.';
-    chatHistory.push({role:'assistant',content:reply});
-    document.getElementById(loadId).outerHTML=`<div class="chat-msg ai"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="chat-text">${fmtChat(reply)}</div></div></div>`;
-  }catch{
-    document.getElementById(loadId).outerHTML=`<div class="chat-msg ai"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="chat-text" style="color:#ff5252">❌ Erro de conexão. O chat com IA funciona apenas no ambiente Claude.ai (React Artifact). No arquivo HTML baixado, use os módulos estáticos de auditoria e documentos.</div></div></div>`;
-  }
-  chatLoading=false;
-  document.getElementById('chatSendBtn').disabled=false;
-  document.getElementById('chatArea').scrollTop=99999;
-}
-
-// ══════════════════════════════════════════
-// SUPABASE CONFIG
-// ══════════════════════════════════════════
-const SUPABASE_URL = 'https://vfylzwrijfxcojbrpopf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmeWx6d3JpamZ4Y29qYnJwb3BmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMjIyOTYsImV4cCI6MjA4ODg5ODI5Nn0.67IDxCF4ef0ejJHsShcCsH3Ztxh-_USlLxfa_vHjxrY';
-
-async function sb(path, opts={}){
-  const headers={'Content-Type':'application/json','apikey':SUPABASE_KEY,...(opts.headers||{})};
-  const session=JSON.parse(localStorage.getItem('sgq_session')||'null');
-  if(session?.access_token) headers['Authorization']='Bearer '+session.access_token;
-  const res=await fetch(SUPABASE_URL+path,{...opts,headers});
-  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||e.error_description||res.status);}
-  const ct=res.headers.get('content-type')||'';
-  return ct.includes('json')?res.json():null;
-}
-
-// ── LOGIN/AUTH via Supabase ──
-let loggedUser = null;
-let sbSession = null;
-
-async function doLogin(){
-  const email=document.getElementById('loginUser').value.trim();
-  const pass=document.getElementById('loginPass').value;
-  const errEl=document.getElementById('loginError');
-  const btn=document.getElementById('loginBtn');
-  if(!email||!pass){errEl.textContent='Preencha email e senha.';return;}
-  btn.textContent='Entrando...';btn.disabled=true;
-  try{
-    const data=await sb('/auth/v1/token?grant_type=password',{
-      method:'POST',
-      body:JSON.stringify({email,password:pass})
-    });
-    sbSession=data;
-    localStorage.setItem('sgq_session',JSON.stringify(data));
-    // Busca perfil do usuário
-    const perfis=await sb('/rest/v1/perfis?id=eq.'+data.user.id+'&select=*');
-    const perfil=perfis&&perfis[0]?perfis[0]:{nome:email,perfil:'Colaborador',email};
-    if(perfil.ativo===false){
-      errEl.textContent='Sua conta está desativada. Contate o administrador.';
-      localStorage.removeItem('sgq_session');
-      btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
-      return;
-    }
-    loggedUser={...perfil, id:data.user.id};
-    await registrarLog('login','Acesso ao sistema SGQ');
-    abrirSistema();
-  } catch(e){
-    errEl.textContent=e.message.includes('Invalid')||e.message.includes('invalid')?'Email ou senha incorretos.':'Erro: '+e.message;
-    document.getElementById('loginPass').value='';
-    setTimeout(()=>errEl.textContent='',4000);
-  }
-  btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
-}
-
-async function doLogout(){
-  if(!confirm('Deseja sair do sistema?')) return;
-  try{
-    await registrarLog('logout','Saiu do sistema');
-    await sb('/auth/v1/logout',{method:'POST'});
-  }catch{}
-  loggedUser=null;sbSession=null;
-  localStorage.removeItem('sgq_session');
-  document.getElementById('loginUser').value='';
-  document.getElementById('loginPass').value='';
-  document.getElementById('loginScreen').style.display='flex';
-}
-
-function abrirSistema(){
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('sidebarUser').textContent=loggedUser.nome||loggedUser.email;
-  document.getElementById('loginError').textContent='';
-  carregarAnos().then(()=>{
-    renderYearPills();
-    carregarAno(anoAtual).then(()=>{
-      updateExtraNav();
-      render();
-    });
-  });
-}
-
-// ── LOG DE ACESSO (ISO 27001) ──
-async function registrarLog(acao, detalhe){
-  try{
-    await sb('/rest/v1/log_acesso',{
-      method:'POST',
-      body:JSON.stringify({
-        usuario_id:loggedUser?.id,
-        email:loggedUser?.email,
-        acao, detalhe,
-        criado_em:new Date().toISOString()
-      })
-    });
-  }catch{}
-}
-
-// ── ANOS via Supabase ──
-const anoData={};
-let anoAtual=2025;
-
-async function carregarAnos(){
-  try{
-    const rows=await sb('/rest/v1/anos_sgq?select=ano&order=ano.asc');
-    if(rows&&rows.length){
-      rows.forEach(r=>{ if(!anoData[r.ano]) anoData[r.ano]={done:{},results:{},openSubs:{'4.1':true},docList:[]}; });
-      anoAtual=rows[0].ano;
-    } else {
-      await sb('/rest/v1/anos_sgq',{method:'POST',body:JSON.stringify({ano:2025})});
-      anoData[2025]={done:{},results:{},openSubs:{'4.1':true},docList:[]};
-      anoAtual=2025;
-    }
-  }catch{ anoData[2025]={done:{},results:{},openSubs:{'4.1':true},docList:[]};anoAtual=2025; }
-}
-
-async function carregarAno(ano){
-  if(!anoData[ano]) anoData[ano]={done:{},results:{},openSubs:{'4.1':true},docList:[]};
-  try{
-    // checklist
-    const ck=await sb('/rest/v1/checklist?ano=eq.'+ano+'&select=criterio_id,feito');
-    if(ck) ck.forEach(r=>{ anoData[ano].done[r.criterio_id]=r.feito; });
-    // resultados IA
-    const ri=await sb('/rest/v1/resultados_ia?ano=eq.'+ano+'&select=*');
-    if(ri) ri.forEach(r=>{ anoData[ano].results[r.criterio_id]={aprovado:r.aprovado,conformidade:r.conformidade,pontos_atendidos:r.pontos_atendidos||[],pontos_faltando:r.pontos_faltando||[],recomendacao:r.recomendacao,filename:r.filename,erro:r.erro}; });
-    // documentos
-    const docs=await sb('/rest/v1/documentos?ano=eq.'+ano+'&select=*&order=criado_em.asc');
-    if(docs&&docs.length) anoData[ano].docList=docs.map(d=>({cod:d.codigo,titulo:d.titulo,tipo:d.tipo,req:d.requisito_iso,versao:d.versao,resp:d.responsavel,aprv:d.data_aprovacao,val:d.data_validade,status:d.status,desc:d.descricao,arquivo:d.arquivo||'',_id:d.id}));
-    else if(ano===2025) anoData[ano].docList=JSON.parse(JSON.stringify(docListDefault));
-  }catch(e){ console.warn('carregarAno erro:',e); }
-  done=anoData[ano].done;
-  results=anoData[ano].results;
-  openSubs=anoData[ano].openSubs;
-  docList=anoData[ano].docList;
-}
-
-async function trocarAno(ano){
-  anoAtual=ano;
-  await carregarAno(ano);
-  currentReq=4;
-  renderYearPills();
-  render();
-  if(activeModule==='docs') renderDocs();
-}
-
-async function adicionarAno(){
-  const anos=Object.keys(anoData).map(Number);
-  const proximo=Math.max(...anos)+1;
-  if(anos.length>=10){alert('Máximo de 10 anos.');return;}
-  try{
-    await sb('/rest/v1/anos_sgq',{method:'POST',body:JSON.stringify({ano:proximo})});
-  }catch{}
-  anoData[proximo]={done:{},results:{},openSubs:{'4.1':true},docList:[]};
-  await trocarAno(proximo);
-}
-
-function renderYearPills(){
-  const container=document.getElementById('yearPills');
-  if(!container) return;
-  const anos=Object.keys(anoData).map(Number).sort();
-  container.innerHTML='';
-  container.style.cssText='display:flex;gap:5px;flex-wrap:wrap;flex:1';
-  anos.forEach(a=>{
-    const btn=document.createElement('button');
-    btn.className='year-pill'+(a===anoAtual?' active':'');
-    btn.textContent=a;
-    btn.onclick=()=>trocarAno(a);
-    container.appendChild(btn);
-  });
-}
-
-// ── CHECKLIST SAVE via Supabase ──
-async function saveCriterio(id, feito){
-  try{
-    await sb('/rest/v1/checklist',{
-      method:'POST',
-      headers:{'Prefer':'resolution=merge-duplicates'},
-      body:JSON.stringify({ano:anoAtual,criterio_id:id,feito,usuario_id:loggedUser?.id,atualizado_em:new Date().toISOString()})
-    });
-  }catch(e){console.warn('saveCriterio:',e);}
-}
-
-async function saveResultadoIA(id, resultado){
-  try{
-    await sb('/rest/v1/resultados_ia',{
-      method:'POST',
-      headers:{'Prefer':'resolution=merge-duplicates'},
-      body:JSON.stringify({
-        ano:anoAtual,criterio_id:id,
-        aprovado:resultado.aprovado,conformidade:resultado.conformidade,
-        pontos_atendidos:resultado.pontos_atendidos,pontos_faltando:resultado.pontos_faltando,
-        recomendacao:resultado.recomendacao,filename:resultado.filename,erro:resultado.erro||false,
-        usuario_id:loggedUser?.id,criado_em:new Date().toISOString()
-      })
-    });
-  }catch(e){console.warn('saveResultadoIA:',e);}
-}
-
-// ── GERENCIAR USUÁRIOS via Supabase ──
-let sbUsers=[];
-
-function perfilColor(p){
-  if(p==='Administrador') return '#ff5252';
-  if(p==='Gestor da Qualidade') return '#00c8ff';
-  if(p==='Auditor Interno') return '#ffea00';
-  if(p==='Colaborador') return '#00e676';
-  return '#607080';
-}
-
-async function renderUsuarios(){
-  const tbody=document.getElementById('userTbody');
-  if(!tbody) return;
-  tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#607080;padding:20px">Carregando...</td></tr>';
-  try{
-    sbUsers=await sb('/rest/v1/perfis?select=*&order=criado_em.asc')||[];
-  }catch{ sbUsers=[]; }
-  tbody.innerHTML='';
-  if(!sbUsers.length){
-    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#607080;padding:20px">Nenhum usuário encontrado.</td></tr>';
-    return;
-  }
-  sbUsers.forEach((u,i)=>{
-    const isSelf=loggedUser&&loggedUser.id===u.id;
-    const cor=perfilColor(u.perfil);
-    const row=document.createElement('tr');
-    row.innerHTML=`
-      <td style="font-weight:600">${u.nome||'—'} ${isSelf?'<span style="font-size:10px;background:rgba(0,200,255,.12);color:#00c8ff;border:1px solid rgba(0,200,255,.3);padding:2px 7px;border-radius:10px;margin-left:5px">Você</span>':''}</td>
-      <td style="color:#00c8ff;font-weight:600">${u.email||'—'}</td>
-      <td><span style="background:rgba(255,255,255,.05);color:${cor};border:1px solid ${cor}40;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">${u.perfil||'—'}</span></td>
-      <td style="color:#607080">${u.departamento||'—'}</td>
-      <td style="color:#607080">${u.email||'—'}</td>
-      <td><span class="doc-status ${u.ativo===false?'ds-vencido':'ds-vigente'}">${u.ativo===false?'Inativo':'Ativo'}</span></td>
-      <td>
-        <div style="display:flex;gap:6px">
-          <button onclick="toggleUserAtivo('${u.id}',${u.ativo===false})" style="padding:4px 9px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:11px;cursor:pointer">${u.ativo===false?'▶ Ativar':'⏸ Desativar'}</button>
-          ${!isSelf?`<button onclick="excluirUsuarioSb('${u.id}','${(u.nome||'').replace(/'/g,"\\'")}','${u.email}')" style="padding:4px 9px;border-radius:6px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:11px;cursor:pointer">🗑</button>`:''}
-        </div>
-      </td>`;
-    tbody.appendChild(row);
-  });
-}
-
-function toggleUserForm(){
-  const box=document.getElementById('userFormBox');
-  box.style.display=box.style.display==='none'?'block':'none';
-  if(box.style.display==='block'){
-    ['uf_nome','uf_user','uf_pass','uf_depto','uf_email'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-    document.getElementById('userFormError').textContent='';
-  }
-}
-
-async function salvarUsuario(){
-  const nome=document.getElementById('uf_nome').value.trim();
-  const email=document.getElementById('uf_email').value.trim();
-  const pass=document.getElementById('uf_pass').value;
-  const perfil=document.getElementById('uf_perfil').value;
-  const depto=document.getElementById('uf_depto').value.trim();
-  const errEl=document.getElementById('userFormError');
-  if(!nome||!email||!pass){errEl.textContent='Nome, email e senha são obrigatórios.';return;}
-  if(pass.length<6){errEl.textContent='Senha deve ter pelo menos 6 caracteres.';return;}
-  errEl.textContent='Criando usuário...';
-  try{
-    // Cria usuário no Supabase Auth via admin endpoint
-    const res=await fetch(SUPABASE_URL+'/auth/v1/admin/users',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+sbSession.access_token},
-      body:JSON.stringify({email,password:pass,email_confirm:true,user_metadata:{nome,perfil}})
-    });
-    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao criar usuário');}
-    const newUser=await res.json();
-    // Atualiza perfil
-    await sb('/rest/v1/perfis?id=eq.'+newUser.id,{
-      method:'PATCH',
-      body:JSON.stringify({nome,perfil,departamento:depto,email,ativo:true})
-    });
-    errEl.style.color='#00e676';errEl.textContent='✅ Usuário criado com sucesso!';
-    setTimeout(()=>{errEl.textContent='';errEl.style.color='#ff5252';toggleUserForm();renderUsuarios();},1500);
-  }catch(e){
-    errEl.style.color='#ff5252';errEl.textContent='Erro: '+e.message;
-  }
-}
-
-async function excluirUsuarioSb(id, nome, email){
-  if(!confirm('Excluir o usuário "'+nome+'" ('+email+')?')) return;
-  try{
-    await fetch(SUPABASE_URL+'/auth/v1/admin/users/'+id,{
-      method:'DELETE',
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sbSession.access_token}
-    });
-    renderUsuarios();
-  }catch(e){alert('Erro ao excluir: '+e.message);}
-}
-
-async function toggleUserAtivo(id, ativar){
-  if(id===loggedUser?.id){alert('Não é possível desativar sua própria conta.');return;}
-  try{
-    await sb('/rest/v1/perfis?id=eq.'+id,{method:'PATCH',body:JSON.stringify({ativo:ativar})});
-    renderUsuarios();
-  }catch(e){alert('Erro: '+e.message);}
-}
-
-async function alterarSenha(){
-  const nova=document.getElementById('cp_nova').value;
-  const conf=document.getElementById('cp_conf').value;
-  const msgEl=document.getElementById('cpMsg');
-  if(nova.length<6){msgEl.style.color='#ff5252';msgEl.textContent='Nova senha deve ter pelo menos 6 caracteres.';return;}
-  if(nova!==conf){msgEl.style.color='#ff5252';msgEl.textContent='As senhas não coincidem.';return;}
-  try{
-    await sb('/auth/v1/user',{method:'PUT',body:JSON.stringify({password:nova})});
-    msgEl.style.color='#00e676';msgEl.textContent='✅ Senha alterada com sucesso!';
-    ['cp_atual','cp_nova','cp_conf'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-    setTimeout(()=>msgEl.textContent='',3000);
-  }catch(e){msgEl.style.color='#ff5252';msgEl.textContent='Erro: '+e.message;}
-}
-
-// ── DOCUMENTOS SAVE via Supabase ──
-const docListDefault=[
-  {cod:'POL-001',titulo:'Política da Qualidade',tipo:'Política',req:'5',versao:'v3.0',resp:'Diretoria',aprv:'2024-01-10',val:'2025-06-30',status:'vigente',desc:'Define os compromissos da organização com a qualidade.',arquivo:''},
-  {cod:'POP-001',titulo:'Controle de Documentos',tipo:'Procedimento',req:'7',versao:'v2.1',resp:'Qualidade',aprv:'2024-03-01',val:'2025-09-01',status:'vigente',desc:'Estabelece o controle de criação, revisão e aprovação de documentos.',arquivo:''},
-  {cod:'POP-002',titulo:'Controle de Registros',tipo:'Procedimento',req:'7',versao:'v2.0',resp:'Qualidade',aprv:'2024-03-01',val:'2025-09-01',status:'vigente',desc:'Define o controle e retenção de registros do SGQ.',arquivo:''},
-  {cod:'POP-003',titulo:'Atendimento ao Cliente',tipo:'Procedimento',req:'8',versao:'v1.4',resp:'Comercial',aprv:'2024-04-15',val:'2025-04-15',status:'revisao',desc:'Padroniza o processo de atendimento e tratamento de reclamações.',arquivo:''},
-  {cod:'POP-004',titulo:'Avaliação de Fornecedores',tipo:'Procedimento',req:'8',versao:'v2.2',resp:'Compras',aprv:'2024-07-10',val:'2025-07-10',status:'vigente',desc:'Critérios e processo de qualificação e avaliação de fornecedores.',arquivo:''},
-  {cod:'POP-007',titulo:'Controle de Equipamentos',tipo:'Procedimento',req:'7',versao:'v1.8',resp:'Manutenção',aprv:'2023-03-01',val:'2025-03-01',status:'vencido',desc:'Controle, manutenção e calibração de equipamentos.',arquivo:''},
-  {cod:'IT-012',titulo:'Calibração de Instrumentos',tipo:'Instrução',req:'7',versao:'v1.2',resp:'Qualidade',aprv:'2023-02-28',val:'2025-02-28',status:'vencido',desc:'Instrução para calibração dos instrumentos de medição.',arquivo:''},
-  {cod:'IT-018',titulo:'Auditorias Internas',tipo:'Instrução',req:'9',versao:'v3.1',resp:'Qualidade',aprv:'2024-12-01',val:'2025-12-01',status:'vigente',desc:'Procedimento para planejamento e execução de auditorias internas.',arquivo:''},
-];
-
-async function salvarDocumentoSb(doc){
-  try{
-    if(doc._id){
-      await sb('/rest/v1/documentos?id=eq.'+doc._id,{method:'PATCH',body:JSON.stringify({status:doc.status,atualizado_em:new Date().toISOString()})});
-    } else {
-      const res=await sb('/rest/v1/documentos',{
-        method:'POST',
-        headers:{'Prefer':'return=representation'},
-        body:JSON.stringify({ano:anoAtual,codigo:doc.cod,titulo:doc.titulo,tipo:doc.tipo,requisito_iso:doc.req,versao:doc.versao,responsavel:doc.resp,data_aprovacao:doc.aprv||null,data_validade:doc.val||null,status:doc.status,descricao:doc.desc,arquivo:doc.arquivo||'',usuario_id:loggedUser?.id})
-      });
-      if(res&&res[0]) doc._id=res[0].id;
-    }
-  }catch(e){console.warn('salvarDocumentoSb:',e);}
-}
-
-// ── OVERRIDE: toggleDone com save ──
+// ══════════════════════════════════════════════════════════════
+// 10. CHECKLIST — TOGGLE + UPLOAD IA
+// ══════════════════════════════════════════════════════════════
 async function toggleDone(id){
   done[id]=!done[id];
   await saveCriterio(id,done[id]);
   render();
 }
 
-// ── OVERRIDE: upload IA com save ──
+function triggerUpload(criterioId, criterioLabel, subNum){
+  pendingUpload={id:criterioId,label:criterioLabel,subNum};
+  document.getElementById('fileInput').click();
+}
+
 document.getElementById('fileInput').addEventListener('change',async function(e){
   const file=e.target.files[0];
   if(!file||!pendingUpload) return;
@@ -1650,14 +1230,225 @@ document.getElementById('fileInput').addEventListener('change',async function(e)
   render();
 });
 
-// ── INIT ──
+// ══════════════════════════════════════════════════════════════
+// 11. GESTÃO DOCUMENTAL
+// ══════════════════════════════════════════════════════════════
+function fmtDate(d){if(!d) return '—';const p=d.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;}
+function statusClass(s){return s==='vigente'?'ds-vigente':s==='revisao'?'ds-revisao':'ds-vencido';}
+function statusLabel(s){return s==='vigente'?'Vigente':s==='revisao'?'Em Revisão':s==='vencido'?'Vencido':'Obsoleto';}
+
+function renderDocs(){
+  const stats=document.getElementById('docStats');
+  if(!stats) return;
+  const total=docList.length,vig=docList.filter(d=>d.status==='vigente').length,rev=docList.filter(d=>d.status==='revisao').length,venc=docList.filter(d=>d.status==='vencido'||d.status==='obsoleto').length;
+  stats.innerHTML=`
+    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #00c8ff;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#00c8ff">${total}</div><div style="font-size:11px;color:#607080;margin-top:3px">Total de Documentos</div></div>
+    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #00e676;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#00e676">${vig}</div><div style="font-size:11px;color:#607080;margin-top:3px">Vigentes</div></div>
+    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #ffea00;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ffea00">${rev}</div><div style="font-size:11px;color:#607080;margin-top:3px">Em Revisão</div></div>
+    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #ff5252;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ff5252">${venc}</div><div style="font-size:11px;color:#607080;margin-top:3px">Vencidos / Obsoletos</div></div>`;
+  const tbody=document.getElementById('docTbody');
+  if(!tbody) return;
+  const lista=docFiltro==='todos'?docList:docList.filter(d=>d.status===docFiltro);
+  tbody.innerHTML='';
+  if(!lista.length){tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;color:#607080;padding:24px">Nenhum documento encontrado.</td></tr>`;return;}
+  lista.forEach((d,i)=>{
+    const idx=docList.indexOf(d);
+    const sc=statusClass(d.status),sl=statusLabel(d.status);
+    const row=document.createElement('tr');
+    row.innerHTML=`<td style="color:#00c8ff;font-weight:600">${d.cod}</td><td><div style="font-weight:500">${d.titulo}</div>${d.desc?`<div style="font-size:11px;color:#607080;margin-top:2px">${d.desc}</div>`:''}</td><td style="color:#607080">${d.tipo}</td><td><span style="background:rgba(0,200,255,.08);color:#00c8ff;border:1px solid rgba(0,200,255,.2);padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600">Req.${d.req}</span></td><td style="color:#607080">${d.versao}</td><td>${d.resp}</td><td style="color:#607080">${fmtDate(d.aprv)}</td><td style="color:${d.status==='vencido'||d.status==='obsoleto'?'#ff5252':d.status==='revisao'?'#ffea00':'#607080'}">${fmtDate(d.val)}</td><td><span class="doc-status ${sc}">${sl}</span></td><td><div style="display:flex;gap:6px"><button onclick="editarStatus(${idx})" style="padding:4px 9px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:11px;cursor:pointer">✏️</button><button onclick="excluirDoc(${idx})" style="padding:4px 9px;border-radius:6px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:11px;cursor:pointer">🗑</button></div></td>`;
+    tbody.appendChild(row);
+  });
+}
+
+function toggleDocForm(){
+  const box=document.getElementById('docFormBox');
+  box.style.display=box.style.display==='none'?'block':'none';
+  if(box.style.display==='block'){
+    const hoje=new Date().toISOString().split('T')[0];
+    document.getElementById('df_aprv').value=hoje;
+    const val=new Date();val.setFullYear(val.getFullYear()+1);
+    document.getElementById('df_val').value=val.toISOString().split('T')[0];
+  }
+}
+
+function docFileSelected(inp){
+  const name=inp.files[0]?inp.files[0].name:'Nenhum arquivo selecionado';
+  document.getElementById('df_filename').textContent=name;
+  document.getElementById('df_filename').style.color=inp.files[0]?'#00e676':'#607080';
+}
+
+async function salvarDocumento(){
+  const cod=document.getElementById('df_cod').value.trim();
+  const titulo=document.getElementById('df_titulo').value.trim();
+  if(!cod||!titulo){alert('Código e Título são obrigatórios.');return;}
+  const fileInp=document.getElementById('df_file');
+  const arquivo=fileInp.files[0]?fileInp.files[0].name:'';
+  const newDoc={cod,titulo,tipo:document.getElementById('df_tipo').value,req:document.getElementById('df_req').value,versao:document.getElementById('df_versao').value||'v1.0',resp:document.getElementById('df_resp').value,aprv:document.getElementById('df_aprv').value,val:document.getElementById('df_val').value,status:document.getElementById('df_status').value,desc:document.getElementById('df_desc').value,arquivo};
+  await salvarDocumentoSb(newDoc);
+  docList.push(newDoc);
+  ['df_cod','df_titulo','df_versao','df_resp','df_desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('df_versao').value='v1.0';
+  document.getElementById('df_filename').textContent='Nenhum arquivo selecionado';
+  document.getElementById('df_filename').style.color='#607080';
+  document.getElementById('docFormBox').style.display='none';
+  renderDocs();
+}
+
+function filtrarDocs(tipo){
+  docFiltro=tipo;
+  ['todos','vigente','revisao','vencido','obsoleto'].forEach(t=>{
+    const btn=document.getElementById('filt_'+t);
+    if(!btn) return;
+    if(t===tipo){btn.style.background='rgba(0,200,255,.1)';btn.style.borderColor='#00c8ff';btn.style.color='#00c8ff';}
+    else{btn.style.background='transparent';btn.style.borderColor='#1e2d3d';btn.style.color='#607080';}
+  });
+  renderDocs();
+}
+
+async function editarStatus(idx){
+  const opts=['vigente','revisao','vencido','obsoleto'];
+  docList[idx].status=opts[(opts.indexOf(docList[idx].status)+1)%opts.length];
+  await salvarDocumentoSb(docList[idx]);
+  renderDocs();
+}
+
+function excluirDoc(idx){
+  if(confirm('Excluir o documento "'+docList[idx].titulo+'"?')){docList.splice(idx,1);renderDocs();}
+}
+
+// ══════════════════════════════════════════════════════════════
+// 12. CHAT IA
+// ══════════════════════════════════════════════════════════════
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+function fillChat(text){const el=document.getElementById('chatInput');el.value=text;autoResize(el);el.focus();}
+function askChat(text){showModule('chat');setTimeout(()=>{fillChat(text);sendChat();},100);}
+function fmtChat(text){
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^#{1,3}\s+(.+)$/gm,`<div style="font-weight:700;font-size:14px;color:#00c8ff;margin:10px 0 4px">$1</div>`)
+    .replace(/^[\-\*]\s+(.+)$/gm,`<div style="display:flex;gap:8px;margin-bottom:4px"><div style="width:6px;height:6px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:6px"></div><span>$1</span></div>`)
+    .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+}
+
+async function sendChat(){
+  const inp=document.getElementById('chatInput');
+  const txt=inp.value.trim();
+  if(!txt||chatLoading) return;
+  inp.value='';inp.style.height='auto';
+  chatLoading=true;
+  document.getElementById('chatSendBtn').disabled=true;
+  chatHistory.push({role:'user',content:txt});
+  const msgs=document.getElementById('chatMessages');
+  msgs.insertAdjacentHTML('beforeend',`<div class="chat-msg user"><div class="chat-avatar user">👤</div><div style="flex:1"><div class="chat-sender user">Usuário</div><div class="chat-text">${txt.replace(/</g,'&lt;')}</div></div></div>`);
+  const loadId='load-'+Date.now();
+  msgs.insertAdjacentHTML('beforeend',`<div class="chat-msg ai" id="${loadId}"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`);
+  document.getElementById('chatArea').scrollTop=99999;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:CHAT_SYSTEM,messages:chatHistory})});
+    const data=await res.json();
+    const reply=(data.content||[]).map(b=>b.text||'').join('')||'Sem resposta.';
+    chatHistory.push({role:'assistant',content:reply});
+    document.getElementById(loadId).outerHTML=`<div class="chat-msg ai"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="chat-text">${fmtChat(reply)}</div></div></div>`;
+  }catch{
+    document.getElementById(loadId).outerHTML=`<div class="chat-msg ai"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="chat-text" style="color:#ff5252">❌ Erro de conexão. O chat funciona apenas no ambiente Claude.ai.</div></div></div>`;
+  }
+  chatLoading=false;
+  document.getElementById('chatSendBtn').disabled=false;
+  document.getElementById('chatArea').scrollTop=99999;
+}
+
+// ══════════════════════════════════════════════════════════════
+// 13. GERENCIAR USUÁRIOS
+// ══════════════════════════════════════════════════════════════
+function perfilColor(p){
+  if(p==='Administrador') return '#ff5252';
+  if(p==='Gestor da Qualidade') return '#00c8ff';
+  if(p==='Auditor Interno') return '#ffea00';
+  if(p==='Colaborador') return '#00e676';
+  return '#607080';
+}
+
+async function renderUsuarios(){
+  const tbody=document.getElementById('userTbody');
+  if(!tbody) return;
+  tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#607080;padding:20px">Carregando...</td></tr>';
+  try{sbUsers=await sb('/rest/v1/perfis?select=*&order=criado_em.asc')||[];}catch{sbUsers=[];}
+  tbody.innerHTML='';
+  if(!sbUsers.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#607080;padding:20px">Nenhum usuário encontrado.</td></tr>';return;}
+  sbUsers.forEach(u=>{
+    const isSelf=loggedUser&&loggedUser.id===u.id;
+    const cor=perfilColor(u.perfil);
+    const row=document.createElement('tr');
+    row.innerHTML=`<td style="font-weight:600">${u.nome||'—'} ${isSelf?'<span style="font-size:10px;background:rgba(0,200,255,.12);color:#00c8ff;border:1px solid rgba(0,200,255,.3);padding:2px 7px;border-radius:10px;margin-left:5px">Você</span>':''}</td><td style="color:#00c8ff;font-weight:600">${u.email||'—'}</td><td><span style="background:rgba(255,255,255,.05);color:${cor};border:1px solid ${cor}40;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">${u.perfil||'—'}</span></td><td style="color:#607080">${u.departamento||'—'}</td><td style="color:#607080">${u.email||'—'}</td><td><span class="doc-status ${u.ativo===false?'ds-vencido':'ds-vigente'}">${u.ativo===false?'Inativo':'Ativo'}</span></td><td><div style="display:flex;gap:6px"><button onclick="toggleUserAtivo('${u.id}',${u.ativo===false})" style="padding:4px 9px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:11px;cursor:pointer">${u.ativo===false?'▶ Ativar':'⏸ Desativar'}</button>${!isSelf?`<button onclick="excluirUsuarioSb('${u.id}','${(u.nome||'').replace(/'/g,"\\'")}','${u.email}')" style="padding:4px 9px;border-radius:6px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:11px;cursor:pointer">🗑</button>`:''}</div></td>`;
+    tbody.appendChild(row);
+  });
+}
+
+function toggleUserForm(){
+  const box=document.getElementById('userFormBox');
+  box.style.display=box.style.display==='none'?'block':'none';
+  if(box.style.display==='block'){
+    ['uf_nome','uf_user','uf_pass','uf_depto','uf_email'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+    document.getElementById('userFormError').textContent='';
+  }
+}
+
+async function salvarUsuario(){
+  const nome=document.getElementById('uf_nome').value.trim();
+  const email=document.getElementById('uf_email').value.trim();
+  const pass=document.getElementById('uf_pass').value;
+  const perfil=document.getElementById('uf_perfil').value;
+  const depto=document.getElementById('uf_depto').value.trim();
+  const errEl=document.getElementById('userFormError');
+  if(!nome||!email||!pass){errEl.textContent='Nome, email e senha são obrigatórios.';return;}
+  if(pass.length<6){errEl.textContent='Senha deve ter pelo menos 6 caracteres.';return;}
+  errEl.textContent='Criando usuário...';
+  try{
+    const res=await fetch(SUPABASE_URL+'/auth/v1/admin/users',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+sbSession.access_token},body:JSON.stringify({email,password:pass,email_confirm:true,user_metadata:{nome,perfil}})});
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao criar usuário');}
+    const newUser=await res.json();
+    await sb('/rest/v1/perfis?id=eq.'+newUser.id,{method:'PATCH',body:JSON.stringify({nome,perfil,departamento:depto,email,ativo:true})});
+    errEl.style.color='#00e676';errEl.textContent='✅ Usuário criado com sucesso!';
+    setTimeout(()=>{errEl.textContent='';errEl.style.color='#ff5252';toggleUserForm();renderUsuarios();},1500);
+  }catch(e){errEl.style.color='#ff5252';errEl.textContent='Erro: '+e.message;}
+}
+
+async function excluirUsuarioSb(id, nome, email){
+  if(!confirm('Excluir o usuário "'+nome+'" ('+email+')?')) return;
+  try{
+    await fetch(SUPABASE_URL+'/auth/v1/admin/users/'+id,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sbSession.access_token}});
+    renderUsuarios();
+  }catch(e){alert('Erro ao excluir: '+e.message);}
+}
+
+async function toggleUserAtivo(id, ativar){
+  if(id===loggedUser?.id){alert('Não é possível desativar sua própria conta.');return;}
+  try{await sb('/rest/v1/perfis?id=eq.'+id,{method:'PATCH',body:JSON.stringify({ativo:ativar})});renderUsuarios();}catch(e){alert('Erro: '+e.message);}
+}
+
+async function alterarSenha(){
+  const nova=document.getElementById('cp_nova').value;
+  const conf=document.getElementById('cp_conf').value;
+  const msgEl=document.getElementById('cpMsg');
+  if(nova.length<6){msgEl.style.color='#ff5252';msgEl.textContent='Nova senha deve ter pelo menos 6 caracteres.';return;}
+  if(nova!==conf){msgEl.style.color='#ff5252';msgEl.textContent='As senhas não coincidem.';return;}
+  try{
+    await sb('/auth/v1/user',{method:'PUT',body:JSON.stringify({password:nova})});
+    msgEl.style.color='#00e676';msgEl.textContent='✅ Senha alterada com sucesso!';
+    ['cp_atual','cp_nova','cp_conf'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+    setTimeout(()=>msgEl.textContent='',3000);
+  }catch(e){msgEl.style.color='#ff5252';msgEl.textContent='Erro: '+e.message;}
+}
+
+// ══════════════════════════════════════════════════════════════
+// 14. INIT — roda ao carregar a página
+// ══════════════════════════════════════════════════════════════
 (async()=>{
-  // Verifica sessão salva
   const saved=localStorage.getItem('sgq_session');
   if(saved){
     try{
       const session=JSON.parse(saved);
-      // Verifica se token ainda é válido
       const user=await sb('/auth/v1/user',{headers:{'Authorization':'Bearer '+session.access_token}});
       if(user&&user.id){
         sbSession=session;
@@ -1667,28 +1458,11 @@ document.getElementById('fileInput').addEventListener('change',async function(e)
         abrirSistema();
         return;
       }
-    }catch{ localStorage.removeItem('sgq_session'); }
+    }catch{localStorage.removeItem('sgq_session');}
   }
-  // Mostra login
   renderYearPills();
-  setTimeout(()=>{ const el=document.getElementById('loginUser'); if(el) el.focus(); },100);
+  setTimeout(()=>{const el=document.getElementById('loginUser');if(el) el.focus();},100);
 })();
-
-
-function perfilColor(p){
-  if(p==='Administrador') return '#ff5252';
-  if(p==='Gestor da Qualidade') return '#00c8ff';
-  if(p==='Auditor Interno') return '#ffea00';
-  if(p==='Colaborador') return '#00e676';
-  return '#607080';
-}
-
-
-</script>
-</body>
-</html>
-
-
 </script>
 </body>
 </html>
