@@ -1368,6 +1368,7 @@ function excluirDoc(idx){
 // ══════════════════════════════════════════════════════════════
 // 12. CHAT IA
 // ══════════════════════════════════════════════════════════════
+// Funções de UI
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
 function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
 function fillChat(text){const el=document.getElementById('chatInput');el.value=text;autoResize(el);el.focus();}
@@ -1380,6 +1381,23 @@ function fmtChat(text){
     .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
 }
 
+// Função segura que chama backend
+async function callGemini(userText){
+  const body = { userText, chatHistory };
+  const res = await fetch('/api/ia', {  // seu endpoint seguro
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error(err.error || 'Erro ao acessar IA');
+  }
+  const data = await res.json();
+  return data.text || '';
+}
+
+// Função principal de envio do chat
 async function sendChat(){
   const inp=document.getElementById('chatInput');
   const txt=inp.value.trim();
@@ -1394,14 +1412,7 @@ async function sendChat(){
   msgs.insertAdjacentHTML('beforeend',`<div class="chat-msg ai" id="${loadId}"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`);
   document.getElementById('chatArea').scrollTop=99999;
   try{
-    // Monta histórico para Gemini
-    const contents=chatHistory.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
-    const key=getApiKey();
-    const body={system_instruction:{parts:[{text:CHAT_SYSTEM}]},contents,generationConfig:{temperature:0.5,maxOutputTokens:1500}};
-    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(!res.ok) throw new Error('Erro Gemini: '+res.status);
-    const data=await res.json();
-    const reply=data?.candidates?.[0]?.content?.parts?.[0]?.text||'Sem resposta.';
+    const reply = await callGemini(txt); // chama backend
     chatHistory.push({role:'assistant',content:reply});
     document.getElementById(loadId).outerHTML=`<div class="chat-msg ai"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="chat-text">${fmtChat(reply)}</div></div></div>`;
   }catch(err){
@@ -1411,7 +1422,6 @@ async function sendChat(){
   document.getElementById('chatSendBtn').disabled=false;
   document.getElementById('chatArea').scrollTop=99999;
 }
-
 // ══════════════════════════════════════════════════════════════
 // 13. GERENCIAR USUÁRIOS
 // ══════════════════════════════════════════════════════════════
