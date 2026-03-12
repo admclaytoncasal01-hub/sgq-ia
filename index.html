@@ -1688,7 +1688,7 @@ function renderUsuarios(){
   if(!tbody) return;
   tbody.innerHTML='';
   USERS.forEach((u,i)=>{
-    const isSelf=loggedUser&&loggedUser.user===u.user;
+    const isSelf = loggedUser && (loggedUser.user === u.user || loggedUser.email === u.user);
     const cor=perfilColor(u.perfil||u.nome);
     const row=document.createElement('tr');
     row.innerHTML=`
@@ -1770,8 +1770,6 @@ const USERS = [
   {user:'qualidade', pass:'iso9001', nome:'Gestor da Qualidade', perfil:'Gestor da Qualidade', depto:'Qualidade', email:'qualidade@empresa.com', ativo:true},
 ];
 let loggedUser = null;
-
-  let loggedUser = null;
 
 const USERS = [
   {
