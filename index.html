@@ -1012,35 +1012,13 @@ function render(){
 }
 
 // ── GESTÃO DOCUMENTAL ──
-
 let docFiltro = 'todos';
+let docList = JSON.parse(JSON.stringify(docListDefault));
 
+function fmtDate(d){ if(!d) return '—'; const p=d.split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d; }
 
-function fmtDate(d){
-  if(!d) return '—';
-  const p = d.split('-');
-  return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0] : d;
-}
-
-function statusClass(s){
-  return s==='vigente'
-    ? 'ds-vigente'
-    : s==='revisao'
-    ? 'ds-revisao'
-    : s==='vencido'
-    ? 'ds-vencido'
-    : 'ds-vencido';
-}
-
-function statusLabel(s){
-  return s==='vigente'
-    ? 'Vigente'
-    : s==='revisao'
-    ? 'Em Revisão'
-    : s==='vencido'
-    ? 'Vencido'
-    : 'Obsoleto';
-}
+function statusClass(s){ return s==='vigente'?'ds-vigente':s==='revisao'?'ds-revisao':s==='vencido'?'ds-vencido':'ds-vencido'; }
+function statusLabel(s){ return s==='vigente'?'Vigente':s==='revisao'?'Em Revisão':s==='vencido'?'Vencido':'Obsoleto'; }
 
 function renderDocs(){
   // Stats
@@ -1313,6 +1291,40 @@ async function sb(path, opts={}){
 let loggedUser = null;
 let sbSession = null;
 
+async function doLogin(){
+  const email=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const errEl=document.getElementById('loginError');
+  const btn=document.getElementById('loginBtn');
+  if(!email||!pass){errEl.textContent='Preencha email e senha.';return;}
+  btn.textContent='Entrando...';btn.disabled=true;
+  try{
+    const data=await sb('/auth/v1/token?grant_type=password',{
+      method:'POST',
+      body:JSON.stringify({email,password:pass})
+    });
+    sbSession=data;
+    localStorage.setItem('sgq_session',JSON.stringify(data));
+    // Busca perfil do usuário
+    const perfis=await sb('/rest/v1/perfis?id=eq.'+data.user.id+'&select=*');
+    const perfil=perfis&&perfis[0]?perfis[0]:{nome:email,perfil:'Colaborador',email};
+    if(perfil.ativo===false){
+      errEl.textContent='Sua conta está desativada. Contate o administrador.';
+      localStorage.removeItem('sgq_session');
+      btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
+      return;
+    }
+    loggedUser={...perfil, id:data.user.id};
+    await registrarLog('login','Acesso ao sistema SGQ');
+    abrirSistema();
+  } catch(e){
+    errEl.textContent=e.message.includes('Invalid')||e.message.includes('invalid')?'Email ou senha incorretos.':'Erro: '+e.message;
+    document.getElementById('loginPass').value='';
+    setTimeout(()=>errEl.textContent='',4000);
+  }
+  btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
+}
+
 async function doLogout(){
   if(!confirm('Deseja sair do sistema?')) return;
   try{
@@ -1357,7 +1369,6 @@ async function registrarLog(acao, detalhe){
 // ── ANOS via Supabase ──
 const anoData={};
 let anoAtual=2025;
-let docList = [];  
 
 async function carregarAnos(){
   try{
@@ -1672,213 +1683,14 @@ function perfilColor(p){
   return '#607080';
 }
 
-function renderUsuarios(){
-  const tbody=document.getElementById('userTbody');
-  if(!tbody) return;
-  tbody.innerHTML='';
-  USERS.forEach((u,i)=>{
-    const isSelf = loggedUser && (loggedUser.user === u.user || loggedUser.email === u.user);
-    const cor=perfilColor(u.perfil||u.nome);
-    const row=document.createElement('tr');
-    row.innerHTML=`
-      <td style="font-weight:600">${u.nome} ${isSelf?'<span style="font-size:10px;background:rgba(0,200,255,.12);color:#00c8ff;border:1px solid rgba(0,200,255,.3);padding:2px 7px;border-radius:10px;margin-left:5px">Você</span>':''}</td>
-      <td style="color:#00c8ff;font-weight:600">${u.user}</td>
-      <td><span style="background:rgba(255,255,255,.05);color:${cor};border:1px solid ${cor}40;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">${u.perfil||'—'}</span></td>
-      <td style="color:#607080">${u.depto||'—'}</td>
-      <td style="color:#607080">${u.email||'—'}</td>
-      <td><span class="doc-status ${u.ativo===false?'ds-vencido':'ds-vigente'}">${u.ativo===false?'Inativo':'Ativo'}</span></td>
-      <td>
-        <div style="display:flex;gap:6px">
-          <button onclick="toggleUserAtivo(${i})" title="${u.ativo===false?'Ativar':'Desativar'}" style="padding:4px 9px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:11px;cursor:pointer">${u.ativo===false?'▶ Ativar':'⏸ Desativar'}</button>
-          ${!isSelf?`<button onclick="excluirUsuario(${i})" title="Excluir" style="padding:4px 9px;border-radius:6px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:11px;cursor:pointer">🗑</button>`:''}
-        </div>
-      </td>`;
-    tbody.appendChild(row);
-  });
-}
 
-function toggleUserForm(){
-  const box=document.getElementById('userFormBox');
-  box.style.display=box.style.display==='none'?'block':'none';
-  if(box.style.display==='block'){
-    ['uf_nome','uf_user','uf_pass','uf_depto','uf_email'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('userFormError').textContent='';
-  }
-}
-
-function salvarUsuario(){
-  const nome=document.getElementById('uf_nome').value.trim();
-  const user=document.getElementById('uf_user').value.trim().toLowerCase();
-  const pass=document.getElementById('uf_pass').value;
-  const perfil=document.getElementById('uf_perfil').value;
-  const depto=document.getElementById('uf_depto').value.trim();
-  const email=document.getElementById('uf_email').value.trim();
-  const errEl=document.getElementById('userFormError');
-  if(!nome||!user||!pass){errEl.textContent='Nome, usuário e senha são obrigatórios.';return;}
-  if(pass.length<6){errEl.textContent='Senha deve ter pelo menos 6 caracteres.';return;}
-  if(USERS.find(u=>u.user===user)){errEl.textContent='Esse usuário já existe.';return;}
-  USERS.push({user,pass,nome,perfil,depto,email,ativo:true});
-  errEl.textContent='';
-  toggleUserForm();
-  renderUsuarios();
-}
-
-function excluirUsuario(i){
-  if(USERS[i].user===loggedUser?.user){alert('Você não pode excluir sua própria conta.');return;}
-  if(confirm('Excluir o usuário "'+USERS[i].nome+'"?')){
-    USERS.splice(i,1);
-    renderUsuarios();
-  }
-}
-
-function toggleUserAtivo(i){
-  if(USERS[i].user===loggedUser?.user){alert('Não é possível desativar sua própria conta.');return;}
-  USERS[i].ativo=USERS[i].ativo===false?true:false;
-  renderUsuarios();
-}
-
-function alterarSenha(){
-  const atual=document.getElementById('cp_atual').value;
-  const nova=document.getElementById('cp_nova').value;
-  const conf=document.getElementById('cp_conf').value;
-  const msgEl=document.getElementById('cpMsg');
-  if(!loggedUser){msgEl.style.color='#ff5252';msgEl.textContent='Usuário não autenticado.';return;}
-  const idx=USERS.findIndex(u=>u.user===loggedUser.user);
-  if(idx<0||USERS[idx].pass!==atual){msgEl.style.color='#ff5252';msgEl.textContent='Senha atual incorreta.';return;}
-  if(nova.length<6){msgEl.style.color='#ff5252';msgEl.textContent='Nova senha deve ter pelo menos 6 caracteres.';return;}
-  if(nova!==conf){msgEl.style.color='#ff5252';msgEl.textContent='As senhas não coincidem.';return;}
-  USERS[idx].pass=nova;
-  msgEl.style.color='#00e676';msgEl.textContent='✅ Senha alterada com sucesso!';
-  ['cp_atual','cp_nova','cp_conf'].forEach(id=>document.getElementById(id).value='');
-  setTimeout(()=>msgEl.textContent='',3000);
-}
-
-
-
-function doLogout(){
-  if(!confirm('Deseja sair do sistema?')) return;
-  loggedUser=null;
-  document.getElementById('loginUser').value='';
-  document.getElementById('loginPass').value='';
-  document.getElementById('loginScreen').style.display='flex';
-}
-
-
-function initAno(ano){
-  if(!anoData[ano]){
-    anoData[ano] = {
-      done:{},
-      results:{},
-      openSubs:{},
-      docList: ano === 2025 
-        ? JSON.parse(JSON.stringify(docListDefault))
-        : []
-    };
-  }
-}
-
-function trocarAno(ano){
-  // salva estado atual
-  anoData[anoAtual].done={...done};
-  anoData[anoAtual].results={...results};
-  anoData[anoAtual].openSubs={...openSubs};
-  anoData[anoAtual].docList=[...docList];
-  // carrega novo ano
-  anoAtual=ano;
-  initAno(ano);
-  done=anoData[ano].done;
-  results=anoData[ano].results;
-  openSubs=anoData[ano].openSubs;
-  docList=anoData[ano].docList;
-  currentReq=4;
-  renderYearPills();
-  render();
-  if(activeModule==='docs') renderDocs();
-}
-
-function adicionarAno(){
-  const anos=Object.keys(anoData).map(Number);
-  const proximo=Math.max(...anos)+1;
-  if(anos.length>=10){alert('Máximo de 10 anos.');return;}
-  initAno(proximo);
-  trocarAno(proximo);
-}
-
-function renderYearPills(){
-  const container=document.getElementById('yearPills');
-  if(!container) return;
-  const anos=Object.keys(anoData).map(Number).sort();
-  container.innerHTML='';
-  container.style.cssText='display:flex;gap:5px;flex-wrap:wrap;flex:1';
-  anos.forEach(a=>{
-    const btn=document.createElement('button');
-    btn.className='year-pill'+(a===anoAtual?' active':'');
-    btn.textContent=a;
-    btn.onclick=()=>trocarAno(a);
-    container.appendChild(btn);
-  });
-}
-
-// Inicializa 2025
-initAno(2025);
-// Sincroniza as vars globais com o ano atual
-function syncAno(){
-  anoData[anoAtual].done=done;
-  anoData[anoAtual].results=results;
-  anoData[anoAtual].openSubs=openSubs;
-  anoData[anoAtual].docList=docList;
-}
-
-// ── INIT ──
-// Mostrar login — o sistema só abre após autenticação
-renderYearPills();
-// Foca no campo de usuário ao carregar
-setTimeout(()=>{ const el=document.getElementById('loginUser'); if(el) el.focus(); },100);
-
-// função de login
-function doLogin(){
-
-  const u = document.getElementById('loginUser').value.trim();
-  const p = document.getElementById('loginPass').value;
-
-  const found = USERS.find(
-    x => x.user === u && x.pass === p && x.ativo !== false
-  );
-
-  if(found){
-
-    loggedUser = found;
-
-    document.getElementById('loginScreen').style.display = 'none';
-
-    if(document.getElementById('sidebarUser')){
-      document.getElementById('sidebarUser').textContent = found.nome;
-    }
-
-    document.getElementById('loginError').textContent = '';
-
-    if(typeof renderYearPills === "function") renderYearPills();
-    if(typeof updateExtraNav === "function") updateExtraNav();
-    if(typeof render === "function") render();
-
-  } else {
-
-    const err = document.getElementById('loginError');
-
-    err.textContent = 'Usuário ou senha inválidos.';
-
-    document.getElementById('loginPass').value = '';
-
-    document.getElementById('loginPass').focus();
-
-    setTimeout(()=>{
-      err.textContent='';
-    },3000);
-
-  }
-
-}
 </script>
 </body>
 </html>
+
+
+</script>
+</body>
+</html>
+
  
