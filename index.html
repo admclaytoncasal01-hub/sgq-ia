@@ -1213,32 +1213,21 @@ function updateExtraNav(){
 // ══════════════════════════════════════════════════════════════
 // 10. CHECKLIST — TOGGLE + UPLOAD IA
 // ══════════════════════════════════════════════════════════════
+
+// Chave da API Google Gemini — salva no localStorage do navegador
+const GEMINI_KEY_FIXED='AIzaSyC-51e7PlbbP5nEVRwGYiw70J_DfZfm9sk';
+
 async function callGemini(userText, system, fileBase64, fileMime){
-
-  const body = {
-    userText,
-    system,
-    fileBase64,
-    fileMime
-  };
-
-const res = await fetch("https://vfylzwrijfxcojbrpopf.supabase.co/functions/v1/quick-handler", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer " + SUPABASE_KEY
-  },
-  body: JSON.stringify(body)
-});
-
-  if(!res.ok){
-    const err = await res.json().catch(()=>({}));
-    throw new Error(err.error || "Erro ao acessar IA");
-  }
-
-  const data = await res.json();
-  return data.text || "";
+  const res=await fetch('https://vfylzwrijfxcojbrpopf.supabase.co/functions/v1/quick-handler',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},
+    body:JSON.stringify({userText:userText||'',system:system||'',fileBase64:fileBase64||null,fileMime:fileMime||null})
+  });
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.message||data.error||'Erro Gemini: '+res.status);
+  return data.text||'';
 }
+
 
 async function toggleDone(id){
   done[id]=!done[id];
@@ -1369,7 +1358,6 @@ function excluirDoc(idx){
 // ══════════════════════════════════════════════════════════════
 // 12. CHAT IA
 // ══════════════════════════════════════════════════════════════
-// Funções de UI
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
 function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
 function fillChat(text){const el=document.getElementById('chatInput');el.value=text;autoResize(el);el.focus();}
@@ -1382,7 +1370,6 @@ function fmtChat(text){
     .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
 }
 
-// Função principal de envio do chat
 async function sendChat(){
   const inp=document.getElementById('chatInput');
   const txt=inp.value.trim();
@@ -1397,7 +1384,7 @@ async function sendChat(){
   msgs.insertAdjacentHTML('beforeend',`<div class="chat-msg ai" id="${loadId}"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`);
   document.getElementById('chatArea').scrollTop=99999;
   try{
-    const reply = await callGemini(txt, CHAT_SYSTEM); // chama backend
+    const reply=await callGemini(txt, CHAT_SYSTEM);
     chatHistory.push({role:'assistant',content:reply});
     document.getElementById(loadId).outerHTML=`<div class="chat-msg ai"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="chat-text">${fmtChat(reply)}</div></div></div>`;
   }catch(err){
@@ -1407,6 +1394,7 @@ async function sendChat(){
   document.getElementById('chatSendBtn').disabled=false;
   document.getElementById('chatArea').scrollTop=99999;
 }
+
 // ══════════════════════════════════════════════════════════════
 // 13. GERENCIAR USUÁRIOS
 // ══════════════════════════════════════════════════════════════
