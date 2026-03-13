@@ -1397,7 +1397,7 @@ async function sendChat(){
   msgs.insertAdjacentHTML('beforeend',`<div class="chat-msg ai" id="${loadId}"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`);
   document.getElementById('chatArea').scrollTop=99999;
   try{
-    const reply = await callGemini(txt); // chama backend
+    const reply = await callGemini(txt, CHAT_SYSTEM); // chama backend
     chatHistory.push({role:'assistant',content:reply});
     document.getElementById(loadId).outerHTML=`<div class="chat-msg ai"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="chat-text">${fmtChat(reply)}</div></div></div>`;
   }catch(err){
