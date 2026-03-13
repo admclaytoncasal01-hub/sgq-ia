@@ -1155,7 +1155,8 @@ function renderContent(){
           const falta=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');
           resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span></div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falta?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falta}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
         }else if(result&&result.erro){
-          resultHTML=`<div class="ia-result err"><span style="color:#ff5252">❌ Erro ao analisar. Tente novamente.</span></div>`;
+          resultHTML="";
+          document.getElementById("resultado").innerHTML = resultHTML;
         }
         cDiv.innerHTML=`<div class="criterio-row"><div class="checkbox${isDone?' checked':''}" onclick="toggleDone('${c.id}')">${isDone?'<span class="checkbox-tick">✓</span>':''}</div><div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id}</span>${c.label}</div>${resultHTML}</div><button class="upload-btn ${isDone?'done':'pending'}" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button></div>`;
         criteriosDiv.appendChild(cDiv);
