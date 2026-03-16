@@ -186,6 +186,61 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
 .iso-tab.active-9001{background:rgba(0,200,255,.12);border-color:#00c8ff;color:#00c8ff}
 .iso-tab.active-27001{background:rgba(160,80,255,.12);border-color:#a050ff;color:#a050ff}
 .iso-tab.active-42001{background:rgba(0,230,118,.12);border-color:#00e676;color:#00e676}
+/* ══ ANEXO A ══ */
+.anexo-header{padding:14px 18px;background:#18222e;border-bottom:1px solid #1e2d3d;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.anexo-card{background:#111820;border:1px solid #1e2d3d;border-radius:12px;margin-bottom:10px;overflow:hidden;transition:border-color .15s}
+.anexo-card:hover{border-color:#2a3d52}
+.controle-row{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(30,45,61,.4)}
+.controle-row:last-child{border-bottom:none}
+.controle-id{font-size:10px;font-weight:700;color:#607080;width:52px;flex-shrink:0;margin-top:2px}
+.controle-label{flex:1;font-size:12.5px;line-height:1.5}
+.nao-obrig-btn{padding:3px 8px;border-radius:5px;font-size:10px;cursor:pointer;border:1px solid #1e2d3d;background:transparent;color:#607080;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all .12s}
+.nao-obrig-btn.active{background:rgba(255,234,0,.08);border-color:rgba(255,234,0,.3);color:#ffea00}
+/* ══ MULTI-DOC ══ */
+.doc-list{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.doc-item{display:flex;align-items:center;gap:8px;padding:5px 9px;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;font-size:12px}
+.doc-item-name{flex:1;color:#e8edf3}
+.doc-item-status{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.add-doc-btn{padding:5px 12px;border-radius:7px;border:1px dashed rgba(0,200,255,.4);background:transparent;color:#00c8ff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px;transition:all .12s}
+.add-doc-btn:hover{background:rgba(0,200,255,.06);border-style:solid}
+/* ══ ARGUMENTAÇÃO ══ */
+.arg-area{margin-top:10px;background:rgba(255,234,0,.03);border:1px solid rgba(255,234,0,.15);border-radius:8px;overflow:hidden}
+.arg-header{padding:8px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:11px;font-weight:700;color:#ffea00;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(255,234,0,.1)}
+.arg-body{padding:10px 12px;display:none}
+.arg-body.open{display:block}
+.arg-textarea{width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;min-height:60px}
+.arg-textarea:focus{border-color:#ffea00}
+.arg-history{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.arg-entry{padding:8px 10px;border-radius:7px;font-size:12px;line-height:1.5}
+.arg-entry.user{background:rgba(255,234,0,.05);border:1px solid rgba(255,234,0,.15);color:#ffea00}
+.arg-entry.ia{background:#18222e;border:1px solid #1e2d3d;color:#e8edf3}
+/* ══ AUDITORIA LIVE ══ */
+.audit-live-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.audit-live-status{padding:10px 20px;background:#18222e;border-bottom:1px solid #1e2d3d;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.audit-phase-badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700}
+.audit-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.audit-msg{display:flex;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid #1e2d3d}
+.audit-msg.auditor{background:#111820}
+.audit-msg.auditado{background:rgba(0,200,255,.04);border-color:rgba(0,200,255,.15);flex-direction:row-reverse}
+.audit-msg.system{background:rgba(255,234,0,.04);border:1px solid rgba(255,234,0,.12);padding:10px 14px}
+.audit-avatar{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.audit-avatar.auditor{background:linear-gradient(135deg,#a050ff,#6020cc)}
+.audit-avatar.auditado{background:#18222e;border:1px solid #1e2d3d}
+.audit-input-area{padding:12px 20px 16px;border-top:1px solid #1e2d3d;background:#111820;flex-shrink:0}
+.audit-input-wrap{display:flex;gap:8px;align-items:flex-end;background:#18222e;border:1px solid #1e2d3d;border-radius:10px;padding:8px 12px}
+.audit-input-wrap:focus-within{border-color:#a050ff}
+.audit-upload-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.audit-action-btn{padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid rgba(160,80,255,.3);background:rgba(160,80,255,.06);color:#a050ff;transition:all .12s}
+.audit-action-btn:hover{background:rgba(160,80,255,.12)}
+/* ══ TEMPLATES DOCS ══ */
+.template-card{background:#111820;border:1px solid #1e2d3d;border-radius:10px;overflow:hidden;margin-bottom:10px}
+.template-header{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1e2d3d;cursor:pointer}
+.template-preview{padding:14px 16px;background:#0d1520;font-size:12px;line-height:1.7;color:#a0b4c8;font-family:monospace;max-height:200px;overflow-y:auto;white-space:pre-wrap;display:none}
+.template-actions{padding:10px 16px;border-top:1px solid #1e2d3d;display:flex;gap:8px}
+.print-btn{padding:7px 16px;border-radius:7px;border:1px solid #00e676;background:transparent;color:#00e676;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s}
+.print-btn:hover{background:rgba(0,230,118,.08)}
+.gen-btn{padding:7px 16px;border-radius:7px;border:none;background:#00c8ff;color:#0a0e14;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+
 </style>
 </head>
 <body>
@@ -243,6 +298,9 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
   <div id="extraNav"></div>
   <div class="nav-section-label" id="navSectionLabel">Requisitos ISO 9001</div>
   <div id="navItems"></div>
+  <div id="anexoNavArea" style="display:none;padding:4px 6px 8px">
+    <button id="btnAnexoA" onclick="abrirAnexoA()" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid rgba(160,80,255,.3);background:rgba(160,80,255,.06);color:#a050ff;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left">🔐 Anexo A — Controles</button>
+  </div>
   <div class="ai-card">
     <div class="ai-card-title"><div class="ai-dot"></div> Auditor IA</div>
     <div class="ai-card-text">Envie documentos em cada critério para validação automática pela IA.</div>
@@ -534,6 +592,80 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
   </div>
 </div>
 
+
+<!-- MÓDULO: ANEXO A ISO 27001 -->
+<div class="main" id="mainAnexo27" style="display:none">
+  <div class="mod-topbar">
+    <div class="mod-icon-badge" style="background:rgba(160,80,255,.1);border-color:rgba(160,80,255,.25);font-size:18px">🔐</div>
+    <div style="flex:1"><div class="mod-title" style="color:#a050ff">Anexo A · ISO 27001:2022</div><div class="mod-sub">93 controles de segurança · Declaração de Aplicabilidade (SoA)</div></div>
+    <div id="anexo27Stats" style="font-size:12px;color:#607080"></div>
+  </div>
+  <div class="mod-content" id="anexo27Content"></div>
+</div>
+
+<!-- MÓDULO: ANEXO A ISO 42001 -->
+<div class="main" id="mainAnexo42" style="display:none">
+  <div class="mod-topbar">
+    <div class="mod-icon-badge" style="background:rgba(0,230,118,.1);border-color:rgba(0,230,118,.25);font-size:18px">🤖</div>
+    <div style="flex:1"><div class="mod-title" style="color:#00e676">Anexo A · ISO 42001:2023</div><div class="mod-sub">38 controles de IA responsável · Governança e ética em IA</div></div>
+    <div id="anexo42Stats" style="font-size:12px;color:#607080"></div>
+  </div>
+  <div class="mod-content" id="anexo42Content"></div>
+</div>
+
+<!-- MÓDULO: AUDITORIA IA LIVE -->
+<div class="main" id="mainAuditLive" style="display:none">
+  <div class="mod-topbar">
+    <div class="mod-icon-badge" style="background:rgba(160,80,255,.1);border-color:rgba(160,80,255,.25)">🎯</div>
+    <div style="flex:1"><div class="mod-title">Auditoria IA · Tempo Real</div><div class="mod-sub">Auditor inteligente conduz a auditoria guiada — ISO 9001 / 27001 / 42001</div></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="auditNormaSelect" style="background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:5px 10px;color:#e8edf3;font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
+        <option value="9001">ISO 9001</option>
+        <option value="27001">ISO 27001</option>
+        <option value="42001">ISO 42001</option>
+      </select>
+      <button onclick="iniciarAuditoria()" id="btnIniciarAudit" style="padding:7px 16px;border-radius:7px;border:none;background:#a050ff;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">▶ Iniciar Nova Auditoria</button>
+      <button onclick="exportarRelatorioAudit()" style="padding:7px 14px;border-radius:7px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">📋 Exportar</button>
+    </div>
+  </div>
+  <div class="audit-live-wrap">
+    <div class="audit-live-status">
+      <div id="auditPhase" class="audit-phase-badge" style="background:rgba(160,80,255,.12);color:#a050ff;border:1px solid rgba(160,80,255,.3)">Aguardando início</div>
+      <div style="font-size:12px;color:#607080" id="auditProgress">Selecione a norma e clique em Iniciar</div>
+      <div style="margin-left:auto;font-size:12px;color:#607080" id="auditReqAtual"></div>
+    </div>
+    <div class="audit-messages" id="auditMessages">
+      <div class="audit-msg auditor">
+        <div class="audit-avatar auditor">🎯</div>
+        <div style="flex:1"><div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#a050ff;margin-bottom:6px">Auditor IA</div>
+        <div style="font-size:14px;line-height:1.7">Olá! Sou o <strong>Auditor IA</strong>, vou conduzir uma auditoria completa guiada. Selecionarei a norma, farei perguntas específicas sobre cada requisito, solicitarei evidências e registrarei achados.<br><br>Selecione a norma desejada e clique em <strong>▶ Iniciar Nova Auditoria</strong> para começar.</div></div>
+      </div>
+    </div>
+    <div class="audit-input-area">
+      <div class="audit-input-wrap">
+        <textarea id="auditInput" rows="1" placeholder="Responda o auditor ou envie evidências..." style="flex:1;background:transparent;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;color:#e8edf3;resize:none;line-height:1.5;max-height:100px" onkeydown="auditKey(event)" oninput="autoResize(this)"></textarea>
+        <button onclick="sendAudit()" id="auditSendBtn" style="width:34px;height:34px;border-radius:7px;border:none;cursor:pointer;background:#a050ff;color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0">➤</button>
+      </div>
+      <div class="audit-upload-row">
+        <button class="audit-action-btn" onclick="auditUploadEvidencia()">📎 Enviar Evidência</button>
+        <button class="audit-action-btn" onclick="auditProximo()">⏭ Próximo Critério</button>
+        <button class="audit-action-btn" onclick="auditConformeManual()">✅ Marcar Conforme</button>
+        <button class="audit-action-btn" onclick="auditNaoConformeManual()">❌ Marcar NC</button>
+        <button class="audit-action-btn" onclick="auditVerResumo()">📊 Ver Resumo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MÓDULO: MODELOS DE DOCUMENTOS -->
+<div class="main" id="mainTemplates" style="display:none">
+  <div class="mod-topbar">
+    <div class="mod-icon-badge">📋</div>
+    <div style="flex:1"><div class="mod-title">Modelos de Documentos SGQ</div><div class="mod-sub">Templates padrão ISO — gere, personalize e imprima</div></div>
+  </div>
+  <div class="mod-content" id="templatesContent"></div>
+</div>
+
 </div><!-- /app -->
 
 <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx" style="display:none">
@@ -590,9 +722,11 @@ Responda em português do Brasil. Seja técnico e estruturado.`;
 
 const EXTRA_MODULES = [
   {id:'chat',icon:'🤖',label:'Assistente IA',badge:''},
+  {id:'auditLive',icon:'🎯',label:'Auditoria IA Live',badge:'NEW'},
   {id:'auditInt',icon:'🔍',label:'Auditoria Interna',badge:''},
   {id:'auditExt',icon:'🏅',label:'Pré-Auditoria Externa',badge:''},
   {id:'docs',icon:'📄',label:'Documentos',badge:''},
+  {id:'templates',icon:'📋',label:'Modelos de Docs',badge:''},
   {id:'alertas',icon:'🔔',label:'Alertas',badge:'3'},
   {id:'usuarios',icon:'👥',label:'Usuários',badge:''},
 ];
@@ -600,7 +734,8 @@ const EXTRA_MODULES = [
 const MAIN_IDS = {
   req:'mainReq',chat:'mainChat',auditInt:'mainAuditInt',
   auditExt:'mainAuditExt',docs:'mainDocs',alertas:'mainAlertas',
-  usuarios:'mainUsuarios'
+  usuarios:'mainUsuarios',auditLive:'mainAuditLive',
+  templates:'mainTemplates'
 };
 
 const docListDefault = [
@@ -1157,6 +1292,1134 @@ async function alterarSenha(){
   renderYearPills();
   setTimeout(()=>{const el=document.getElementById('loginUser');if(el) el.focus();},100);
 })();
+
+
+// ══════════════════════════════════════════════════════════════
+// ★ ADIÇÕES — ANEXO A · MULTI-DOC · ARGUMENTAÇÃO · AUDITORIA LIVE · TEMPLATES
+// ══════════════════════════════════════════════════════════════
+
+// ══ ESTADO NOVO ══
+const naoObrig27 = {};   // controleId -> true se não obrigatório
+const naoObrig42 = {};
+const doneAnexo27 = {};  // controleId -> true
+const doneAnexo42 = {};
+const multiDocs = {};    // criterioId -> [{filename, result, norma}]
+const argumentos = {};   // criterioId -> [{tipo:'user'|'ia', texto}]
+let auditLoading = false;
+let auditSession = { norma:'9001', fase:'aguardando', reqAtual:4, subIdx:0, critIdx:0, achados:[], historico:[] };
+let auditFileInput = null;
+
+// ══ ANEXO A ISO 27001 — 93 CONTROLES ══
+const ANEXO_27001 = [
+  { tema: "5 · Controles Organizacionais", cor: "#a050ff", controles: [
+    {id:"5.1", label:"Políticas de segurança da informação"},
+    {id:"5.2", label:"Papéis e responsabilidades de segurança da informação"},
+    {id:"5.3", label:"Segregação de funções"},
+    {id:"5.4", label:"Responsabilidades da direção"},
+    {id:"5.5", label:"Contato com autoridades"},
+    {id:"5.6", label:"Contato com grupos de interesse especial"},
+    {id:"5.7", label:"Inteligência de ameaças"},
+    {id:"5.8", label:"Segurança da informação no gerenciamento de projetos"},
+    {id:"5.9", label:"Inventário de informações e outros ativos associados"},
+    {id:"5.10", label:"Uso aceitável de informações e outros ativos associados"},
+    {id:"5.11", label:"Devolução de ativos"},
+    {id:"5.12", label:"Classificação da informação"},
+    {id:"5.13", label:"Rotulagem de informações"},
+    {id:"5.14", label:"Transferência de informações"},
+    {id:"5.15", label:"Controle de acesso"},
+    {id:"5.16", label:"Gerenciamento de identidade"},
+    {id:"5.17", label:"Informações de autenticação"},
+    {id:"5.18", label:"Direitos de acesso"},
+    {id:"5.19", label:"Segurança da informação em relacionamentos com fornecedores"},
+    {id:"5.20", label:"Abordagem da segurança da informação em acordos com fornecedores"},
+    {id:"5.21", label:"Gerenciamento da segurança da informação na cadeia de suprimentos de TIC"},
+    {id:"5.22", label:"Monitoramento, revisão e gerenciamento de mudanças de serviços de fornecedores"},
+    {id:"5.23", label:"Segurança da informação para uso de serviços em nuvem"},
+    {id:"5.24", label:"Planejamento e preparação do gerenciamento de incidentes de SI"},
+    {id:"5.25", label:"Avaliação e decisão sobre eventos de segurança da informação"},
+    {id:"5.26", label:"Resposta a incidentes de segurança da informação"},
+    {id:"5.27", label:"Aprendizado com incidentes de segurança da informação"},
+    {id:"5.28", label:"Coleta de evidências"},
+    {id:"5.29", label:"Segurança da informação durante perturbação"},
+    {id:"5.30", label:"Prontidão de TIC para continuidade dos negócios"},
+    {id:"5.31", label:"Requisitos legais, estatutários, regulatórios e contratuais"},
+    {id:"5.32", label:"Direitos de propriedade intelectual"},
+    {id:"5.33", label:"Proteção de registros"},
+    {id:"5.34", label:"Privacidade e proteção de PII (LGPD)"},
+    {id:"5.35", label:"Revisão independente da segurança da informação"},
+    {id:"5.36", label:"Conformidade com políticas e normas de SI"},
+    {id:"5.37", label:"Procedimentos operacionais documentados"},
+  ]},
+  { tema: "6 · Controles de Pessoas", cor: "#a050ff", controles: [
+    {id:"6.1", label:"Triagem de candidatos"},
+    {id:"6.2", label:"Termos e condições de emprego"},
+    {id:"6.3", label:"Conscientização, educação e treinamento em SI"},
+    {id:"6.4", label:"Processo disciplinar"},
+    {id:"6.5", label:"Responsabilidades após término ou mudança de emprego"},
+    {id:"6.6", label:"Acordos de confidencialidade ou não divulgação"},
+    {id:"6.7", label:"Trabalho remoto"},
+    {id:"6.8", label:"Relato de eventos de SI"},
+  ]},
+  { tema: "7 · Controles Físicos", cor: "#a050ff", controles: [
+    {id:"7.1", label:"Perímetros de segurança física"},
+    {id:"7.2", label:"Entrada física"},
+    {id:"7.3", label:"Segurança de escritórios, salas e instalações"},
+    {id:"7.4", label:"Monitoramento de segurança física"},
+    {id:"7.5", label:"Proteção contra ameaças físicas e ambientais"},
+    {id:"7.6", label:"Trabalho em áreas seguras"},
+    {id:"7.7", label:"Mesa limpa e tela limpa"},
+    {id:"7.8", label:"Localização e proteção de equipamentos"},
+    {id:"7.9", label:"Segurança de ativos fora do local"},
+    {id:"7.10", label:"Mídia de armazenamento"},
+    {id:"7.11", label:"Utilitários de suporte"},
+    {id:"7.12", label:"Segurança de cabeamento"},
+    {id:"7.13", label:"Manutenção de equipamentos"},
+    {id:"7.14", label:"Descarte ou reutilização segura de equipamentos"},
+  ]},
+  { tema: "8 · Controles Tecnológicos", cor: "#a050ff", controles: [
+    {id:"8.1", label:"Dispositivos de endpoint do usuário"},
+    {id:"8.2", label:"Direitos de acesso privilegiados"},
+    {id:"8.3", label:"Restrição de acesso a informações"},
+    {id:"8.4", label:"Acesso ao código-fonte"},
+    {id:"8.5", label:"Autenticação segura"},
+    {id:"8.6", label:"Gerenciamento de capacidade"},
+    {id:"8.7", label:"Proteção contra malware"},
+    {id:"8.8", label:"Gerenciamento de vulnerabilidades técnicas"},
+    {id:"8.9", label:"Gerenciamento de configuração"},
+    {id:"8.10", label:"Exclusão de informações"},
+    {id:"8.11", label:"Mascaramento de dados"},
+    {id:"8.12", label:"Prevenção de vazamento de dados (DLP)"},
+    {id:"8.13", label:"Backup de informações"},
+    {id:"8.14", label:"Redundância de instalações de processamento de informações"},
+    {id:"8.15", label:"Registro (logging)"},
+    {id:"8.16", label:"Atividades de monitoramento"},
+    {id:"8.17", label:"Sincronização de relógio"},
+    {id:"8.18", label:"Uso de programas utilitários privilegiados"},
+    {id:"8.19", label:"Instalação de software em sistemas operacionais em produção"},
+    {id:"8.20", label:"Segurança de redes"},
+    {id:"8.21", label:"Segurança de serviços de rede"},
+    {id:"8.22", label:"Segregação de redes"},
+    {id:"8.23", label:"Filtragem web"},
+    {id:"8.24", label:"Uso de criptografia"},
+    {id:"8.25", label:"Ciclo de vida de desenvolvimento seguro"},
+    {id:"8.26", label:"Requisitos de segurança de aplicativos"},
+    {id:"8.27", label:"Arquitetura de sistema segura e princípios de engenharia"},
+    {id:"8.28", label:"Codificação segura"},
+    {id:"8.29", label:"Teste de segurança em desenvolvimento e aceitação"},
+    {id:"8.30", label:"Desenvolvimento terceirizado"},
+    {id:"8.31", label:"Separação de ambientes de desenvolvimento, teste e produção"},
+    {id:"8.32", label:"Gerenciamento de mudanças"},
+    {id:"8.33", label:"Informações de teste"},
+    {id:"8.34", label:"Proteção dos sistemas de informação durante teste de auditoria"},
+  ]},
+];
+
+// ══ ANEXO A ISO 42001 — 38 CONTROLES ══
+const ANEXO_42001 = [
+  { tema: "A.2 · Políticas para o uso de IA", cor: "#00e676", controles: [
+    {id:"A.2.1", label:"Política para o uso de sistemas de IA"},
+    {id:"A.2.2", label:"Papéis e responsabilidades para uso de IA"},
+  ]},
+  { tema: "A.3 · Processos de Impacto em IA", cor: "#00e676", controles: [
+    {id:"A.3.1", label:"Avaliação de impacto de IA — processo documentado"},
+    {id:"A.3.2", label:"Identificação e documentação de sistemas de IA"},
+    {id:"A.3.3", label:"Gestão do impacto de sistemas de IA em indivíduos e grupos"},
+  ]},
+  { tema: "A.4 · Recursos para Desenvolvimento de IA", cor: "#00e676", controles: [
+    {id:"A.4.1", label:"Qualidade de dados — adequação e suficiência"},
+    {id:"A.4.2", label:"Atributos dos dados — relevância e representatividade"},
+    {id:"A.4.3", label:"Seleção e preparação de dados de treinamento"},
+    {id:"A.4.4", label:"Aquisição de modelos de IA de terceiros"},
+    {id:"A.4.5", label:"Ferramentas e infraestrutura para desenvolvimento de IA"},
+    {id:"A.4.6", label:"Conhecimento e competência para desenvolvimento de IA"},
+  ]},
+  { tema: "A.5 · Ciclo de Vida de Sistemas de IA", cor: "#00e676", controles: [
+    {id:"A.5.1", label:"Avaliação de impacto antes do desenvolvimento ou aquisição"},
+    {id:"A.5.2", label:"Especificação de requisitos do sistema de IA"},
+    {id:"A.5.3", label:"Requisitos de dados para sistemas de IA"},
+    {id:"A.5.4", label:"Verificação e validação de dados"},
+    {id:"A.5.5", label:"Engenharia de características (feature engineering)"},
+    {id:"A.5.6", label:"Treinamento do modelo de IA"},
+    {id:"A.5.7", label:"Avaliação do modelo de IA — desempenho e ética"},
+    {id:"A.5.8", label:"Validação do sistema de IA antes da implantação"},
+    {id:"A.5.9", label:"Implantação do sistema de IA em produção"},
+    {id:"A.5.10", label:"Monitoramento do sistema de IA em produção"},
+    {id:"A.5.11", label:"Retirada e desativação do sistema de IA"},
+    {id:"A.5.12", label:"Manutenção e atualização de sistemas de IA"},
+    {id:"A.5.13", label:"Documentação de sistemas de IA"},
+    {id:"A.5.14", label:"Retenção de informações relacionadas a sistemas de IA"},
+  ]},
+  { tema: "A.6 · Abordagem da IA na Cadeia de Valor", cor: "#00e676", controles: [
+    {id:"A.6.1", label:"Alocação de interesses e responsabilidades com fornecedores"},
+    {id:"A.6.2", label:"Responsabilidades relacionadas a sistemas de IA de terceiros"},
+  ]},
+  { tema: "A.7 · Operação Responsável de IA", cor: "#00e676", controles: [
+    {id:"A.7.1", label:"Controles de uso previsto e uso indevido de sistemas de IA"},
+    {id:"A.7.2", label:"Supervisão humana de sistemas de IA"},
+    {id:"A.7.3", label:"Manuseio e resposta a falhas de sistemas de IA"},
+    {id:"A.7.4", label:"Testes de validade e segurança de sistemas de IA"},
+    {id:"A.7.5", label:"Explicabilidade e interpretabilidade de decisões de IA"},
+    {id:"A.7.6", label:"Equidade e não discriminação em sistemas de IA"},
+    {id:"A.7.7", label:"Privacidade e proteção de dados em sistemas de IA"},
+    {id:"A.7.8", label:"Segurança de sistemas de IA contra ataques adversariais"},
+  ]},
+];
+
+// ══ TEMPLATES DE DOCUMENTOS ══
+const DOC_TEMPLATES = [
+  { id:'pop_nc', tipo:'POP', titulo:'POP — Controle de Não Conformidades', req:'10.2', icon:'📄',
+    estrutura: `PROCEDIMENTO OPERACIONAL PADRÃO
+Código: POP-[NNN]
+Título: Controle de Não Conformidades
+Versão: v1.0  |  Data: [DATA]  |  Responsável: [NOME]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. OBJETIVO
+Estabelecer o processo para identificação, registro, análise e tratamento de não conformidades (NC) no SGQ, assegurando conformidade com o Requisito 10.2 da ISO 9001:2015.
+
+2. ESCOPO
+Aplica-se a todas as áreas, processos e atividades do SGQ da [EMPRESA].
+
+3. REFERÊNCIAS
+• ISO 9001:2015 — Requisitos 8.7 e 10.2
+• POP-001 — Controle de Documentos
+• IT-018 — Auditorias Internas
+
+4. DEFINIÇÕES
+• Não Conformidade (NC): Não atendimento a um requisito.
+• Ação Corretiva (AC): Ação para eliminar a causa de uma NC.
+• Reincidência: NC já tratada que volta a ocorrer.
+
+5. RESPONSABILIDADES
+• Gestor da Qualidade: Abrir, analisar e monitorar NCs.
+• Responsável da área: Executar ações corretivas.
+• Alta Direção: Revisar NCs na Análise Crítica.
+
+6. DESCRIÇÃO DO PROCESSO
+6.1 Identificação e Registro
+   → Qualquer colaborador pode identificar uma NC.
+   → Preencher o RNC (Registro de NC) com: descrição, data, local, evidências.
+
+6.2 Análise de Causa Raiz
+   → Usar metodologia: 5 Porquês ou Diagrama de Ishikawa.
+   → Registrar as causas identificadas no RNC.
+
+6.3 Plano de Ação Corretiva
+   → Definir ação, responsável e prazo.
+   → Prazo máximo: 30 dias para NCs menores, 15 dias para maiores.
+
+6.4 Implementação e Verificação
+   → Executar a ação conforme planejado.
+   → Verificar eficácia em 30/60 dias após encerramento.
+
+6.5 Encerramento
+   → Gestor da Qualidade encerra o RNC após verificação de eficácia.
+
+7. REGISTROS GERADOS
+• RNC — Registro de Não Conformidade
+• Plano de Ação Corretiva
+• Evidência de eficácia
+
+8. INDICADORES
+• Taxa de NCs recorrentes (meta: < 10%)
+• Prazo médio de encerramento (meta: < 30 dias)
+• % ações eficazes (meta: > 85%)
+
+9. HISTÓRICO DE REVISÕES
+Rev. | Data | Descrição | Responsável
+v1.0 | [DATA] | Emissão inicial | [NOME]
+`},
+  { id:'pol_qualidade', tipo:'Política', titulo:'Política da Qualidade', req:'5.2', icon:'🏛️',
+    estrutura: `POLÍTICA DA QUALIDADE
+Código: POL-001  |  Versão: v1.0  |  Data: [DATA]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+A [EMPRESA], empresa dedicada a [RAMO DE ATIVIDADE], compromete-se a:
+
+✦ SATISFAÇÃO DO CLIENTE
+   Atender plenamente os requisitos e expectativas dos nossos clientes,
+   buscando superar suas expectativas em qualidade e prazo.
+
+✦ MELHORIA CONTÍNUA
+   Promover a melhoria contínua de todos os processos do SGQ,
+   utilizando dados e evidências para decisões eficazes.
+
+✦ CONFORMIDADE
+   Cumprir os requisitos legais, regulatórios e normativos aplicáveis,
+   incluindo os requisitos da ISO 9001:2015.
+
+✦ COMPROMETIMENTO DA LIDERANÇA
+   A Alta Direção lidera pelo exemplo, provendo recursos e participando
+   ativamente das análises críticas do SGQ.
+
+OBJETIVOS DA QUALIDADE
+Esta política é sustentada por objetivos mensuráveis, revisados anualmente
+na Análise Crítica pela Direção.
+
+Esta política é comunicada, compreendida e aplicada por todos os
+colaboradores da [EMPRESA].
+
+[LOCAL], [DATA]
+
+_________________________________
+[NOME DO DIRETOR]
+Diretor / CEO — [EMPRESA]
+`},
+  { id:'pol_si', tipo:'Política', titulo:'Política de Segurança da Informação', req:'27001-5.2', icon:'🔐',
+    estrutura: `POLÍTICA DE SEGURANÇA DA INFORMAÇÃO
+Código: POL-SI-001  |  Versão: v1.0  |  Data: [DATA]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. DECLARAÇÃO DA DIREÇÃO
+A [EMPRESA] reconhece a informação como ativo estratégico e está comprometida
+com sua proteção conforme a ISO/IEC 27001:2022 e a LGPD (Lei nº 13.709/2018).
+
+2. PRINCÍPIOS
+• CONFIDENCIALIDADE: Acesso restrito a pessoas autorizadas.
+• INTEGRIDADE: Proteção contra alterações não autorizadas.
+• DISPONIBILIDADE: Acesso garantido quando necessário.
+
+3. OBJETIVOS
+• Proteger ativos de informação contra ameaças internas e externas.
+• Garantir conformidade com requisitos legais e regulatórios.
+• Minimizar riscos de incidentes de segurança.
+• Assegurar continuidade dos processos críticos.
+
+4. RESPONSABILIDADES
+• CISO / Responsável pelo SGSI: Coordenar e monitorar o SGSI.
+• Todos os colaboradores: Cumprir esta política e reportar incidentes.
+• Fornecedores: Assinar e cumprir Acordos de Confidencialidade (NDA).
+
+5. REQUISITOS OBRIGATÓRIOS
+• Todo acesso a sistemas requer autenticação forte (MFA onde aplicável).
+• Dados confidenciais não devem ser transmitidos sem criptografia.
+• Incidentes de SI devem ser reportados em até 24 horas.
+• Dispositivos pessoais seguem a política BYOD vigente.
+• Violações desta política estão sujeitas a medidas disciplinares.
+
+6. REVISÃO
+Esta política é revisada anualmente ou após incidentes significativos.
+
+[LOCAL], [DATA]
+
+_________________________________
+[NOME DO RESPONSÁVEL]
+CISO / Responsável pelo SGSI
+`},
+  { id:'pol_ia', tipo:'Política', titulo:'Política de IA Responsável', req:'42001-5.2', icon:'🤖',
+    estrutura: `POLÍTICA DE INTELIGÊNCIA ARTIFICIAL RESPONSÁVEL
+Código: POL-IA-001  |  Versão: v1.0  |  Data: [DATA]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. PROPÓSITO
+Estabelecer os princípios e diretrizes para o uso ético e responsável
+de sistemas de Inteligência Artificial (IA) na [EMPRESA], em conformidade
+com a ISO/IEC 42001:2023.
+
+2. PRINCÍPIOS DE IA RESPONSÁVEL
+
+✦ TRANSPARÊNCIA
+   Uso de IA é comunicado aos usuários afetados.
+   Decisões automatizadas podem ser explicadas quando solicitado.
+
+✦ EQUIDADE
+   Sistemas de IA são avaliados para viés e discriminação.
+   Grupos vulneráveis recebem proteção adicional.
+
+✦ PRIVACIDADE
+   Dados pessoais tratados por IA seguem a LGPD.
+   Minimização de dados aplicada no desenvolvimento.
+
+✦ SEGURANÇA
+   Sistemas de IA são testados contra ataques adversariais.
+   Monitoramento contínuo em produção.
+
+✦ SUPERVISÃO HUMANA
+   Decisões de alto impacto requerem revisão humana.
+   Mecanismo de contestação disponível para afetados.
+
+✦ ACCOUNTABILITY
+   Responsáveis designados para cada sistema de IA.
+   Registro de decisões e justificativas mantido.
+
+3. PROIBIÇÕES
+• Uso de IA para discriminação por raça, gênero, idade ou religião.
+• Uso de IA para manipulação psicológica ou comportamental.
+• Implantação de IA sem avaliação de impacto aprovada.
+• Uso de dados sem base legal conforme LGPD.
+
+4. GOVERNANÇA
+O Comitê de Ética em IA revisa esta política anualmente e aprova
+todas as novas implantações de sistemas de IA de alto risco.
+
+[LOCAL], [DATA]
+
+_________________________________
+[NOME DO RESPONSÁVEL]
+Responsável pelo SGAI / Comitê de Ética em IA
+`},
+  { id:'pop_auditoria', tipo:'POP', titulo:'POP — Auditorias Internas', req:'9.2', icon:'📄',
+    estrutura: `PROCEDIMENTO OPERACIONAL PADRÃO
+Código: IT-018
+Título: Planejamento e Execução de Auditorias Internas
+Versão: v3.1  |  Data: [DATA]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. OBJETIVO
+Definir o processo para planejamento, execução, relato e acompanhamento
+das auditorias internas do SGQ, conforme Requisito 9.2 da ISO 9001:2015.
+
+2. PROGRAMA ANUAL DE AUDITORIA
+• Frequência mínima: todos os processos do SGQ auditados 1x/ano.
+• Frequência adicional: processos críticos ou com NCs recentes — 2x/ano.
+• Auditores: independentes do processo auditado, capacitados em ISO 9001.
+
+3. FASES DA AUDITORIA
+3.1 Planejamento
+   → Definir escopo, critérios, auditores e data.
+   → Preparar lista de verificação (checklist).
+   → Comunicar área auditada com 10 dias de antecedência.
+
+3.2 Execução
+   → Reunião de abertura com responsáveis da área.
+   → Verificação de documentos, registros e evidências.
+   → Entrevistas com colaboradores.
+   → Identificação de achados: Conformidades, NCs, Observações.
+
+3.3 Relato
+   → Emitir Relatório de Auditoria em até 5 dias úteis.
+   → Classificar achados: NC Maior, NC Menor, Observação.
+   → Reunião de encerramento.
+
+3.4 Acompanhamento
+   → Área auditada abre RNC para cada NC encontrada.
+   → Auditor verifica eficácia das ações em prazo acordado.
+
+4. REGISTROS
+• Programa Anual de Auditoria
+• Checklist de Auditoria
+• Relatório de Auditoria
+• Registro de NCs abertas
+
+5. INDICADORES
+• % do programa executado (meta: 100%)
+• Prazo médio de encerramento de NCs de auditoria (meta: < 45 dias)
+`},
+  { id:'it_risco', tipo:'Instrução', titulo:'IT — Avaliação e Gestão de Riscos', req:'6.1', icon:'⚠️',
+    estrutura: `INSTRUÇÃO DE TRABALHO
+Código: IT-RISCO-001
+Título: Avaliação e Gestão de Riscos do SGQ
+Versão: v1.0  |  Data: [DATA]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. METODOLOGIA
+Matriz de Riscos 5x5 (Probabilidade x Impacto)
+
+PROBABILIDADE:
+1 — Raro (< 10% chance/ano)
+2 — Improvável (10-30%)
+3 — Possível (30-50%)
+4 — Provável (50-70%)
+5 — Quase certo (> 70%)
+
+IMPACTO:
+1 — Insignificante
+2 — Menor
+3 — Moderado
+4 — Significativo
+5 — Catastrófico
+
+NÍVEL DE RISCO = Probabilidade × Impacto
+• 1-4: Baixo (aceitar / monitorar)
+• 5-9: Médio (tratar / monitorar)
+• 10-16: Alto (tratar imediatamente)
+• 17-25: Crítico (escalar para direção)
+
+2. PROCESSO DE AVALIAÇÃO
+Passo 1: Identificar o risco (o quê pode dar errado?)
+Passo 2: Identificar a causa raiz potencial
+Passo 3: Identificar consequências
+Passo 4: Avaliar probabilidade (1-5)
+Passo 5: Avaliar impacto (1-5)
+Passo 6: Calcular nível de risco
+Passo 7: Definir tratamento (aceitar/mitigar/transferir/evitar)
+Passo 8: Designar responsável e prazo
+
+3. FREQUÊNCIA
+• Revisão completa: semestralmente ou após mudanças significativas.
+• Monitoramento: mensal para riscos Altos/Críticos.
+
+4. REGISTRO
+• Matriz de Riscos e Oportunidades (formulário FRM-RISCO-001)
+`},
+];
+
+// ══════════════════════════════════════════════════════════════
+// ★ FUNÇÕES ANEXO A
+// ══════════════════════════════════════════════════════════════
+function abrirAnexoA() {
+  if (normaAtiva === '27001') showModuleAnexo('27001');
+  else if (normaAtiva === '42001') showModuleAnexo('42001');
+  else alert('Selecione ISO 27001 ou ISO 42001 para acessar o Anexo A.');
+}
+
+function showModuleAnexo(norma) {
+  activeModule = 'anexo' + norma;
+  Object.values(MAIN_IDS).forEach(mid => { const el = document.getElementById(mid); if (el) el.style.display = 'none'; });
+  document.getElementById('main27001').style.display = 'none';
+  document.getElementById('main42001').style.display = 'none';
+  document.getElementById('mainAnexo27').style.display = 'none';
+  document.getElementById('mainAnexo42').style.display = 'none';
+  document.getElementById('mainAnexo' + norma.replace('001','')).style.display = 'flex';
+  updateExtraNav();
+  renderAnexoA(norma);
+}
+
+function renderAnexoA(norma) {
+  const anexo = norma === '27001' ? ANEXO_27001 : ANEXO_42001;
+  const naoObrigMap = norma === '27001' ? naoObrig27 : naoObrig42;
+  const doneMap = norma === '27001' ? doneAnexo27 : doneAnexo42;
+  const cor = norma === '27001' ? '#a050ff' : '#00e676';
+  const contentEl = document.getElementById('anexo' + norma.replace('001','') + 'Content');
+  const statsEl = document.getElementById('anexo' + norma.replace('001','') + 'Stats');
+  if (!contentEl) return;
+
+  const totalControles = anexo.reduce((s, t) => s + t.controles.length, 0);
+  const aplicaveis = Object.keys(naoObrigMap).filter(k => naoObrigMap[k]).length;
+  const implementados = Object.keys(doneMap).filter(k => doneMap[k]).length;
+  const naoAplicaveis = Object.keys(naoObrigMap).filter(k => naoObrigMap[k]).length;
+  const pct = (totalControles - naoAplicaveis) > 0 ? Math.round(implementados / (totalControles - naoAplicaveis) * 100) : 0;
+
+  if (statsEl) statsEl.innerHTML = `<span style="color:${pctColor(pct)};font-weight:700;font-size:15px">${pct}%</span> <span style="color:#607080">· ${implementados} impl. · ${naoAplicaveis} N/A · ${totalControles} total</span>`;
+
+  contentEl.innerHTML = '';
+
+  // Stats bar
+  const statsBar = document.createElement('div');
+  statsBar.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px';
+  statsBar.innerHTML = `
+    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid ${cor};border-radius:10px;padding:12px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:${cor}">${totalControles}</div><div style="font-size:11px;color:#607080;margin-top:2px">Total Controles</div></div>
+    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #00e676;border-radius:10px;padding:12px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#00e676">${implementados}</div><div style="font-size:11px;color:#607080;margin-top:2px">Implementados</div></div>
+    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #ffea00;border-radius:10px;padding:12px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#ffea00">${totalControles - implementados - naoAplicaveis}</div><div style="font-size:11px;color:#607080;margin-top:2px">Pendentes</div></div>
+    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #607080;border-radius:10px;padding:12px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#607080">${naoAplicaveis}</div><div style="font-size:11px;color:#607080;margin-top:2px">Não Obrigatório</div></div>`;
+  contentEl.appendChild(statsBar);
+
+  // Instructions
+  const info = document.createElement('div');
+  info.style.cssText = 'margin-bottom:14px;padding:10px 14px;background:rgba(255,234,0,.04);border:1px solid rgba(255,234,0,.12);border-radius:8px;font-size:12px;color:#607080';
+  info.innerHTML = `💡 <strong style="color:#ffea00">Declaração de Aplicabilidade (SoA):</strong> Marque ✅ os controles implementados. Use <strong>N/A</strong> para controles que não se aplicam ao contexto da organização (com justificativa documentada).`;
+  contentEl.appendChild(info);
+
+  anexo.forEach(tema => {
+    const card = document.createElement('div');
+    card.className = 'anexo-card';
+
+    const totalTema = tema.controles.length;
+    const implTema = tema.controles.filter(c => doneMap[c.id]).length;
+    const naTema = tema.controles.filter(c => naoObrigMap[c.id]).length;
+    const pctTema = (totalTema - naTema) > 0 ? Math.round(implTema / (totalTema - naTema) * 100) : 100;
+    const pctColTema = pctColor(pctTema);
+
+    const header = document.createElement('div');
+    header.className = 'sub-header';
+    header.innerHTML = `
+      <div class="sub-num" style="background:${cor}18;border-color:${cor}40;color:${cor};font-size:11px;width:auto;padding:0 8px">${implTema}/${totalTema}</div>
+      <div style="flex:1"><div class="sub-name">${tema.tema}</div><div class="sub-meta">${totalTema} controles · ${naTema} N/A</div></div>
+      <div class="sub-pct" style="color:${pctTema===0?'#607080':pctColTema}">${pctTema}%</div>
+      <div class="sub-chevron" style="transform:${(openSubs27[tema.tema]||openSubs42[tema.tema])?'rotate(180deg)':'rotate(0)'}">▼</div>`;
+
+    const openKey = norma + '_' + tema.tema;
+    const openMap = norma === '27001' ? openSubs27 : openSubs42;
+    if (openMap[tema.tema] === undefined) openMap[tema.tema] = false;
+
+    const miniBar = document.createElement('div');
+    miniBar.className = 'sub-minibar';
+    miniBar.innerHTML = `<div style="height:3px;width:${pctTema}%;background:${pctTema===0?'#1e2d3d':pctColTema};transition:width .5s;border-radius:2px"></div>`;
+
+    const bodyDiv = document.createElement('div');
+    bodyDiv.style.display = openMap[tema.tema] ? 'block' : 'none';
+
+    tema.controles.forEach(c => {
+      const isDone = !!doneMap[c.id];
+      const isNA = !!naoObrigMap[c.id];
+      const row = document.createElement('div');
+      row.className = 'controle-row';
+      row.style.opacity = isNA ? '0.45' : '1';
+      row.innerHTML = `
+        <div class="controle-id">${c.id}</div>
+        <div class="controle-label">${c.label}</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+          <button class="nao-obrig-btn${isNA?' active':''}" onclick="toggleNA('${norma}','${c.id}')" title="Marcar como Não Obrigatório">${isNA?'✗ N/A':'N/A'}</button>
+          <div class="checkbox${isDone?' checked':''}" onclick="toggleAnexo('${norma}','${c.id}')" style="${isNA?'pointer-events:none;opacity:.3':''}">${isDone?'<span class="checkbox-tick">✓</span>':''}</div>
+        </div>`;
+      bodyDiv.appendChild(row);
+    });
+
+    header.onclick = () => { openMap[tema.tema] = !openMap[tema.tema]; renderAnexoA(norma); };
+    card.appendChild(header);
+    card.appendChild(miniBar);
+    card.appendChild(bodyDiv);
+    contentEl.appendChild(card);
+  });
+}
+
+function toggleNA(norma, id) {
+  const map = norma === '27001' ? naoObrig27 : naoObrig42;
+  map[id] = !map[id];
+  if (map[id]) { // if marking as N/A, uncheck done
+    const dm = norma === '27001' ? doneAnexo27 : doneAnexo42;
+    delete dm[id];
+  }
+  saveCriterio('anexo_na_' + norma + '_' + id, map[id]);
+  renderAnexoA(norma);
+}
+
+function toggleAnexo(norma, id) {
+  const doneMap = norma === '27001' ? doneAnexo27 : doneAnexo42;
+  doneMap[id] = !doneMap[id];
+  saveCriterio('anexo_' + norma + '_' + id, doneMap[id]);
+  renderAnexoA(norma);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ★ MÚLTIPLOS DOCUMENTOS POR CRITÉRIO
+// ══════════════════════════════════════════════════════════════
+function getMultiDocsKey(norma, criterioId) {
+  return (norma && norma !== '9001') ? norma + '_' + criterioId : criterioId;
+}
+
+function renderMultiDocs(criterioId, norma) {
+  const key = getMultiDocsKey(norma, criterioId);
+  const docs = multiDocs[key] || [];
+  if (!docs.length) return '';
+  return `<div class="doc-list">${docs.map((d, i) => `
+    <div class="doc-item">
+      <span style="font-size:12px">📄</span>
+      <span class="doc-item-name">${d.filename}</span>
+      <span class="doc-item-status" style="background:${d.aprovado?'rgba(0,230,118,.12)':'rgba(255,82,82,.12)'};color:${d.aprovado?'#00e676':'#ff5252'}">${d.aprovado?'✅ Aprovado':'⚠️ Insuf.'}</span>
+      <button onclick="removerDocCriterio('${key}',${i})" style="padding:2px 7px;border-radius:5px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:10px;cursor:pointer">✕</button>
+    </div>`).join('')}
+  </div>`;
+}
+
+function removerDocCriterio(key, idx) {
+  if (!multiDocs[key]) return;
+  multiDocs[key].splice(idx, 1);
+  render();
+  if (normaAtiva !== '9001') renderISO(normaAtiva);
+}
+
+// Patch triggerUpload to support multi-doc
+function triggerUploadMulti(criterioId, criterioLabel, norma) {
+  pendingUpload = { id: criterioId, label: criterioLabel, norma: norma || '9001', multi: true };
+  document.getElementById('fileInput').click();
+}
+
+// ══════════════════════════════════════════════════════════════
+// ★ ARGUMENTAÇÃO APÓS ANÁLISE IA
+// ══════════════════════════════════════════════════════════════
+function toggleArgArea(criterioId) {
+  const body = document.getElementById('argBody_' + criterioId);
+  if (!body) return;
+  body.classList.toggle('open');
+}
+
+async function enviarArgumento(criterioId, norma) {
+  const inp = document.getElementById('argInput_' + criterioId);
+  if (!inp || !inp.value.trim()) return;
+  const texto = inp.value.trim();
+  inp.value = '';
+
+  if (!argumentos[criterioId]) argumentos[criterioId] = [];
+  argumentos[criterioId].push({ tipo: 'user', texto });
+
+  // Save to Supabase
+  try {
+    await sb('/rest/v1/resultados_ia', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ ano: anoAtual, criterio_id: 'arg_' + criterioId, recomendacao: JSON.stringify(argumentos[criterioId]), usuario_id: loggedUser?.id, criado_em: new Date().toISOString() })
+    });
+  } catch(e) {}
+
+  renderArgHistory(criterioId);
+
+  // IA registers the justification
+  const iaResp = document.getElementById('argIaResp_' + criterioId);
+  if (iaResp) iaResp.innerHTML = '<div style="font-size:11px;color:#607080;padding:4px 0">📝 Registrando justificativa...</div>';
+
+  try {
+    const system = 'Você é auditor ISO ' + (norma||'9001') + '. O usuário está contestando uma análise anterior. Reconheça a justificativa, registre como observação formal, e informe que o resultado original é mantido mas a justificativa está documentada. Responda em 2-3 frases, tom profissional.';
+    const prevResult = norma === '27001' ? results27[criterioId] : norma === '42001' ? results42[criterioId] : results[criterioId];
+    const context = prevResult ? `Análise anterior: ${prevResult.aprovado?'APROVADO':'INSUFICIENTE'} (${prevResult.conformidade||''}).\n` : '';
+    const reply = await callGemini(context + 'Justificativa do gestor: "' + texto + '"', system);
+    argumentos[criterioId].push({ tipo: 'ia', texto: reply });
+    try {
+      await sb('/rest/v1/resultados_ia', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ ano: anoAtual, criterio_id: 'arg_' + criterioId, recomendacao: JSON.stringify(argumentos[criterioId]), usuario_id: loggedUser?.id, criado_em: new Date().toISOString() })
+      });
+    } catch(e) {}
+    renderArgHistory(criterioId);
+  } catch(err) {
+    if (iaResp) iaResp.innerHTML = `<div style="font-size:11px;color:#ff5252">Erro: ${err.message}</div>`;
+  }
+}
+
+function renderArgHistory(criterioId) {
+  const hist = document.getElementById('argHistory_' + criterioId);
+  if (!hist) return;
+  const args = argumentos[criterioId] || [];
+  hist.innerHTML = args.map(a => `
+    <div class="arg-entry ${a.tipo}">
+      <strong>${a.tipo === 'user' ? '👤 Sua argumentação:' : '🤖 IA (registrado):'}</strong><br>
+      ${a.texto.replace(/</g,'&lt;')}
+    </div>`).join('');
+}
+
+function buildArgWidget(criterioId, hasResult) {
+  if (!hasResult) return '';
+  const args = argumentos[criterioId] || [];
+  return `
+    <div class="arg-area" id="argArea_${criterioId}">
+      <div class="arg-header" onclick="toggleArgArea('${criterioId}')">
+        <span>💬</span> Argumentar / Justificar ${args.length > 0 ? `<span style="background:rgba(255,234,0,.15);padding:1px 7px;border-radius:10px;font-size:10px">${args.length/2|0} argumento(s)</span>` : ''}
+        <span style="margin-left:auto;font-size:11px;color:#607080">▼</span>
+      </div>
+      <div class="arg-body" id="argBody_${criterioId}">
+        <div class="arg-history" id="argHistory_${criterioId}">${args.map(a=>`<div class="arg-entry ${a.tipo}"><strong>${a.tipo==='user'?'👤 Sua argumentação:':'🤖 IA (registrado):'}</strong><br>${a.texto.replace(/</g,'&lt;')}</div>`).join('')}</div>
+        <div id="argIaResp_${criterioId}"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <textarea class="arg-textarea" id="argInput_${criterioId}" rows="2" placeholder="Digite sua justificativa ou contestação para a análise da IA..."></textarea>
+          <button onclick="enviarArgumento('${criterioId}')" style="padding:8px 14px;border-radius:7px;border:none;background:#ffea00;color:#0a0e14;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;align-self:flex-end;flex-shrink:0">Enviar</button>
+        </div>
+        <div style="font-size:11px;color:#607080;margin-top:5px">📌 A justificativa será registrada. O resultado da análise original é mantido.</div>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// ★ AUDITORIA IA LIVE
+// ══════════════════════════════════════════════════════════════
+const AUDIT_SYSTEM = `Você é um Auditor Interno certificado ISO 9001, 27001 e 42001, conduzindo uma auditoria formal.
+Sua missão: auditar sistematicamente cada requisito, fazer UMA pergunta objetiva por vez, solicitar evidências específicas, registrar achados.
+Formato de resposta: sempre inicie com [AUDITANDO: REQ X.X] e termine com [PRÓXIMA AÇÃO: aguardando resposta | solicitar evidência | registrar achado | avançar].
+Tom: profissional, direto, formal. Português do Brasil.`;
+
+let auditHistory = [];
+let auditUploadPending = false;
+
+async function iniciarAuditoria() {
+  const norma = document.getElementById('auditNormaSelect').value;
+  auditSession = { norma, fase: 'em_andamento', reqAtual: 4, subIdx: 0, critIdx: 0, achados: [], historico: [], normaLabel: 'ISO ' + norma };
+  auditHistory = [];
+
+  document.getElementById('auditMessages').innerHTML = '';
+  document.getElementById('auditPhase').textContent = 'Em andamento';
+  document.getElementById('auditPhase').style.background = 'rgba(160,80,255,.12)';
+  document.getElementById('auditPhase').style.color = '#a050ff';
+
+  const cl = norma === '9001' ? CHECKLIST : norma === '27001' ? CHECKLIST_27001 : CHECKLIST_42001;
+  const reqs = Object.keys(cl);
+  document.getElementById('auditProgress').textContent = `Auditando Req. 4 · ${reqs.length} requisitos`;
+  document.getElementById('auditReqAtual').textContent = `ISO ${norma}`;
+
+  const openMsg = `Iniciando Auditoria Interna — ISO ${norma}:${norma==='9001'?'2015':'2022'}.\n\nEstou auditando sistematicamente cada requisito. Vou fazer perguntas objetivas, solicitar evidências e registrar achados.\n\n**Protocolo:**\n- Uma pergunta por vez\n- Solicito evidências específicas\n- Registro conformidades, NCs e observações\n- Ao final, gero relatório completo\n\nVamos começar pelo **Requisito 4 — Contexto da Organização**.`;
+
+  addAuditMsg('auditor', openMsg);
+
+  auditLoading = true;
+  document.getElementById('auditSendBtn').disabled = true;
+
+  try {
+    const cl4 = cl[4];
+    const firstSub = cl4.subitems[0];
+    const prompt = `Inicie a auditoria do Requisito 4 (Contexto da Organização) da ISO ${norma}. Comece pelo subitem ${firstSub.num} — ${firstSub.name}. Faça a primeira pergunta de auditoria sobre: "${firstSub.criterios[0].label}". Seja direto e objetivo.`;
+    const reply = await callGemini(prompt, AUDIT_SYSTEM);
+    auditHistory.push({ role: 'user', content: prompt });
+    auditHistory.push({ role: 'assistant', content: reply });
+    addAuditMsg('auditor', reply);
+  } catch(err) {
+    addAuditMsg('system', '❌ Erro ao iniciar: ' + err.message);
+  }
+
+  auditLoading = false;
+  document.getElementById('auditSendBtn').disabled = false;
+}
+
+function addAuditMsg(tipo, texto) {
+  const msgs = document.getElementById('auditMessages');
+  const div = document.createElement('div');
+  div.className = 'audit-msg ' + (tipo === 'system' ? 'system' : tipo);
+  if (tipo === 'system') {
+    div.innerHTML = `<div style="font-size:12px;color:#ffea00;width:100%">${texto}</div>`;
+  } else {
+    const isAuditor = tipo === 'auditor';
+    const avatarClass = isAuditor ? 'auditor' : 'auditado';
+    const senderColor = isAuditor ? '#a050ff' : '#607080';
+    const senderLabel = isAuditor ? 'Auditor IA' : 'Auditado';
+    div.innerHTML = `
+      <div class="audit-avatar ${avatarClass}">${isAuditor ? '🎯' : '👤'}</div>
+      <div style="flex:1">
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${senderColor};margin-bottom:6px">${senderLabel}</div>
+        <div style="font-size:13px;line-height:1.7">${texto.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>
+      </div>`;
+  }
+  msgs.appendChild(div);
+  msgs.scrollTop = 99999;
+}
+
+async function sendAudit() {
+  const inp = document.getElementById('auditInput');
+  const txt = inp.value.trim();
+  if (!txt || auditLoading) return;
+  inp.value = ''; inp.style.height = 'auto';
+
+  addAuditMsg('auditado', txt);
+  auditHistory.push({ role: 'user', content: txt });
+  auditLoading = true;
+  document.getElementById('auditSendBtn').disabled = true;
+
+  const loadId = 'auditload-' + Date.now();
+  const msgs = document.getElementById('auditMessages');
+  msgs.insertAdjacentHTML('beforeend', `<div class="audit-msg auditor" id="${loadId}"><div class="audit-avatar auditor">🎯</div><div style="flex:1"><div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#a050ff;margin-bottom:6px">Auditor IA</div><div class="typing"><div class="typing-dot" style="background:#a050ff"></div><div class="typing-dot" style="background:#a050ff"></div><div class="typing-dot" style="background:#a050ff"></div></div></div></div>`);
+  msgs.scrollTop = 99999;
+
+  try {
+    const context = `Contexto da auditoria: ISO ${auditSession.norma}, Req. ${auditSession.reqAtual}.\nHistórico resumido: ${auditHistory.slice(-4).map(h=>h.role+': '+h.content.slice(0,100)).join(' | ')}`;
+    const reply = await callGemini(txt, AUDIT_SYSTEM + '\n\n' + context);
+    auditHistory.push({ role: 'assistant', content: reply });
+    document.getElementById(loadId).outerHTML = '';
+    addAuditMsg('auditor', reply);
+
+    // Auto-detect if should advance
+    if (reply.includes('avançar') || reply.includes('próximo requisito') || reply.includes('Requisito 5')) {
+      if (auditSession.reqAtual < 10) {
+        auditSession.reqAtual++;
+        document.getElementById('auditProgress').textContent = `Auditando Req. ${auditSession.reqAtual}`;
+      }
+    }
+  } catch(err) {
+    document.getElementById(loadId).outerHTML = '';
+    addAuditMsg('system', '❌ Erro: ' + err.message);
+  }
+
+  auditLoading = false;
+  document.getElementById('auditSendBtn').disabled = false;
+}
+
+function auditKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAudit(); } }
+
+async function auditProximo() {
+  if (auditLoading) return;
+  const cl = auditSession.norma === '9001' ? CHECKLIST : auditSession.norma === '27001' ? CHECKLIST_27001 : CHECKLIST_42001;
+  const reqs = Object.keys(cl).map(Number);
+  const curIdx = reqs.indexOf(auditSession.reqAtual);
+  if (curIdx < reqs.length - 1) {
+    auditSession.reqAtual = reqs[curIdx + 1];
+    document.getElementById('auditProgress').textContent = `Auditando Req. ${auditSession.reqAtual}`;
+    addAuditMsg('system', `⏭ Avançando para Requisito ${auditSession.reqAtual}`);
+
+    auditLoading = true;
+    document.getElementById('auditSendBtn').disabled = true;
+    try {
+      const req = cl[auditSession.reqAtual];
+      const prompt = `Avance para o Requisito ${auditSession.reqAtual} — ${req.title}. Faça a primeira pergunta sobre o primeiro subitem: ${req.subitems[0].num} — ${req.subitems[0].name}.`;
+      const reply = await callGemini(prompt, AUDIT_SYSTEM);
+      addAuditMsg('auditor', reply);
+    } catch(err) { addAuditMsg('system', '❌ Erro: ' + err.message); }
+    auditLoading = false;
+    document.getElementById('auditSendBtn').disabled = false;
+  } else {
+    addAuditMsg('system', '✅ Todos os requisitos auditados! Clique em 📊 Ver Resumo para o relatório final.');
+  }
+}
+
+function auditConformeManual() {
+  const cl = auditSession.norma === '9001' ? CHECKLIST : auditSession.norma === '27001' ? CHECKLIST_27001 : CHECKLIST_42001;
+  const req = cl[auditSession.reqAtual];
+  auditSession.achados.push({ tipo: 'conforme', req: auditSession.reqAtual, desc: `Req. ${auditSession.reqAtual} — ${req?.title}` });
+  addAuditMsg('system', `✅ Req. ${auditSession.reqAtual} marcado como CONFORME`);
+}
+
+function auditNaoConformeManual() {
+  const cl = auditSession.norma === '9001' ? CHECKLIST : auditSession.norma === '27001' ? CHECKLIST_27001 : CHECKLIST_42001;
+  const req = cl[auditSession.reqAtual];
+  auditSession.achados.push({ tipo: 'nc', req: auditSession.reqAtual, desc: `Req. ${auditSession.reqAtual} — ${req?.title}` });
+  addAuditMsg('system', `❌ NC registrada: Req. ${auditSession.reqAtual}`);
+}
+
+async function auditVerResumo() {
+  if (auditLoading) return;
+  auditLoading = true;
+  document.getElementById('auditSendBtn').disabled = true;
+  addAuditMsg('system', '📊 Gerando relatório de auditoria...');
+
+  const conformes = auditSession.achados.filter(a => a.tipo === 'conforme').length;
+  const ncs = auditSession.achados.filter(a => a.tipo === 'nc').length;
+
+  try {
+    const prompt = `Gere um RELATÓRIO FINAL de auditoria interna ISO ${auditSession.norma}. 
+    Dados: ${conformes} itens conformes, ${ncs} NCs registradas.
+    Achados: ${JSON.stringify(auditSession.achados)}.
+    Histórico resumido: ${auditHistory.slice(-6).map(h=>h.role+': '+h.content.slice(0,150)).join(' | ')}.
+    Inclua: Sumário Executivo, NCs encontradas, Observações, Pontos Fortes, Recomendações prioritárias, Nível de prontidão estimado para certificação.`;
+    const reply = await callGemini(prompt, AUDIT_SYSTEM);
+    addAuditMsg('auditor', '📋 **RELATÓRIO FINAL DE AUDITORIA**\n\n' + reply);
+    document.getElementById('auditPhase').textContent = 'Concluída';
+    document.getElementById('auditPhase').style.background = 'rgba(0,230,118,.12)';
+    document.getElementById('auditPhase').style.color = '#00e676';
+  } catch(err) { addAuditMsg('system', '❌ Erro: ' + err.message); }
+
+  auditLoading = false;
+  document.getElementById('auditSendBtn').disabled = false;
+}
+
+function auditUploadEvidencia() {
+  auditUploadPending = true;
+  document.getElementById('fileInput').click();
+}
+
+function exportarRelatorioAudit() {
+  const msgs = document.getElementById('auditMessages');
+  const texto = Array.from(msgs.querySelectorAll('.audit-msg')).map(m => {
+    const sender = m.querySelector('[style*="letter-spacing"]')?.textContent || '';
+    const body = m.querySelector('[style*="line-height"]')?.textContent || '';
+    return sender + ':\n' + body + '\n';
+  }).join('\n---\n');
+  const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'auditoria-ia-' + new Date().toISOString().split('T')[0] + '.txt';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ★ MODELOS DE DOCUMENTOS
+// ══════════════════════════════════════════════════════════════
+async function renderTemplates() {
+  const content = document.getElementById('templatesContent');
+  if (!content) return;
+  content.innerHTML = '';
+
+  // Intro
+  const intro = document.createElement('div');
+  intro.style.cssText = 'margin-bottom:16px;padding:12px 16px;background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.15);border-radius:10px;font-size:13px;color:#a0b4c8';
+  intro.innerHTML = `📋 <strong style="color:#00c8ff">Modelos de Documentos SGQ</strong> — Templates padrão ISO. Clique em <strong>✨ Gerar com IA</strong> para personalizar para sua empresa, ou <strong>🖨️ Imprimir</strong> para usar o modelo base.`;
+  content.appendChild(intro);
+
+  // Chat ask for doc
+  const askSection = document.createElement('div');
+  askSection.style.cssText = 'background:#111820;border:1px solid #1e2d3d;border-radius:12px;padding:16px;margin-bottom:16px';
+  askSection.innerHTML = `
+    <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px;color:#e8edf3">🤖 Gerar Documento Personalizado com IA</div>
+    <div style="display:flex;gap:8px">
+      <input id="templateAskInput" placeholder='Ex: "Gere um POP para controle de acesso físico ISO 27001"' style="flex:1;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:9px 12px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+      <button onclick="gerarDocIA()" style="padding:9px 18px;border-radius:7px;border:none;background:#00c8ff;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Gerar →</button>
+    </div>
+    <div id="templateGenResult" style="margin-top:10px"></div>`;
+  content.appendChild(askSection);
+
+  // Template cards
+  const title = document.createElement('div');
+  title.style.cssText = "font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:12px;color:#e8edf3";
+  title.textContent = 'Templates Base ISO';
+  content.appendChild(title);
+
+  DOC_TEMPLATES.forEach(tpl => {
+    const card = document.createElement('div');
+    card.className = 'template-card';
+
+    const header = document.createElement('div');
+    header.className = 'template-header';
+    header.innerHTML = `
+      <div style="font-size:18px">${tpl.icon}</div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:14px">${tpl.titulo}</div>
+        <div style="font-size:11px;color:#607080;margin-top:2px">${tpl.tipo} · Req. ${tpl.req}</div>
+      </div>
+      <div style="font-size:12px;color:#607080">▼ Ver preview</div>`;
+
+    const preview = document.createElement('div');
+    preview.className = 'template-preview';
+    preview.textContent = tpl.estrutura;
+    preview.style.display = 'none';
+
+    const actions = document.createElement('div');
+    actions.className = 'template-actions';
+    actions.innerHTML = `
+      <button class="print-btn" onclick="imprimirTemplate('${tpl.id}')">🖨️ Imprimir</button>
+      <button class="gen-btn" onclick="gerarTemplateIA('${tpl.id}')">✨ Gerar com IA</button>
+      <button onclick="copiarTemplate('${tpl.id}')" style="padding:7px 14px;border-radius:7px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">📋 Copiar</button>`;
+
+    header.onclick = () => { preview.style.display = preview.style.display === 'none' ? 'block' : 'none'; };
+    card.appendChild(header);
+    card.appendChild(preview);
+    card.appendChild(actions);
+    content.appendChild(card);
+  });
+}
+
+function imprimirTemplate(tplId) {
+  const tpl = DOC_TEMPLATES.find(t => t.id === tplId);
+  if (!tpl) return;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>${tpl.titulo}</title><style>body{font-family:Arial,sans-serif;font-size:13px;line-height:1.7;padding:40px;color:#000}pre{white-space:pre-wrap;font-family:Arial,sans-serif}h1{font-size:18px;border-bottom:2px solid #000;padding-bottom:8px}@media print{@page{margin:2cm}}</style></head><body><h1>${tpl.titulo}</h1><pre>${tpl.estrutura}</pre></body></html>`);
+  win.document.close();
+  win.print();
+}
+
+async function gerarTemplateIA(tplId) {
+  const tpl = DOC_TEMPLATES.find(t => t.id === tplId);
+  if (!tpl) return;
+  const empresa = loggedUser?.empresa || 'CCADV';
+  const prompt = `Use este template base como estrutura e gere uma versão COMPLETA e PERSONALIZADA para a empresa "${empresa}". 
+Preencha todos os campos [EMPRESA], [DATA], [NOME], etc.
+Adicione conteúdo específico e detalhado em cada seção.
+Template base:\n\n${tpl.estrutura}`;
+  await gerarDocParaImprimir(tpl.titulo, prompt, tplId + '_generated');
+}
+
+async function gerarDocIA() {
+  const input = document.getElementById('templateAskInput');
+  const txt = input.value.trim();
+  if (!txt) return;
+  const resultDiv = document.getElementById('templateGenResult');
+  resultDiv.innerHTML = '<div style="color:#607080;font-size:12px">⏳ Gerando documento...</div>';
+
+  try {
+    const system = 'Você é especialista em documentação ISO 9001/27001/42001. Gere o documento solicitado de forma completa, estruturada e profissional, com todas as seções necessárias. Use a empresa CCADV e data atual.';
+    const reply = await callGemini(txt, system);
+    const docId = 'custom_' + Date.now();
+    window._genDocs = window._genDocs || {};
+    window._genDocs[docId] = { titulo: txt.slice(0,60), conteudo: reply };
+    resultDiv.innerHTML = `
+      <div style="background:#18222e;border:1px solid rgba(0,230,118,.2);border-radius:9px;padding:12px;margin-top:6px">
+        <div style="font-size:11px;font-weight:700;color:#00e676;margin-bottom:8px">✅ Documento gerado!</div>
+        <div style="font-size:12px;color:#e8edf3;line-height:1.7;max-height:300px;overflow-y:auto;white-space:pre-wrap">${reply.replace(/</g,'&lt;')}</div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="print-btn" onclick="imprimirGenDoc('${docId}')">🖨️ Imprimir</button>
+          <button onclick="copiarGenDoc('${docId}')" style="padding:7px 14px;border-radius:7px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">📋 Copiar</button>
+        </div>
+      </div>`;
+  } catch(err) {
+    resultDiv.innerHTML = `<div style="font-size:12px;color:#ff5252">❌ Erro: ${err.message}</div>`;
+  }
+}
+
+async function gerarDocParaImprimir(titulo, prompt, docId) {
+  const tplCard = document.querySelector(`.template-card[data-id="${docId}"]`);
+  try {
+    const system = 'Você é especialista em documentação ISO. Gere o documento completo conforme solicitado, formato profissional.';
+    const reply = await callGemini(prompt, system);
+    window._genDocs = window._genDocs || {};
+    window._genDocs[docId] = { titulo, conteudo: reply };
+    alert(`✅ Documento "${titulo}" gerado! Clique em Imprimir para abrir.`);
+  } catch(err) { alert('Erro ao gerar: ' + err.message); }
+}
+
+function imprimirGenDoc(docId) {
+  const doc = (window._genDocs || {})[docId];
+  if (!doc) return;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>${doc.titulo}</title><style>body{font-family:Arial,sans-serif;font-size:13px;line-height:1.7;padding:40px;color:#000}pre{white-space:pre-wrap;font-family:Arial,sans-serif}@media print{@page{margin:2cm}}</style></head><body><pre>${doc.conteudo.replace(/</g,'&lt;')}</pre></body></html>`);
+  win.document.close(); win.print();
+}
+
+function copiarTemplate(tplId) {
+  const tpl = DOC_TEMPLATES.find(t => t.id === tplId);
+  if (!tpl) return;
+  navigator.clipboard.writeText(tpl.estrutura).then(() => alert('✅ Template copiado!'));
+}
+
+function copiarGenDoc(docId) {
+  const doc = (window._genDocs || {})[docId];
+  if (!doc) return;
+  navigator.clipboard.writeText(doc.conteudo).then(() => alert('✅ Documento copiado!'));
+}
+
+// ══════════════════════════════════════════════════════════════
+// ★ PATCH showModule para novos módulos
+// ══════════════════════════════════════════════════════════════
+const _origShowModule = showModule;
+showModule = function(id) {
+  if (id === 'templates') {
+    activeModule = 'templates';
+    Object.values(MAIN_IDS).forEach(mid => { const el = document.getElementById(mid); if (el) el.style.display = 'none'; });
+    document.getElementById('main27001').style.display = 'none';
+    document.getElementById('main42001').style.display = 'none';
+    document.getElementById('mainAnexo27').style.display = 'none';
+    document.getElementById('mainAnexo42').style.display = 'none';
+    document.getElementById('mainAuditLive').style.display = 'none';
+    document.getElementById('mainTemplates').style.display = 'flex';
+    updateExtraNav();
+    renderTemplates();
+    return;
+  }
+  if (id === 'auditLive') {
+    activeModule = 'auditLive';
+    Object.values(MAIN_IDS).forEach(mid => { const el = document.getElementById(mid); if (el) el.style.display = 'none'; });
+    document.getElementById('main27001').style.display = 'none';
+    document.getElementById('main42001').style.display = 'none';
+    document.getElementById('mainAnexo27').style.display = 'none';
+    document.getElementById('mainAnexo42').style.display = 'none';
+    document.getElementById('mainAuditLive').style.display = 'flex';
+    updateExtraNav();
+    return;
+  }
+  // Hide new modules when switching to others
+  const newMods = ['mainAnexo27','mainAnexo42','mainAuditLive','mainTemplates'];
+  newMods.forEach(m => { const el = document.getElementById(m); if(el) el.style.display='none'; });
+  _origShowModule(id);
+};
+
+// ══════════════════════════════════════════════════════════════
+// ★ PATCH trocarNorma to show/hide Anexo A button
+// ══════════════════════════════════════════════════════════════
+const _origTrocarNorma = trocarNorma;
+trocarNorma = function(norma) {
+  const anexoNav = document.getElementById('anexoNavArea');
+  const btnAnexo = document.getElementById('btnAnexoA');
+  if (anexoNav) {
+    anexoNav.style.display = (norma === '27001' || norma === '42001') ? 'block' : 'none';
+    if (btnAnexo) {
+      btnAnexo.style.borderColor = norma === '42001' ? 'rgba(0,230,118,.3)' : 'rgba(160,80,255,.3)';
+      btnAnexo.style.background = norma === '42001' ? 'rgba(0,230,118,.06)' : 'rgba(160,80,255,.06)';
+      btnAnexo.style.color = norma === '42001' ? '#00e676' : '#a050ff';
+      btnAnexo.textContent = norma === '42001' ? '🤖 Anexo A — Controles IA' : '🔐 Anexo A — Controles SI';
+    }
+  }
+  _origTrocarNorma(norma);
+};
+
+// ══════════════════════════════════════════════════════════════
+// ★ PATCH fileInput para auditoria e multi-doc
+// ══════════════════════════════════════════════════════════════
+document.getElementById('fileInput').addEventListener('change', async function(e3) {
+  const file = e3.target.files[0];
+  if (!file) return;
+  e3.target.value = '';
+
+  // Auditoria upload
+  if (auditUploadPending) {
+    auditUploadPending = false;
+    addAuditMsg('auditado', `📎 Enviando evidência: ${file.name}...`);
+    try {
+      const base64 = await new Promise((res,rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(file); });
+      const isPdf = file.type === 'application/pdf'; const isImg = file.type.startsWith('image/');
+      const fileMime = (isPdf||isImg) ? file.type : null;
+      const prompt = `O auditado enviou a evidência "${file.name}". Analise o documento como auditor ISO ${auditSession.norma}. Diga se é uma evidência adequada para o critério em análise (Req. ${auditSession.reqAtual}), aponte pontos fortes e lacunas, e faça a próxima pergunta de auditoria.`;
+      const reply = await callGemini(prompt, AUDIT_SYSTEM, fileMime ? base64 : null, fileMime);
+      addAuditMsg('auditor', reply);
+    } catch(err) { addAuditMsg('system', '❌ Erro ao analisar evidência: ' + err.message); }
+    return;
+  }
+
+  // Multi-doc upload (handled by main listener for pendingUpload)
+  // The main fileInput listener handles this — don't double-process
+}, false);
+
 </script>
 </body>
 </html>
