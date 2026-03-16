@@ -3266,6 +3266,18 @@ async function renderAcessos() {
   let users = [];
   try { users = await sb('/rest/v1/perfis?select=*&order=criado_em.asc') || []; } catch(e) {}
 
+
+  // Load saved acessos from resultados_ia (stored with criterio_id = 'acesso_USERID')
+  try {
+    const acessoRows = await sb('/rest/v1/resultados_ia?criterio_id=like.acesso_*&ano=eq.0&select=criterio_id,recomendacao,usuario_id') || [];
+    acessoRows.forEach(row => {
+      var uid = row.criterio_id ? row.criterio_id.replace('acesso_','') : row.usuario_id;
+      if (uid && row.recomendacao) {
+        try { acessosUsuarios[uid] = JSON.parse(row.recomendacao); } catch(e) {}
+      }
+    });
+  } catch(e) {}
+
   content.innerHTML = '';
   const intro = document.createElement('div');
   intro.style.cssText = 'margin-bottom:16px;padding:12px 16px;background:rgba(255,234,0,.04);border:1px solid rgba(255,234,0,.12);border-radius:9px;font-size:12px;color:#607080';
@@ -3292,7 +3304,7 @@ async function renderAcessos() {
         <div style="font-weight:600;font-size:14px">${user.nome || user.email}</div>
         <div style="font-size:11px;color:#607080">${user.email} · <span style="color:#00c8ff">${user.perfil}</span></div>
       </div>
-      <button onclick="salvarAcesso('${user.id}')" style="padding:6px 16px;border-radius:7px;border:none;background:#00c8ff;color:#0a0e14;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">💾 Salvar</button>`;
+      <button onclick="salvarAcesso('${user.id}')" data-userid="${user.id}" style="padding:6px 16px;border-radius:7px;border:none;background:#00c8ff;color:#0a0e14;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">💾 Salvar</button>`;
     card.appendChild(hdr);
 
     // Permissions grid
@@ -3378,14 +3390,21 @@ async function salvarAcesso(userId) {
     }
   });
 
-  // Save to Supabase
+  // Save to resultados_ia (using criterio_id = 'acesso_USER_ID')
   try {
-    await sb('/rest/v1/perfis?id=eq.' + userId, {
-      method: 'PATCH',
-      body: JSON.stringify({ acessos: JSON.stringify(ac), atualizado_em: new Date().toISOString() })
+    await sb('/rest/v1/resultados_ia', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({
+        ano: 0,
+        criterio_id: 'acesso_' + userId,
+        recomendacao: JSON.stringify(ac),
+        usuario_id: userId,
+        criado_em: new Date().toISOString()
+      })
     });
     // Visual feedback
-    const btns = document.querySelectorAll(`button[onclick="salvarAcesso('${userId}')"]`);
+    const btns = document.querySelectorAll('button[data-userid="' + userId + '"]');
     btns.forEach(b => { b.textContent = '✅ Salvo!'; b.style.background = '#00e676'; setTimeout(() => { b.textContent = '💾 Salvar'; b.style.background = '#00c8ff'; }, 2000); });
   } catch(e) { alert('Erro ao salvar: ' + e.message); }
 }
