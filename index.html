@@ -797,16 +797,16 @@ Ao criar documentos SGQ use: Objetivo, Escopo, Referências, Definições, Respo
 Responda em português do Brasil. Seja técnico e estruturado.`;
 
 const EXTRA_MODULES = [
-  {id:'chat',icon:'🤖',label:'Assistente IA',badge:''},
-  {id:'auditLive',icon:'🎯',label:'Auditoria IA Live',badge:'NEW'},
-  {id:'auditInt',icon:'🔍',label:'Auditoria Interna',badge:''},
-  {id:'auditExt',icon:'🏅',label:'Pré-Auditoria Externa',badge:''},
-  {id:'docs',icon:'📄',label:'Documentos',badge:''},
-  {id:'templates',icon:'📋',label:'Modelos de Docs',badge:''},
-  {id:'alertas',icon:'🔔',label:'Alertas',badge:'3'},
-  {id:'usuarios',icon:'👥',label:'Usuários',badge:''},
-  {id:'acessos',icon:'🔑',label:'Controle de Acesso',badge:''},
-  {id:'userTemplates',icon:'📁',label:'Meus Templates',badge:''},
+  {id:'chat',       icon:'🤖',label:'Assistente IA',        badge:'',    roles:['Administrador','Gestor da Qualidade','Auditor Interno','Colaborador','Somente Leitura']},
+  {id:'auditLive',  icon:'🎯',label:'Auditoria IA Live',    badge:'NEW', roles:['Administrador','Gestor da Qualidade','Auditor Interno']},
+  {id:'auditInt',   icon:'🔍',label:'Auditoria Interna',    badge:'',    roles:['Administrador','Gestor da Qualidade','Auditor Interno']},
+  {id:'auditExt',   icon:'🏅',label:'Pré-Auditoria Externa',badge:'',    roles:['Administrador','Gestor da Qualidade','Auditor Interno']},
+  {id:'docs',       icon:'📄',label:'Documentos',           badge:'',    roles:['Administrador','Gestor da Qualidade','Auditor Interno','Colaborador']},
+  {id:'templates',  icon:'📋',label:'Modelos de Docs',      badge:'',    roles:['Administrador','Gestor da Qualidade']},
+  {id:'alertas',    icon:'🔔',label:'Alertas',              badge:'3',   roles:['Administrador','Gestor da Qualidade','Auditor Interno']},
+  {id:'usuarios',   icon:'👥',label:'Usuários',             badge:'',    roles:['Administrador']},
+  {id:'acessos',    icon:'🔑',label:'Controle de Acesso',   badge:'',    roles:['Administrador']},
+  {id:'userTemplates',icon:'📁',label:'Meus Templates',    badge:'',    roles:['Administrador','Gestor da Qualidade']},
 ];
 
 const MAIN_IDS = {
@@ -1092,7 +1092,10 @@ function showModule(id){
 
 function updateExtraNav(){
   const nav=document.getElementById('extraNav');nav.innerHTML='';
+  const perfilAtual = loggedUser ? loggedUser.perfil : 'Colaborador';
   EXTRA_MODULES.forEach(m=>{
+    // Filter by role — if roles defined, check if user's perfil is allowed
+    if (m.roles && !m.roles.includes(perfilAtual)) return;
     const active=activeModule===m.id;
     const div=document.createElement('div');div.className='nav-item'+(active?' active':'');
     div.style.cssText='display:flex;align-items:center;gap:9px;padding:8px 12px;margin:0 6px 3px;border-radius:8px;cursor:pointer;border:1px solid '+(active?'rgba(0,200,255,.2)':'transparent')+';background:'+(active?'rgba(0,200,255,.08)':'transparent');
