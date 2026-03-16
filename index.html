@@ -897,7 +897,16 @@ function abrirSistema(){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('sidebarUser').textContent=loggedUser.nome||loggedUser.email;
   document.getElementById('loginError').textContent='';
-  carregarAnos().then(()=>{renderYearPills();carregarAno(anoAtual).then(()=>{updateExtraNav();render();});});
+  carregarAnos().then(()=>{
+    renderYearPills();
+    carregarAno(anoAtual).then(async ()=>{
+      // Load access restrictions for this user
+      await carregarAcessoUsuario(loggedUser.id);
+      aplicarRestricaoAcesso();
+      updateExtraNav();
+      render();
+    });
+  });
 }
 
 async function registrarLog(acao,detalhe){
@@ -1064,7 +1073,7 @@ function renderContent(){
   });
 }
 
-function render(){updateTopbar();updateSidebar();renderContent();}
+function render(){updateTopbar();updateSidebar();renderContent();_aplicarFiltroNavItens();}
 
 // ══════════════════════════════════════════════════════════════
 // 9. MÓDULOS — NAVEGAÇÃO
@@ -3619,6 +3628,8 @@ trocarNorma = function(norma) {
     return;
   }
   _origTrocarNormaV3(norma);
+  // Re-apply nav filter after norma change
+  setTimeout(_aplicarFiltroNavItens, 50);
 };
 
 // ── Patch fileInput to record history for all normas ──
@@ -3656,6 +3667,82 @@ document.getElementById('fileInput').addEventListener('change', async function(e
   }
   renderAB2L();
 }, false);
+
+
+// ══════════════════════════════════════════════════════════════
+// ★ CONTROLE DE ACESSO — CARREGAR E APLICAR
+// ══════════════════════════════════════════════════════════════
+async function carregarAcessoUsuario(userId) {
+  if (!userId) return;
+  if (loggedUser && loggedUser.perfil === 'Administrador') return; // admin sempre tem tudo
+  try {
+    const rows = await sb('/rest/v1/resultados_ia?criterio_id=eq.acesso_' + userId + '&ano=eq.0&select=recomendacao,usuario_id');
+    if (rows && rows.length && rows[0].recomendacao) {
+      acessosUsuarios[userId] = JSON.parse(rows[0].recomendacao);
+    }
+  } catch(e) { console.warn('carregarAcessoUsuario:', e); }
+}
+
+function aplicarRestricaoAcesso() {
+  if (!loggedUser || loggedUser.perfil === 'Administrador') {
+    // Admin: show everything
+    ['9001','27001','42001','ab2l'].forEach(n => {
+      var t = document.getElementById('isoTab' + (n==='ab2l'?'AB2L':n));
+      if (t) t.style.display = '';
+    });
+    return;
+  }
+
+  var ac = acessosUsuarios[loggedUser.id];
+  if (!ac) return; // no restrictions saved = full access
+
+  var normasPermitidas = ac.normas || ALL_NORMAS;
+
+  // Show/hide ISO tabs
+  var tabMap = {'9001':'isoTab9001','27001':'isoTab27001','42001':'isoTab42001','ab2l':'isoTabAB2L'};
+  Object.entries(tabMap).forEach(function(entry) {
+    var norma = entry[0], tabId = entry[1];
+    var tab = document.getElementById(tabId);
+    if (tab) {
+      tab.style.display = normasPermitidas.includes(norma) ? '' : 'none';
+    }
+  });
+
+  // If current norma is blocked, switch to first allowed
+  if (!normasPermitidas.includes(normaAtiva || '9001')) {
+    var primeira = normasPermitidas[0];
+    if (primeira) {
+      setTimeout(function() { trocarNorma(primeira); }, 100);
+    }
+  }
+
+  // Filter nav items for current norma based on requisitos allowed
+  // (updateSidebar/renderISO already use the CHECKLIST filtered by currentReq
+  //  so we just need to skip rendering blocked items)
+  // We'll patch updateSidebar to respect access
+  _aplicarFiltroNavItens();
+}
+
+function _aplicarFiltroNavItens() {
+  if (!loggedUser || loggedUser.perfil === 'Administrador') return;
+  var ac = acessosUsuarios[loggedUser.id];
+  if (!ac) return;
+  var norma = normaAtiva || '9001';
+  var reqsPermitidos = (ac.requisitos && ac.requisitos[norma]) ? ac.requisitos[norma] : null;
+  if (!reqsPermitidos) return;
+
+  // Hide nav items for blocked requisitos
+  var navItems = document.getElementById('navItems');
+  if (!navItems) return;
+  Array.from(navItems.children).forEach(function(div) {
+    var text = div.textContent || '';
+    var blocked = true;
+    reqsPermitidos.forEach(function(req) {
+      if (text.indexOf(String(req)) >= 0 || text.indexOf(req) >= 0) blocked = false;
+    });
+    div.style.display = blocked ? 'none' : '';
+  });
+}
 
 </script>
 </body>
