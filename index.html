@@ -3119,45 +3119,57 @@ function triggerUploadAB2L(id, label) {
 // ★ HISTÓRICO DE INCLUSÕES (⋯)
 // ══════════════════════════════════════════════════════════════
 function toggleHistPopover(criterioId, evt) {
-  document.querySelectorAll('.hist-popover').forEach(p => {
+  document.querySelectorAll('.hist-popover').forEach(function(p) {
     if (p.id !== 'hist_' + criterioId) p.style.display = 'none';
   });
-  const pop = document.getElementById('hist_' + criterioId);
+  var pop = document.getElementById('hist_' + criterioId);
   if (!pop) return;
   if (pop.style.display !== 'none') { pop.style.display = 'none'; return; }
-
-  // Position with fixed coords
-  const btn = evt ? (evt.currentTarget || evt.target) : null;
+  var btn = evt ? (evt.currentTarget || evt.target) : null;
   if (btn) {
-    const rect = btn.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
+    var rect = btn.getBoundingClientRect();
+    var spaceBelow = window.innerHeight - rect.bottom;
     if (spaceBelow > 200) {
       pop.style.top = (rect.bottom + 6) + 'px';
     } else {
       pop.style.top = Math.max(10, rect.top - 326) + 'px';
     }
-    if (rect.right + 10 > window.innerWidth) {
-      pop.style.left = Math.max(10, window.innerWidth - 330) + 'px';
+    if (rect.left + 330 > window.innerWidth) {
+      pop.style.left = Math.max(10, window.innerWidth - 334) + 'px';
     } else {
       pop.style.left = Math.max(10, rect.left - 280) + 'px';
     }
   }
-
-  const hist = docHistorico[criterioId] || [];
-  const closeBtn = '<span onclick="document.getElementById('hist_'+criterioId+'').style.display='none'" style="cursor:pointer;color:#607080">✕</span>';
+  var hist = docHistorico[criterioId] || [];
+  var closeFn = "document.getElementById('hist_CRIT').style.display='none'".replace('CRIT', criterioId);
+  var closeSpan = '<span onclick="' + closeFn + '" style="cursor:pointer;color:#607080">&#x2715;</span>';
   if (!hist.length) {
-    pop.innerHTML = '<div class="hist-popover-title"><span>Histórico de inclusões</span>'+closeBtn+'</div><div style="font-size:12px;color:#607080;text-align:center;padding:8px 0">Nenhuma inclusão registrada</div>';
+    pop.innerHTML = '<div class="hist-popover-title"><span>Histórico</span>' + closeSpan + '</div>' +
+      '<div style="font-size:12px;color:#607080;text-align:center;padding:8px 0">Nenhuma inclusão registrada</div>';
   } else {
-    let rows = '';
-    hist.slice().reverse().forEach(h => {
-      const cor = h.resultado==='aprovado'?'#00e676':h.resultado==='insuficiente'?'#ff5252':'#ffea00';
-      rows += '<div class="hist-entry"><div style="display:flex;justify-content:space-between"><span class="hist-user">👤 '+(h.usuario||h.email)+'</span><span class="hist-date">'+(h.data?new Date(h.data).toLocaleString('pt-BR'):'—')+'</span></div><div style="margin-top:2px">📄 '+h.filename+' <span class="hist-result" style="color:'+cor+'">'+( h.resultado||'—')+'</span></div><div style="color:#607080;font-size:11px">Norma: '+(h.norma||'—')+'</div></div>';
+    var rows = '';
+    hist.slice().reverse().forEach(function(h) {
+      var cor = h.resultado === 'aprovado' ? '#00e676' : h.resultado === 'insuficiente' ? '#ff5252' : '#ffea00';
+      rows += '<div class="hist-entry">' +
+        '<div style="display:flex;justify-content:space-between">' +
+        '<span class="hist-user">' + (h.usuario || h.email || '') + '</span>' +
+        '<span class="hist-date">' + (h.data ? new Date(h.data).toLocaleString('pt-BR') : '-') + '</span>' +
+        '</div>' +
+        '<div style="margin-top:2px">' + (h.filename || '') +
+        ' <span style="color:' + cor + ';font-weight:700;font-size:11px">' + (h.resultado || '-') + '</span></div>' +
+        '<div style="color:#607080;font-size:11px">Norma: ' + (h.norma || '-') + '</div>' +
+        '</div>';
     });
-    pop.innerHTML = '<div class="hist-popover-title"><span>Histórico ('+hist.length+')</span>'+closeBtn+'</div>'+rows;
+    pop.innerHTML = '<div class="hist-popover-title"><span>Histórico (' + hist.length + ')</span>' + closeSpan + '</div>' + rows;
   }
   pop.style.display = 'block';
-  setTimeout(() => {
-    const handler = (e) => { if (!pop.contains(e.target) && e.target !== btn) { pop.style.display = 'none'; document.removeEventListener('click', handler); } };
+  setTimeout(function() {
+    var handler = function(e) {
+      if (!pop.contains(e.target) && e.target !== btn) {
+        pop.style.display = 'none';
+        document.removeEventListener('click', handler);
+      }
+    };
     document.addEventListener('click', handler);
   }, 50);
 }
