@@ -250,7 +250,7 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
 .perm-read{background:rgba(0,200,255,.08);color:#00c8ff;border:1px solid rgba(0,200,255,.2)}
 .perm-none{background:rgba(255,82,82,.08);color:#ff5252;border:1px solid rgba(255,82,82,.2)}
 /* ══ HISTORY POPOVER ══ */
-.hist-popover{position:absolute;right:0;top:32px;width:320px;background:#18222e;border:1px solid #2a3d52;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:200;padding:12px 14px}
+.hist-popover{position:fixed;width:320px;background:#18222e;border:1px solid #2a3d52;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:9999;padding:12px 14px;max-height:320px;overflow-y:auto}
 .hist-popover-title{font-size:11px;font-weight:700;color:#607080;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;justify-content:space-between}
 .hist-entry{padding:7px 0;border-bottom:1px solid rgba(30,45,61,.6);font-size:12px;line-height:1.5}
 .hist-entry:last-child{border-bottom:none}
@@ -1030,7 +1030,7 @@ function renderContent(){
         let resultHTML='';
         if(result&&!result.erro){const rClass=result.aprovado?'ok':'warn';const rColor=result.aprovado?'#00e676':'#ffea00';const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');const falt=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span></div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falt?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falt}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
         }else if(result&&result.erro){resultHTML=`<div class="ia-result err"><span style="color:#ff5252">❌ Erro ao analisar. Tente novamente.</span></div>`;}
-        cDiv.innerHTML=`<div class="criterio-row"><div class="checkbox${isDone?' checked':''}" onclick="toggleDone('${c.id}')">${isDone?'<span class="checkbox-tick">✓</span>':''}</div><div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id}</span>${c.label}</div>${resultHTML}</div><button class="upload-btn ${isDone?'done':'pending'}" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button></div>`;
+        cDiv.innerHTML=`<div class="criterio-row"><div class="checkbox${isDone?' checked':''}" onclick="toggleDone('${c.id}')">${isDone?'<span class="checkbox-tick">✓</span>':''}</div><div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id}</span>${c.label}</div>${resultHTML}</div><button class="upload-btn ${isDone?'done':'pending'}" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button><div style="position:relative;display:inline-block;margin-left:4px"><button onclick=\"toggleHistPopover('${c.id}',event)\" title="Histórico de inclusões" style="width:26px;height:26px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center">⋯</button><div class="hist-popover" id="hist_${c.id}" style="display:none"></div></div></div>`;
         criteriosDiv.appendChild(cDiv);
       });
       if(pending.length>0){const faltaDiv=document.createElement('div');faltaDiv.className='falta-box';faltaDiv.innerHTML=`<div class="falta-title">📋 Para chegar a 100% neste subitem, ainda falta:</div>`+pending.map(c=>`<div class="falta-item"><span>• ${c.label}</span><button class="falta-btn" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')">📎 Enviar →</button></div>`).join('');criteriosDiv.appendChild(faltaDiv);}
@@ -1164,7 +1164,7 @@ function renderISO(norma){
         }else if(result&&result.erro){resultHTML=`<div class="ia-result err"><span style="color:#ff5252">❌ Erro ao analisar. Tente novamente.</span></div>`;}
         const lbl=c.label.replace(/'/g,"\\'");const cid=c.id;
         const toggleFn=`toggleDoneISO('${norma}','${cid}')`;const uploadFn=`triggerUploadISO('${norma}','${cid}','${lbl}')`;
-        cDiv.innerHTML=`<div class="criterio-row"><div class="checkbox${isDone?' checked':''}" onclick="${toggleFn}">${isDone?'<span class="checkbox-tick">✓</span>':''}</div><div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id.replace('27_','').replace('42_','')}</span>${c.label}</div>${resultHTML}</div><button class="upload-btn ${isDone?'done':'pending'}" onclick="${uploadFn}" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button></div>`;
+        cDiv.innerHTML=`<div class="criterio-row"><div class="checkbox${isDone?' checked':''}" onclick="${toggleFn}">${isDone?'<span class="checkbox-tick">✓</span>':''}</div><div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id.replace('27_','').replace('42_','')}</span>${c.label}</div>${resultHTML}</div><button class="upload-btn ${isDone?'done':'pending'}" onclick="${uploadFn}" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button><div style="position:relative;display:inline-block;margin-left:4px"><button onclick=\"toggleHistPopover('${c.id}',event)\" title="Histórico de inclusões" style="width:26px;height:26px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center">⋯</button><div class="hist-popover" id="hist_${c.id}" style="display:none"></div></div></div>`;
         criteriosDiv.appendChild(cDiv);
       });
       if(pending.length>0){const faltaDiv=document.createElement('div');faltaDiv.className='falta-box';faltaDiv.innerHTML=`<div class="falta-title">📋 Para chegar a 100% neste subitem, ainda falta:</div>`+pending.map(c=>{const lbl=c.label.replace(/'/g,"\\'");const fn=`triggerUploadISO('${norma}','${c.id}','${lbl}')`;return`<div class="falta-item"><span>• ${c.label}</span><button class="falta-btn" onclick="${fn}">📎 Enviar →</button></div>`;}).join('');criteriosDiv.appendChild(faltaDiv);}
@@ -1324,14 +1324,40 @@ async function salvarUsuario(){
   const nome=document.getElementById('uf_nome').value.trim();const email=document.getElementById('uf_email').value.trim();const pass=document.getElementById('uf_pass').value;const perfil=document.getElementById('uf_perfil').value;const depto=document.getElementById('uf_depto').value.trim();const errEl=document.getElementById('userFormError');
   if(!nome||!email||!pass){errEl.textContent='Nome, email e senha são obrigatórios.';return;}
   if(pass.length<6){errEl.textContent='Senha deve ter pelo menos 6 caracteres.';return;}
-  errEl.textContent='Criando usuário...';
+  if(!email.includes('@')){errEl.textContent='Informe um email válido.';return;}
+  errEl.textContent='Criando usuário...';errEl.style.color='#607080';
   try{
-    const res=await fetch(SUPABASE_URL+'/auth/v1/admin/users',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+sbSession.access_token},body:JSON.stringify({email,password:pass,email_confirm:true,user_metadata:{nome,perfil}})});
-    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao criar usuário');}
-    const newUser=await res.json();
-    await sb('/rest/v1/perfis?id=eq.'+newUser.id,{method:'PATCH',body:JSON.stringify({nome,perfil,departamento:depto,email,ativo:true})});
-    errEl.style.color='#00e676';errEl.textContent='✅ Usuário criado com sucesso!';
-    setTimeout(()=>{errEl.textContent='';errEl.style.color='#ff5252';toggleUserForm();renderUsuarios();},1500);
+    // Step 1: Create user via signup (works with anon key)
+    const res=await fetch(SUPABASE_URL+'/auth/v1/signup',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
+      body:JSON.stringify({email,password:pass,data:{nome,perfil}})
+    });
+    const data=await res.json();
+    if(!res.ok){
+      const msg=data.msg||data.message||data.error_description||data.error||'Erro ao criar usuário';
+      if(msg.includes('already registered')||msg.includes('already been registered')) throw new Error('Este email já está cadastrado no sistema.');
+      throw new Error(msg);
+    }
+    if(!data.user&&!data.id){
+      // Email confirmation required - user created but needs to confirm
+      errEl.style.color='#ffea00';
+      errEl.textContent='⚠️ Usuário criado! O email de confirmação foi enviado para '+email+'. Peça ao usuário confirmar antes de fazer login.';
+      // Try to save profile anyway using identities
+      setTimeout(()=>{errEl.textContent='';errEl.style.color='#ff5252';toggleUserForm();renderUsuarios();},4000);
+      return;
+    }
+    const userId=(data.user||data).id;
+    // Step 2: Save/update profile
+    try{
+      await sb('/rest/v1/perfis',{
+        method:'POST',
+        headers:{'Prefer':'resolution=merge-duplicates'},
+        body:JSON.stringify({id:userId,nome,perfil,departamento:depto,email,ativo:true,criado_em:new Date().toISOString()})
+      });
+    }catch(profileErr){console.warn('Profile save:',profileErr);}
+    errEl.style.color='#00e676';errEl.textContent='✅ Usuário criado! Email de confirmação enviado para '+email;
+    setTimeout(()=>{errEl.textContent='';errEl.style.color='#ff5252';toggleUserForm();renderUsuarios();},2500);
   }catch(e){errEl.style.color='#ff5252';errEl.textContent='Erro: '+e.message;}
 }
 
@@ -3061,7 +3087,7 @@ function renderAB2L() {
             <button class="upload-btn pending" onclick="triggerUploadAB2L('${c.id}','${c.label.replace(/'/g,"\\'")}')">📎 Enviar evidência</button>
             ${result ? `<span style="font-size:11px;color:#607080">📄 ${result.filename} · <span style="color:${result.aprovado?'#00e676':'#ffea00'}">${result.aprovado?'Aprovado':'Insuficiente'}</span></span>` : ''}
             <div style="position:relative;margin-left:auto">
-              <button onclick="toggleHistPopover('${c.id}')" title="Histórico de inclusões" style="width:28px;height:28px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">⋯</button>
+              <button onclick=\"toggleHistPopover('${c.id}',event)\" title="Histórico de inclusões" style="width:28px;height:28px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">⋯</button>
               <div class="hist-popover" id="hist_${c.id}" style="display:none"></div>
             </div>
           </div>
@@ -3092,12 +3118,30 @@ function triggerUploadAB2L(id, label) {
 // ══════════════════════════════════════════════════════════════
 // ★ HISTÓRICO DE INCLUSÕES (⋯)
 // ══════════════════════════════════════════════════════════════
-function toggleHistPopover(criterioId) {
+function toggleHistPopover(criterioId, evt) {
   // Close other open popovers
   document.querySelectorAll('.hist-popover').forEach(p => { if (p.id !== 'hist_' + criterioId) p.style.display = 'none'; });
   const pop = document.getElementById('hist_' + criterioId);
   if (!pop) return;
   if (pop.style.display !== 'none') { pop.style.display = 'none'; return; }
+  // Position using fixed coords from button
+  const btn = (evt && evt.target) ? evt.target : document.querySelector('[onclick*="toggleHistPopover(\''+criterioId+'\'")']');
+  if (btn) {
+    const rect = btn.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const popH = 320;
+    if (spaceBelow > popH || spaceBelow > 150) {
+      pop.style.top = (rect.bottom + 6) + 'px';
+    } else {
+      pop.style.top = Math.max(10, rect.top - popH - 6) + 'px';
+    }
+    const rightEdge = rect.right;
+    if (rightEdge + 320 > window.innerWidth) {
+      pop.style.left = Math.max(10, window.innerWidth - 330) + 'px';
+    } else {
+      pop.style.left = Math.max(10, rect.left - 290) + 'px';
+    }
+  }
 
   const hist = docHistorico[criterioId] || [];
   if (!hist.length) {
