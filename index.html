@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SGQ · Sistema de Gestão da Qualidade com IA</title>
+<title>SGQ · ISO 9001 | 27001 | 42001 com IA</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -166,7 +166,7 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
 .login-logo-name{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;text-align:center;margin:6px 0 4px}
 .login-logo-sub{font-size:12px;color:#607080;text-align:center;margin-bottom:28px}
 .login-field-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#607080;margin-bottom:6px}
-.login-input{width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:9px;padding:11px 14px;color:#e8edf3;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:14px;transition:border-color .15s}
+.login-input{width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:9px;padding:11px 14px;color:#e8edf3;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:14px;transition:border-color .15px}
 .login-input:focus{border-color:#00c8ff}
 .login-btn{width:100%;padding:13px;border-radius:9px;border:none;background:linear-gradient(135deg,#00c8ff,#0066ff);color:#fff;font-size:14px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;margin-top:6px;letter-spacing:1px;transition:opacity .15s}
 .login-btn:hover{opacity:.9}
@@ -179,6 +179,13 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
 .year-pill:hover{border-color:#00c8ff;color:#00c8ff}
 .year-add{padding:4px 10px;border-radius:20px;font-size:13px;cursor:pointer;border:1px dashed #1e2d3d;background:transparent;color:#607080;font-family:'DM Sans',sans-serif;transition:all .12s}
 .year-add:hover{border-color:#00e676;color:#00e676}
+/* ══ ISO SELECTOR — NOVO ══ */
+.iso-selector{display:flex;gap:4px;padding:6px 14px 8px;flex-wrap:wrap}
+.iso-tab{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid #1e2d3d;background:transparent;color:#607080;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap}
+.iso-tab:hover{border-color:#00c8ff;color:#00c8ff}
+.iso-tab.active-9001{background:rgba(0,200,255,.12);border-color:#00c8ff;color:#00c8ff}
+.iso-tab.active-27001{background:rgba(160,80,255,.12);border-color:#a050ff;color:#a050ff}
+.iso-tab.active-42001{background:rgba(0,230,118,.12);border-color:#00e676;color:#00e676}
 </style>
 </head>
 <body>
@@ -186,8 +193,9 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
 <!-- TELA DE LOGIN -->
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
-    <div class="login-logo-tag">A revoluçao em seu SGQ</div>
-    <div class="login-logo-name">SGQ · IA</div>    
+    <div class="login-logo-tag">ISO 9001 · 27001 · 42001</div>
+    <div class="login-logo-name">SGQ · IA</div>
+    <div class="login-logo-sub">Sistema de Gestão da Qualidade · CCADV</div>
     <div class="login-field-label">Email</div>
     <input class="login-input" id="loginUser" type="email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')doLogin()">
     <div class="login-field-label">Senha</div>
@@ -197,20 +205,28 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
     <div class="login-footer">🔒 Autenticação segura · Supabase Auth</div>
   </div>
 </div>
-<div class="app">
 
+<div class="app">
 <nav class="sidebar" id="sidebar">
   <div class="logo">
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
       <div>
-        <div class="logo-tag">ISO 9001</div>
+        <div class="logo-tag">ISO 9001 · 27001 · 42001</div>
         <div class="logo-name">SGQ · IA</div>
-        <div class="logo-sub">Gestão da Qualidade</div>
+        <div class="logo-sub">Gestão Integrada · CCADV</div>
       </div>
       <button onclick="doLogout()" title="Sair" style="background:transparent;border:1px solid #1e2d3d;border-radius:7px;color:#607080;font-size:11px;cursor:pointer;padding:4px 9px;font-family:'DM Sans',sans-serif;margin-top:2px">Sair</button>
     </div>
     <div style="margin-top:8px;font-size:10px;color:#607080;font-weight:600;letter-spacing:2px;text-transform:uppercase">Usuário: <span id="sidebarUser" style="color:#00c8ff"></span></div>
   </div>
+
+  <!-- SELETOR DE NORMA ISO — NOVO -->
+  <div class="iso-selector">
+    <button class="iso-tab active-9001" id="isoTab9001" onclick="trocarNorma('9001')">ISO 9001</button>
+    <button class="iso-tab" id="isoTab27001" onclick="trocarNorma('27001')">ISO 27001</button>
+    <button class="iso-tab" id="isoTab42001" onclick="trocarNorma('42001')">ISO 42001</button>
+  </div>
+
   <!-- SELETOR DE ANO -->
   <div class="year-bar">
     <div id="yearPills"></div>
@@ -225,15 +241,15 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
   </div>
   <div class="nav-section-label">Módulos</div>
   <div id="extraNav"></div>
-  <div class="nav-section-label">Requisitos ISO</div>
+  <div class="nav-section-label" id="navSectionLabel">Requisitos ISO 9001</div>
   <div id="navItems"></div>
   <div class="ai-card">
     <div class="ai-card-title"><div class="ai-dot"></div> Auditor IA</div>
     <div class="ai-card-text">Envie documentos em cada critério para validação automática pela IA.</div>
-    <button onclick="configurarChaveAPI()" style="margin-top:8px;width:100%;padding:6px;border-radius:6px;border:1px solid rgba(0,200,255,.3);background:transparent;color:#00c8ff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">🔑 Configurar chave API</button>
   </div>
 </nav>
 
+<!-- MAIN ISO 9001 -->
 <div class="main" id="mainReq">
   <div class="topbar">
     <div class="topbar-row">
@@ -253,11 +269,51 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
   <div class="content" id="content"></div>
 </div>
 
+<!-- MAIN ISO 27001 — NOVO -->
+<div class="main" id="main27001" style="display:none">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="req-num-badge" id="topReqNum27" style="background:rgba(160,80,255,.1);border-color:rgba(160,80,255,.25);color:#a050ff">4</div>
+      <div style="flex:1">
+        <div class="req-title" id="topReqTitle27">Contexto da Organização</div>
+        <div class="req-sub" id="topReqSub27">ISO 27001 · SGSI — Sistema de Gestão de Segurança da Informação</div>
+      </div>
+      <div>
+        <div class="req-pct-big" id="topReqPct27" style="color:#607080">0%</div>
+        <div class="req-pct-label" id="topReqCriterios27">0 de 0 critérios</div>
+      </div>
+    </div>
+    <div class="topbar-bar"><div class="bar-fill" id="topBarFill27" style="width:0%;background:#607080"></div></div>
+    <div class="topbar-hint" id="topHint27"></div>
+  </div>
+  <div class="content" id="content27"></div>
+</div>
+
+<!-- MAIN ISO 42001 — NOVO -->
+<div class="main" id="main42001" style="display:none">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="req-num-badge" id="topReqNum42" style="background:rgba(0,230,118,.1);border-color:rgba(0,230,118,.25);color:#00e676">4</div>
+      <div style="flex:1">
+        <div class="req-title" id="topReqTitle42">Contexto da Organização</div>
+        <div class="req-sub" id="topReqSub42">ISO 42001 · SGAI — Sistema de Gestão de IA Responsável</div>
+      </div>
+      <div>
+        <div class="req-pct-big" id="topReqPct42" style="color:#607080">0%</div>
+        <div class="req-pct-label" id="topReqCriterios42">0 de 0 critérios</div>
+      </div>
+    </div>
+    <div class="topbar-bar"><div class="bar-fill" id="topBarFill42" style="width:0%;background:#607080"></div></div>
+    <div class="topbar-hint" id="topHint42"></div>
+  </div>
+  <div class="content" id="content42"></div>
+</div>
+
 <!-- MÓDULO: CHAT IA -->
 <div class="main" id="mainChat" style="display:none">
   <div class="mod-topbar">
     <div class="mod-icon-badge">🤖</div>
-    <div><div class="mod-title">Assistente IA · SGQ</div><div class="mod-sub">Especialista ISO 9001 — análise, documentos e auditorias</div></div>
+    <div><div class="mod-title">Assistente IA · SGQ</div><div class="mod-sub">Especialista ISO 9001 / 27001 / 42001 — análise, documentos e auditorias</div></div>
   </div>
   <div class="mod-content" id="chatArea">
     <div class="chat-area" id="chatMessages">
@@ -265,13 +321,13 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
         <div class="chat-avatar ai">🤖</div>
         <div style="flex:1">
           <div class="chat-sender ai">Assistente SGQ · IA</div>
-          <div class="chat-text">Olá! Sou o <strong>Assistente Inteligente do SGQ</strong>, especialista em ISO 9001. Posso ajudar com análise de conformidade, geração de documentos, simulação de auditorias e identificação de riscos.</div>
+          <div class="chat-text">Olá! Sou o <strong>Assistente Inteligente do SGQ</strong>, especialista em ISO 9001, ISO 27001 e ISO 42001. Posso ajudar com análise de conformidade, geração de documentos, simulação de auditorias e identificação de riscos.</div>
           <div class="quick-grid">
-            <button class="quick-btn" onclick="askChat('Faça uma análise de conformidade geral do SGQ')"><span class="quick-icon">📊</span><span class="quick-label">Análise Geral</span><span class="quick-desc">Conformidade completa ISO 9001</span></button>
-            <button class="quick-btn" onclick="askChat('Simule uma auditoria interna completa do SGQ')"><span class="quick-icon">🔍</span><span class="quick-label">Auditoria Interna</span><span class="quick-desc">Simulação prévia completa</span></button>
-            <button class="quick-btn" onclick="askChat('Identifique os principais riscos de não conformidade ISO')"><span class="quick-icon">⚠️</span><span class="quick-label">Riscos ISO</span><span class="quick-desc">Diagnóstico preventivo</span></button>
-            <button class="quick-btn" onclick="askChat('Gere um POP completo para controle de não conformidades')"><span class="quick-icon">📄</span><span class="quick-label">Gerar POP</span><span class="quick-desc">Documentação do SGQ</span></button>
-            <button class="quick-btn" onclick="askChat('Analise o Requisito 9 — Avaliação de Desempenho e indicadores')"><span class="quick-icon">📈</span><span class="quick-label">Req. 9 · KPIs</span><span class="quick-desc">Desempenho e indicadores</span></button>
+            <button class="quick-btn" onclick="askChat('Faça uma análise de conformidade geral do SGQ ISO 9001')"><span class="quick-icon">📊</span><span class="quick-label">Análise ISO 9001</span><span class="quick-desc">Conformidade completa</span></button>
+            <button class="quick-btn" onclick="askChat('Analise nossa conformidade com a ISO 27001 e principais lacunas de segurança da informação')"><span class="quick-icon">🔒</span><span class="quick-label">Análise ISO 27001</span><span class="quick-desc">Segurança da Informação</span></button>
+            <button class="quick-btn" onclick="askChat('Analise nossa conformidade com a ISO 42001 e maturidade em IA responsável')"><span class="quick-icon">🤖</span><span class="quick-label">Análise ISO 42001</span><span class="quick-desc">Gestão de IA</span></button>
+            <button class="quick-btn" onclick="askChat('Simule uma auditoria interna completa do SGQ ISO 9001')"><span class="quick-icon">🔍</span><span class="quick-label">Auditoria Interna</span><span class="quick-desc">Simulação ISO 9001</span></button>
+            <button class="quick-btn" onclick="askChat('Gere um POP completo para controle de não conformidades ISO 9001')"><span class="quick-icon">📄</span><span class="quick-label">Gerar POP</span><span class="quick-desc">Documentação SGQ</span></button>
             <button class="quick-btn" onclick="askChat('Prepare um relatório de pré-auditoria de certificação ISO 9001')"><span class="quick-icon">🏅</span><span class="quick-label">Pré-Certificação</span><span class="quick-desc">Simulação externa ISO</span></button>
           </div>
         </div>
@@ -280,13 +336,13 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
   </div>
   <div class="chat-input-area">
     <div class="chat-input-wrap">
-      <textarea class="chat-textarea" id="chatInput" rows="1" placeholder="Pergunte sobre ISO 9001, análise, auditorias, documentos..." onkeydown="chatKey(event)" oninput="autoResize(this)"></textarea>
+      <textarea class="chat-textarea" id="chatInput" rows="1" placeholder="Pergunte sobre ISO 9001, 27001, 42001, auditorias, documentos..." onkeydown="chatKey(event)" oninput="autoResize(this)"></textarea>
       <button class="chat-send" id="chatSendBtn" onclick="sendChat()">➤</button>
     </div>
     <div class="chat-hints">
-      <span class="chat-hint" onclick="fillChat('Analise o Req. 10 — Melhoria Contínua')">Req. 10 · Melhoria</span>
-      <span class="chat-hint" onclick="fillChat('Quais ações corretivas estão em atraso?')">Ações em atraso</span>
-      <span class="chat-hint" onclick="fillChat('Gere um Plano de Ação para satisfação do cliente')">Plano de ação</span>
+      <span class="chat-hint" onclick="fillChat('Analise o Req. 10 — Melhoria Contínua ISO 9001')">Req. 10 · Melhoria</span>
+      <span class="chat-hint" onclick="fillChat('Quais são os controles obrigatórios do Anexo A da ISO 27001?')">Anexo A ISO 27001</span>
+      <span class="chat-hint" onclick="fillChat('Como implementar supervisão humana em sistemas de IA conforme ISO 42001?')">ISO 42001 · IA</span>
       <span class="chat-hint" onclick="fillChat('Crie um POP para gestão de não conformidades')">Criar POP · NC</span>
       <span class="chat-hint" onclick="fillChat('O que devo preparar para a auditoria de certificação?')">Preparar certificação</span>
     </div>
@@ -310,29 +366,29 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
         <div class="analysis-row">
           <div class="ablock">
             <div class="ablock-label" style="color:#ff5252">⛔ Não Conformidades Potenciais</div>
-            <div class="ablock-item"><div class="abul" style="background:#ff5252"></div><div><strong>Req. 7.5</strong> — Documentos POP-007 e IT-012 vencidos sem revisão formal. Risco de NC maior.</div></div>
-            <div class="ablock-item"><div class="abul" style="background:#ff5252"></div><div><strong>Req. 10.2</strong> — Ação corretiva sem tratamento dentro do prazo estabelecido.</div></div>
+            <div class="ablock-item"><div class="abul" style="background:#ff5252"></div><div><strong>Req. 7.5</strong> — Documentos POP-007 e IT-012 vencidos sem revisão formal.</div></div>
+            <div class="ablock-item"><div class="abul" style="background:#ff5252"></div><div><strong>Req. 10.2</strong> — Ação corretiva sem tratamento dentro do prazo.</div></div>
             <div class="ablock-item"><div class="abul" style="background:#ff5252"></div><div><strong>Req. 9.1.2</strong> — Ausência de análise formal das causas de queda na satisfação do cliente.</div></div>
           </div>
           <div class="ablock">
             <div class="ablock-label" style="color:#ffea00">⚠ Observações</div>
             <div class="ablock-item"><div class="abul" style="background:#ffea00"></div><div><strong>Req. 6.1</strong> — Registro de riscos desatualizado. Última revisão há mais de 6 meses.</div></div>
-            <div class="ablock-item"><div class="abul" style="background:#ffea00"></div><div><strong>Req. 7.2</strong> — Competências de 3 colaboradores sem registro de treinamento atualizado.</div></div>
-            <div class="ablock-item"><div class="abul" style="background:#ffea00"></div><div><strong>Req. 8.4</strong> — Avaliação formal de fornecedores críticos pendente neste ciclo.</div></div>
+            <div class="ablock-item"><div class="abul" style="background:#ffea00"></div><div><strong>Req. 7.2</strong> — Competências de 3 colaboradores sem registro atualizado.</div></div>
+            <div class="ablock-item"><div class="abul" style="background:#ffea00"></div><div><strong>Req. 8.4</strong> — Avaliação formal de fornecedores críticos pendente.</div></div>
           </div>
         </div>
         <div class="analysis-row">
           <div class="ablock">
             <div class="ablock-label" style="color:#00e676">✔ Pontos Fortes</div>
-            <div class="ablock-item"><div class="abul" style="background:#00e676"></div><div><strong>Req. 4</strong> — Contexto organizacional e partes interessadas bem documentados.</div></div>
-            <div class="ablock-item"><div class="abul" style="background:#00e676"></div><div><strong>Req. 5</strong> — Política da Qualidade comunicada com evidências de comprometimento.</div></div>
-            <div class="ablock-item"><div class="abul" style="background:#00e676"></div><div><strong>Req. 8</strong> — Processos operacionais com controles e rastreabilidade adequados.</div></div>
+            <div class="ablock-item"><div class="abul" style="background:#00e676"></div><div><strong>Req. 4</strong> — Contexto organizacional bem documentado.</div></div>
+            <div class="ablock-item"><div class="abul" style="background:#00e676"></div><div><strong>Req. 5</strong> — Política da Qualidade comunicada com evidências.</div></div>
+            <div class="ablock-item"><div class="abul" style="background:#00e676"></div><div><strong>Req. 8</strong> — Processos operacionais com controles adequados.</div></div>
           </div>
           <div class="ablock">
             <div class="ablock-label" style="color:#00c8ff">→ Recomendações Prioritárias</div>
             <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Reativar revisão dos documentos vencidos com aprovação formal urgente.</div></div>
-            <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Realizar análise de causa raiz da insatisfação do cliente e abrir ação corretiva.</div></div>
-            <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Atualizar matriz de riscos antes da próxima reunião de análise crítica.</div></div>
+            <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Realizar análise de causa raiz da insatisfação do cliente.</div></div>
+            <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Atualizar matriz de riscos antes da próxima análise crítica.</div></div>
           </div>
         </div>
       </div>
@@ -359,21 +415,21 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
       <div class="analysis-body">
         <div class="ablock" style="margin-bottom:4px">
           <div class="ablock-label" style="color:#ff5252">⛔ Possíveis Não Conformidades Maiores</div>
-          <div class="ablock-item"><div class="abul" style="background:#ff5252"></div><div><strong>Req. 7.5</strong> — Documentos vencidos sem controle formal. Risco alto de NC maior em certificação.</div></div>
-          <div class="ablock-item"><div class="abul" style="background:#ff5252"></div><div><strong>Req. 10.2</strong> — Processo de tratamento de NC com lacuna de eficácia demonstrável.</div></div>
+          <div class="ablock-item"><div class="abul" style="background:#ff5252"></div><div><strong>Req. 7.5</strong> — Documentos vencidos sem controle formal.</div></div>
+          <div class="ablock-item"><div class="abul" style="background:#ff5252"></div><div><strong>Req. 10.2</strong> — Processo de tratamento de NC com lacuna de eficácia.</div></div>
         </div>
         <div class="ablock" style="margin-bottom:4px">
           <div class="ablock-label" style="color:#ffea00">⚠ Possíveis Não Conformidades Menores</div>
           <div class="ablock-item"><div class="abul" style="background:#ffea00"></div><div><strong>Req. 6.1</strong> — Avaliação de riscos sem revisão periódica documentada.</div></div>
-          <div class="ablock-item"><div class="abul" style="background:#ffea00"></div><div><strong>Req. 7.2</strong> — Evidências de competência incompletas para parte do quadro de pessoal.</div></div>
+          <div class="ablock-item"><div class="abul" style="background:#ffea00"></div><div><strong>Req. 7.2</strong> — Evidências de competência incompletas.</div></div>
           <div class="ablock-item"><div class="abul" style="background:#ffea00"></div><div><strong>Req. 9.1.2</strong> — Satisfação do cliente sem plano de ação para resultados negativos.</div></div>
         </div>
         <div class="ablock">
           <div class="ablock-label" style="color:#00c8ff">→ Recomendações para Certificação</div>
           <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Priorizar resolução de documentos vencidos 15 dias antes da auditoria.</div></div>
-          <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Evidenciar eficácia de todas as ações corretivas com registros de verificação.</div></div>
-          <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Realizar análise crítica da direção antes da auditoria e documentar resultados.</div></div>
-          <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Treinar equipe envolvida na auditoria sobre os requisitos ISO 9001.</div></div>
+          <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Evidenciar eficácia de todas as ações corretivas.</div></div>
+          <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Realizar análise crítica da direção antes da auditoria.</div></div>
+          <div class="ablock-item"><div class="abul" style="background:#00c8ff"></div><div>Treinar equipe sobre os requisitos ISO 9001.</div></div>
         </div>
       </div>
     </div>
@@ -391,91 +447,24 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
     <button onclick="toggleDocForm()" id="btnNovoDoc" style="padding:8px 18px;border-radius:8px;border:1px solid #00c8ff;background:transparent;color:#00c8ff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">+ Incluir Documento</button>
   </div>
   <div class="mod-content">
-
-    <!-- FORMULÁRIO DE INCLUSÃO (oculto por padrão) -->
     <div id="docFormBox" style="display:none;background:#111820;border:1px solid rgba(0,200,255,.25);border-radius:12px;padding:18px;margin-bottom:16px">
       <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#00c8ff;margin-bottom:14px">📝 Novo Documento</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Código *</div>
-          <input id="df_cod" placeholder="ex: POP-010" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Título *</div>
-          <input id="df_titulo" placeholder="ex: Controle de Qualidade" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Tipo</div>
-          <select id="df_tipo" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-            <option value="Política">Política</option>
-            <option value="Procedimento" selected>Procedimento</option>
-            <option value="Instrução">Instrução de Trabalho</option>
-            <option value="Formulário">Formulário</option>
-            <option value="Registro">Registro</option>
-            <option value="Manual">Manual</option>
-            <option value="Plano">Plano</option>
-          </select>
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Versão</div>
-          <input id="df_versao" placeholder="ex: v1.0" value="v1.0" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Responsável</div>
-          <input id="df_resp" placeholder="ex: Qualidade" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Requisito ISO</div>
-          <select id="df_req" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-            <option value="4">Req. 4 — Contexto</option>
-            <option value="5">Req. 5 — Liderança</option>
-            <option value="6">Req. 6 — Planejamento</option>
-            <option value="7" selected>Req. 7 — Apoio</option>
-            <option value="8">Req. 8 — Operação</option>
-            <option value="9">Req. 9 — Desempenho</option>
-            <option value="10">Req. 10 — Melhoria</option>
-          </select>
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Data de Aprovação</div>
-          <input id="df_aprv" type="date" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Data de Validade</div>
-          <input id="df_val" type="date" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Status</div>
-          <select id="df_status" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-            <option value="vigente">Vigente</option>
-            <option value="revisao">Em Revisão</option>
-            <option value="vencido">Vencido</option>
-            <option value="obsoleto">Obsoleto</option>
-          </select>
-        </div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Código *</div><input id="df_cod" placeholder="ex: POP-010" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Título *</div><input id="df_titulo" placeholder="ex: Controle de Qualidade" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Tipo</div><select id="df_tipo" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"><option value="Política">Política</option><option value="Procedimento" selected>Procedimento</option><option value="Instrução">Instrução de Trabalho</option><option value="Formulário">Formulário</option><option value="Registro">Registro</option><option value="Manual">Manual</option><option value="Plano">Plano</option></select></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Versão</div><input id="df_versao" placeholder="ex: v1.0" value="v1.0" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Responsável</div><input id="df_resp" placeholder="ex: Qualidade" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Requisito ISO</div><select id="df_req" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"><option value="4">Req. 4 — Contexto</option><option value="5">Req. 5 — Liderança</option><option value="6">Req. 6 — Planejamento</option><option value="7" selected>Req. 7 — Apoio</option><option value="8">Req. 8 — Operação</option><option value="9">Req. 9 — Desempenho</option><option value="10">Req. 10 — Melhoria</option></select></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Data de Aprovação</div><input id="df_aprv" type="date" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Data de Validade</div><input id="df_val" type="date" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Status</div><select id="df_status" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"><option value="vigente">Vigente</option><option value="revisao">Em Revisão</option><option value="vencido">Vencido</option><option value="obsoleto">Obsoleto</option></select></div>
       </div>
-      <div style="margin-bottom:12px">
-        <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Descrição / Objetivo</div>
-        <textarea id="df_desc" rows="2" placeholder="Descreva o objetivo do documento..." style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical"></textarea>
-      </div>
-      <div style="margin-bottom:14px">
-        <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Anexar Arquivo (opcional)</div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <input type="file" id="df_file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg" style="display:none" onchange="docFileSelected(this)">
-          <button onclick="document.getElementById('df_file').click()" style="padding:7px 14px;border-radius:7px;border:1px solid #1e2d3d;background:#18222e;color:#607080;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">📎 Selecionar arquivo</button>
-          <span id="df_filename" style="font-size:12px;color:#607080">Nenhum arquivo selecionado</span>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px">
-        <button onclick="salvarDocumento()" style="padding:9px 22px;border-radius:8px;border:none;background:#00c8ff;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✓ Salvar Documento</button>
-        <button onclick="toggleDocForm()" style="padding:9px 18px;border-radius:8px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button>
-      </div>
+      <div style="margin-bottom:12px"><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Descrição / Objetivo</div><textarea id="df_desc" rows="2" placeholder="Descreva o objetivo do documento..." style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical"></textarea></div>
+      <div style="margin-bottom:14px"><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Anexar Arquivo (opcional)</div><div style="display:flex;align-items:center;gap:10px"><input type="file" id="df_file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg" style="display:none" onchange="docFileSelected(this)"><button onclick="document.getElementById('df_file').click()" style="padding:7px 14px;border-radius:7px;border:1px solid #1e2d3d;background:#18222e;color:#607080;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">📎 Selecionar arquivo</button><span id="df_filename" style="font-size:12px;color:#607080">Nenhum arquivo selecionado</span></div></div>
+      <div style="display:flex;gap:10px"><button onclick="salvarDocumento()" style="padding:9px 22px;border-radius:8px;border:none;background:#00c8ff;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✓ Salvar Documento</button><button onclick="toggleDocForm()" style="padding:9px 18px;border-radius:8px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button></div>
     </div>
-
-    <!-- FILTROS + ESTATÍSTICAS -->
     <div id="docStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"></div>
-
-    <!-- FILTRO POR STATUS -->
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
       <span style="font-size:12px;color:#607080;align-self:center">Filtrar:</span>
       <button onclick="filtrarDocs('todos')" id="filt_todos" style="padding:5px 14px;border-radius:20px;border:1px solid #00c8ff;background:rgba(0,200,255,.1);color:#00c8ff;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Todos</button>
@@ -484,359 +473,133 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
       <button onclick="filtrarDocs('vencido')" id="filt_vencido" style="padding:5px 14px;border-radius:20px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">🔴 Vencidos</button>
       <button onclick="filtrarDocs('obsoleto')" id="filt_obsoleto" style="padding:5px 14px;border-radius:20px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">⛔ Obsoletos</button>
     </div>
-
-    <!-- MATRIZ DE DOCUMENTOS -->
     <div style="background:#111820;border:1px solid #1e2d3d;border-radius:12px;overflow:hidden">
-      <table class="doc-table" id="docMatriz">
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Título</th>
-            <th>Tipo</th>
-            <th>Req. ISO</th>
-            <th>Versão</th>
-            <th>Responsável</th>
-            <th>Aprovação</th>
-            <th>Validade</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="docTbody"></tbody>
-      </table>
+      <table class="doc-table" id="docMatriz"><thead><tr><th>Código</th><th>Título</th><th>Tipo</th><th>Req. ISO</th><th>Versão</th><th>Responsável</th><th>Aprovação</th><th>Validade</th><th>Status</th><th>Ações</th></tr></thead><tbody id="docTbody"></tbody></table>
     </div>
-
   </div>
 </div>
 
 <!-- MÓDULO: ALERTAS -->
 <div class="main" id="mainAlertas" style="display:none">
-  <div class="mod-topbar">
-    <div class="mod-icon-badge">🔔</div>
-    <div><div class="mod-title">Alertas · Auditor IA Contínuo</div><div class="mod-sub">Monitoramento automático de riscos de não conformidade</div></div>
-  </div>
+  <div class="mod-topbar"><div class="mod-icon-badge">🔔</div><div><div class="mod-title">Alertas · Auditor IA Contínuo</div><div class="mod-sub">Monitoramento automático de riscos de não conformidade</div></div></div>
   <div class="mod-content">
     <div class="mod-section">Alertas Ativos</div>
     <div class="alert-box danger"><span style="font-size:16px;flex-shrink:0">🔴</span><div><div class="alert-label">Não Conformidade · Req. 7</div><div class="alert-text">2 documentos com vigência vencida: <strong>POP-007</strong> e <strong>IT-012</strong>. Risco real de não conformidade em auditoria externa.</div></div></div>
-    <div class="alert-box warn"><span style="font-size:16px;flex-shrink:0">🟡</span><div><div class="alert-label">Ação Corretiva Atrasada · Req. 10</div><div class="alert-text">Ação corretiva <strong>AC-2024-031</strong> com prazo vencido há 8 dias. Responsável: Depto. Qualidade. Requer escalamento imediato.</div></div></div>
-    <div class="alert-box info"><span style="font-size:16px;flex-shrink:0">🔵</span><div><div class="alert-label">Indicador Abaixo da Meta · Req. 9</div><div class="alert-text">Indicador <strong>Satisfação do Cliente</strong> em 71% — abaixo da meta de 80%. Tendência negativa há 2 ciclos consecutivos.</div></div></div>
+    <div class="alert-box warn"><span style="font-size:16px;flex-shrink:0">🟡</span><div><div class="alert-label">Ação Corretiva Atrasada · Req. 10</div><div class="alert-text">Ação corretiva <strong>AC-2024-031</strong> com prazo vencido há 8 dias. Responsável: Depto. Qualidade.</div></div></div>
+    <div class="alert-box info"><span style="font-size:16px;flex-shrink:0">🔵</span><div><div class="alert-label">Indicador Abaixo da Meta · Req. 9</div><div class="alert-text">Indicador <strong>Satisfação do Cliente</strong> em 71% — abaixo da meta de 80%.</div></div></div>
     <div style="height:1px;background:#1e2d3d;margin:18px 0"></div>
     <div class="mod-section">Documentos com Vencimento Próximo</div>
     <div style="background:#111820;border:1px solid #1e2d3d;border-radius:12px;overflow:hidden">
-      <table class="doc-table">
-        <thead><tr><th>Documento</th><th>Tipo</th><th>Vencimento</th><th>Status</th></tr></thead>
-        <tbody>
-          <tr><td>Política da Qualidade</td><td>Política</td><td>30/06/2025</td><td><span class="doc-status ds-vigente">Vigente</span></td></tr>
-          <tr><td>POP-003 Atendimento ao Cliente</td><td>Procedimento</td><td>15/04/2025</td><td><span class="doc-status ds-revisao">Em Revisão</span></td></tr>
-          <tr><td>POP-007 Controle de Equipamentos</td><td>Procedimento</td><td>01/03/2025</td><td><span class="doc-status ds-vencido">Vencido</span></td></tr>
-          <tr><td>IT-012 Calibração de Instrumentos</td><td>Instrução</td><td>28/02/2025</td><td><span class="doc-status ds-vencido">Vencido</span></td></tr>
-        </tbody>
-      </table>
+      <table class="doc-table"><thead><tr><th>Documento</th><th>Tipo</th><th>Vencimento</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Política da Qualidade</td><td>Política</td><td>30/06/2025</td><td><span class="doc-status ds-vigente">Vigente</span></td></tr>
+        <tr><td>POP-003 Atendimento ao Cliente</td><td>Procedimento</td><td>15/04/2025</td><td><span class="doc-status ds-revisao">Em Revisão</span></td></tr>
+        <tr><td>POP-007 Controle de Equipamentos</td><td>Procedimento</td><td>01/03/2025</td><td><span class="doc-status ds-vencido">Vencido</span></td></tr>
+        <tr><td>IT-012 Calibração de Instrumentos</td><td>Instrução</td><td>28/02/2025</td><td><span class="doc-status ds-vencido">Vencido</span></td></tr>
+      </tbody></table>
     </div>
   </div>
 </div>
 
 <!-- MÓDULO: USUÁRIOS -->
 <div class="main" id="mainUsuarios" style="display:none">
-  <div class="mod-topbar">
-    <div class="mod-icon-badge">👥</div>
-    <div style="flex:1"><div class="mod-title">Gerenciar Usuários</div><div class="mod-sub">Controle de acesso ao sistema SGQ</div></div>
-    <button onclick="toggleUserForm()" id="btnNovoUser" style="padding:8px 18px;border-radius:8px;border:1px solid #00c8ff;background:transparent;color:#00c8ff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">+ Novo Usuário</button>
-  </div>
+  <div class="mod-topbar"><div class="mod-icon-badge">👥</div><div style="flex:1"><div class="mod-title">Gerenciar Usuários</div><div class="mod-sub">Controle de acesso ao sistema SGQ</div></div><button onclick="toggleUserForm()" id="btnNovoUser" style="padding:8px 18px;border-radius:8px;border:1px solid #00c8ff;background:transparent;color:#00c8ff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">+ Novo Usuário</button></div>
   <div class="mod-content">
-
-    <!-- FORMULÁRIO NOVO USUÁRIO -->
     <div id="userFormBox" style="display:none;background:#111820;border:1px solid rgba(0,200,255,.25);border-radius:12px;padding:18px;margin-bottom:16px">
       <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#00c8ff;margin-bottom:14px">👤 Novo Usuário</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Nome Completo *</div>
-          <input id="uf_nome" placeholder="ex: João Silva" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Usuário (login) *</div>
-          <input id="uf_user" placeholder="ex: joao.silva" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Senha *</div>
-          <input id="uf_pass" type="password" placeholder="Mínimo 6 caracteres" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Perfil</div>
-          <select id="uf_perfil" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-            <option value="Administrador">Administrador</option>
-            <option value="Gestor da Qualidade" selected>Gestor da Qualidade</option>
-            <option value="Auditor Interno">Auditor Interno</option>
-            <option value="Colaborador">Colaborador</option>
-            <option value="Somente Leitura">Somente Leitura</option>
-          </select>
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Departamento</div>
-          <input id="uf_depto" placeholder="ex: Qualidade" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Email</div>
-          <input id="uf_email" type="email" placeholder="ex: joao@empresa.com" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-        </div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Nome Completo *</div><input id="uf_nome" placeholder="ex: João Silva" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Usuário (login) *</div><input id="uf_user" placeholder="ex: joao.silva" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Senha *</div><input id="uf_pass" type="password" placeholder="Mínimo 6 caracteres" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Perfil</div><select id="uf_perfil" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"><option value="Administrador">Administrador</option><option value="Gestor da Qualidade" selected>Gestor da Qualidade</option><option value="Auditor Interno">Auditor Interno</option><option value="Colaborador">Colaborador</option><option value="Somente Leitura">Somente Leitura</option></select></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Departamento</div><input id="uf_depto" placeholder="ex: Qualidade" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Email</div><input id="uf_email" type="email" placeholder="ex: joao@empresa.com" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none"></div>
       </div>
       <div id="userFormError" style="font-size:12px;color:#ff5252;margin-bottom:10px;min-height:16px"></div>
-      <div style="display:flex;gap:10px">
-        <button onclick="salvarUsuario()" style="padding:9px 22px;border-radius:8px;border:none;background:#00c8ff;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✓ Salvar Usuário</button>
-        <button onclick="toggleUserForm()" style="padding:9px 18px;border-radius:8px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button>
-      </div>
+      <div style="display:flex;gap:10px"><button onclick="salvarUsuario()" style="padding:9px 22px;border-radius:8px;border:none;background:#00c8ff;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✓ Salvar Usuário</button><button onclick="toggleUserForm()" style="padding:9px 18px;border-radius:8px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button></div>
     </div>
-
-    <!-- ALTERAR SENHA PRÓPRIA -->
     <div style="background:#111820;border:1px solid #1e2d3d;border-radius:12px;padding:16px;margin-bottom:16px">
       <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:12px;color:#e8edf3">🔑 Alterar Minha Senha</div>
       <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Senha Atual</div>
-          <input id="cp_atual" type="password" placeholder="Senha atual" style="background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:170px">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Nova Senha</div>
-          <input id="cp_nova" type="password" placeholder="Nova senha" style="background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:170px">
-        </div>
-        <div>
-          <div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Confirmar</div>
-          <input id="cp_conf" type="password" placeholder="Confirmar senha" style="background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:170px">
-        </div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Senha Atual</div><input id="cp_atual" type="password" placeholder="Senha atual" style="background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:170px"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Nova Senha</div><input id="cp_nova" type="password" placeholder="Nova senha" style="background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:170px"></div>
+        <div><div style="font-size:11px;color:#607080;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Confirmar</div><input id="cp_conf" type="password" placeholder="Confirmar senha" style="background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:170px"></div>
         <button onclick="alterarSenha()" style="padding:9px 18px;border-radius:8px;border:none;background:#00c8ff;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Alterar</button>
       </div>
       <div id="cpMsg" style="font-size:12px;margin-top:8px;min-height:16px"></div>
     </div>
-
-    <!-- LISTA DE USUÁRIOS -->
     <div style="background:#111820;border:1px solid #1e2d3d;border-radius:12px;overflow:hidden">
-      <table class="doc-table">
-        <thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th>Departamento</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead>
-        <tbody id="userTbody"></tbody>
-      </table>
+      <table class="doc-table"><thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th>Departamento</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody id="userTbody"></tbody></table>
     </div>
-
   </div>
 </div>
 
-</div>
+</div><!-- /app -->
 
 <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx" style="display:none">
 
-
 <script>
 // ══════════════════════════════════════════════════════════════
-// 1. CONSTANTES GLOBAIS — devem vir PRIMEIRO
+// 1. CONSTANTES GLOBAIS
 // ══════════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://vfylzwrijfxcojbrpopf.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmeWx6d3JpamZ4Y29qYnJwb3BmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMjIyOTYsImV4cCI6MjA4ODg5ODI5Nn0.67IDxCF4ef0ejJHsShcCsH3Ztxh-_USlLxfa_vHjxrY';
 
+// ══ ISO 9001 CHECKLIST ══
 const CHECKLIST = {
-  4:{title:"Contexto da Organização",sub:"Partes interessadas · Escopo · Processos do SGQ",
-    subitems:[
-      {num:"4.1",name:"Contexto Externo e Interno",criterios:[
-        {id:"4.1.1",label:"Análise SWOT documentada e aprovada"},
-        {id:"4.1.2",label:"Fatores externos identificados (políticos, econômicos, sociais, tecnológicos)"},
-        {id:"4.1.3",label:"Fatores internos identificados (cultura, valores, desempenho)"},
-        {id:"4.1.4",label:"Análise SWOT revisada nos últimos 6 meses"},
-        {id:"4.1.5",label:"Evidência de uso da SWOT no planejamento estratégico"},
-      ]},
-      {num:"4.2",name:"Partes Interessadas",criterios:[
-        {id:"4.2.1",label:"Lista de partes interessadas documentada"},
-        {id:"4.2.2",label:"Necessidades e expectativas de cada parte registradas"},
-        {id:"4.2.3",label:"Requisitos legais e regulamentares identificados"},
-        {id:"4.2.4",label:"Revisão das partes interessadas nos últimos 6 meses"},
-        {id:"4.2.5",label:"Monitoramento periódico das partes interessadas definido"},
-      ]},
-      {num:"4.3",name:"Escopo do SGQ",criterios:[
-        {id:"4.3.1",label:"Escopo documentado e aprovado pela direção"},
-        {id:"4.3.2",label:"Limites e aplicabilidade do SGQ definidos"},
-        {id:"4.3.3",label:"Exclusões justificadas (se houver)"},
-        {id:"4.3.4",label:"Escopo disponível e comunicado às partes interessadas"},
-        {id:"4.3.5",label:"Escopo revisado após mudanças organizacionais"},
-      ]},
-      {num:"4.4",name:"Processos do SGQ",criterios:[
-        {id:"4.4.1",label:"Mapa de processos elaborado e documentado"},
-        {id:"4.4.2",label:"Entradas e saídas de cada processo definidas"},
-        {id:"4.4.3",label:"Responsáveis por cada processo designados"},
-        {id:"4.4.4",label:"Riscos e oportunidades de cada processo avaliados"},
-        {id:"4.4.5",label:"Indicadores de desempenho definidos para cada processo"},
-        {id:"4.4.6",label:"Interação entre processos documentada"},
-      ]},
-    ]},
-  5:{title:"Liderança",sub:"Política · Responsabilidades · Comprometimento",
-    subitems:[
-      {num:"5.1",name:"Liderança e Comprometimento",criterios:[
-        {id:"5.1.1",label:"Alta direção preside reuniões do SGQ documentadas em ata"},
-        {id:"5.1.2",label:"Recursos para o SGQ aprovados e disponibilizados"},
-        {id:"5.1.3",label:"Política da Qualidade aprovada pela alta direção"},
-        {id:"5.1.4",label:"Atas de reunião com pauta específica de SGQ nos últimos 2 meses"},
-        {id:"5.1.5",label:"Análise de riscos que afetam satisfação do cliente pela liderança"},
-      ]},
-      {num:"5.2",name:"Política da Qualidade",criterios:[
-        {id:"5.2.1",label:"Política da Qualidade documentada e aprovada"},
-        {id:"5.2.2",label:"Política adequada ao propósito e contexto da organização"},
-        {id:"5.2.3",label:"Política comunicada a todos os colaboradores"},
-        {id:"5.2.4",label:"Política disponível às partes interessadas externas"},
-        {id:"5.2.5",label:"Revisão da política no último ciclo de análise crítica"},
-      ]},
-      {num:"5.3",name:"Papéis e Responsabilidades",criterios:[
-        {id:"5.3.1",label:"Matriz RACI do SGQ documentada"},
-        {id:"5.3.2",label:"Representante da qualidade formalmente designado"},
-        {id:"5.3.3",label:"Responsabilidades comunicadas a todos os envolvidos"},
-        {id:"5.3.4",label:"Matriz RACI atualizada após última reestruturação"},
-      ]},
-    ]},
-  6:{title:"Planejamento",sub:"Riscos · Oportunidades · Objetivos · Mudanças",
-    subitems:[
-      {num:"6.1",name:"Riscos e Oportunidades",criterios:[
-        {id:"6.1.1",label:"Metodologia de gestão de riscos definida"},
-        {id:"6.1.2",label:"Matriz de riscos elaborada com probabilidade e impacto"},
-        {id:"6.1.3",label:"Planos de ação para todos os riscos 'alto' definidos"},
-        {id:"6.1.4",label:"Riscos revisados nos últimos 6 meses"},
-        {id:"6.1.5",label:"Oportunidades formalizadas com plano de aproveitamento"},
-        {id:"6.1.6",label:"Responsáveis pelos riscos designados"},
-      ]},
-      {num:"6.2",name:"Objetivos da Qualidade",criterios:[
-        {id:"6.2.1",label:"Objetivos da qualidade documentados e aprovados"},
-        {id:"6.2.2",label:"Objetivos mensuráveis com indicadores associados"},
-        {id:"6.2.3",label:"Prazos e responsáveis definidos para cada objetivo"},
-        {id:"6.2.4",label:"Objetivos comunicados aos departamentos"},
-        {id:"6.2.5",label:"Monitoramento periódico dos objetivos registrado"},
-      ]},
-      {num:"6.3",name:"Planejamento de Mudanças",criterios:[
-        {id:"6.3.1",label:"Processo formal de planejamento de mudanças definido"},
-        {id:"6.3.2",label:"Mudanças recentes passaram pelo processo formal"},
-        {id:"6.3.3",label:"Impactos das mudanças avaliados antes da implementação"},
-        {id:"6.3.4",label:"Registro de mudanças realizadas mantido"},
-      ]},
-    ]},
-  7:{title:"Apoio e Recursos",sub:"Recursos · Competências · Comunicação · Documentos",
-    subitems:[
-      {num:"7.1",name:"Recursos e Infraestrutura",criterios:[
-        {id:"7.1.1",label:"Infraestrutura necessária identificada e disponível"},
-        {id:"7.1.2",label:"Ambiente de trabalho adequado documentado"},
-        {id:"7.1.3",label:"Plano de manutenção preventiva documentado"},
-        {id:"7.1.4",label:"Registros de calibração de instrumentos atualizados"},
-        {id:"7.1.5",label:"Rastreabilidade de medições garantida"},
-      ]},
-      {num:"7.2",name:"Competência",criterios:[
-        {id:"7.2.1",label:"Competências necessárias para cada função definidas"},
-        {id:"7.2.2",label:"Plano de treinamento anual elaborado"},
-        {id:"7.2.3",label:"Registros de treinamento de todos os colaboradores"},
-        {id:"7.2.4",label:"Avaliação de eficácia dos treinamentos realizada"},
-        {id:"7.2.5",label:"Evidências de competência arquivadas (diplomas, certificados)"},
-      ]},
-      {num:"7.3",name:"Conscientização",criterios:[
-        {id:"7.3.1",label:"Colaboradores conscientes da Política da Qualidade"},
-        {id:"7.3.2",label:"Contribuição de cada função para o SGQ comunicada"},
-        {id:"7.3.3",label:"Consequências do não atendimento aos requisitos comunicadas"},
-      ]},
-      {num:"7.5",name:"Informação Documentada",criterios:[
-        {id:"7.5.1",label:"Lista mestre de documentos atualizada"},
-        {id:"7.5.2",label:"Todos os documentos com versão, data e aprovação"},
-        {id:"7.5.3",label:"POP-007 revisado e aprovado"},
-        {id:"7.5.4",label:"IT-012 revisada e aprovada"},
-        {id:"7.5.5",label:"Documentos obsoletos retirados de circulação"},
-        {id:"7.5.6",label:"Controle de documentos externos implementado"},
-      ]},
-    ]},
-  8:{title:"Operação",sub:"Processos · Fornecedores · Clientes · Produto",
-    subitems:[
-      {num:"8.1",name:"Planejamento Operacional",criterios:[
-        {id:"8.1.1",label:"Critérios de aceitação de processos definidos"},
-        {id:"8.1.2",label:"Plano de controle de processos documentado"},
-        {id:"8.1.3",label:"Recursos necessários por processo identificados"},
-        {id:"8.1.4",label:"Rastreabilidade de todas as etapas implementada"},
-      ]},
-      {num:"8.2",name:"Requisitos do Cliente",criterios:[
-        {id:"8.2.1",label:"Canais de comunicação com clientes formalizados"},
-        {id:"8.2.2",label:"Requisitos do produto/serviço determinados"},
-        {id:"8.2.3",label:"Análise crítica dos requisitos antes do fornecimento"},
-        {id:"8.2.4",label:"Registro de análise crítica de contratos mantido"},
-      ]},
-      {num:"8.4",name:"Controle de Fornecedores",criterios:[
-        {id:"8.4.1",label:"Lista de fornecedores aprovados documentada"},
-        {id:"8.4.2",label:"Critérios de avaliação de fornecedores definidos"},
-        {id:"8.4.3",label:"Avaliação inicial de todos os fornecedores críticos"},
-        {id:"8.4.4",label:"Reavaliação periódica anual realizada e registrada"},
-        {id:"8.4.5",label:"Requisitos comunicados formalmente aos fornecedores"},
-      ]},
-      {num:"8.7",name:"Controle de Saídas Não Conformes",criterios:[
-        {id:"8.7.1",label:"Processo de identificação de produtos/serviços NC definido"},
-        {id:"8.7.2",label:"Disposição de NC documentada (rejeitar, retrabalhar, liberar)"},
-        {id:"8.7.3",label:"Registros de NC mantidos com descrição e tratamento"},
-      ]},
-    ]},
-  9:{title:"Avaliação de Desempenho",sub:"Indicadores · Auditoria · Satisfação · Análise crítica",
-    subitems:[
-      {num:"9.1",name:"Monitoramento e Medição",criterios:[
-        {id:"9.1.1",label:"Indicadores de desempenho definidos para os processos"},
-        {id:"9.1.2",label:"Coleta de dados regular e registrada mensalmente"},
-        {id:"9.1.3",label:"Análise de dados usada para tomada de decisão documentada"},
-        {id:"9.1.4",label:"Pesquisa de satisfação do cliente realizada"},
-        {id:"9.1.5",label:"Plano de ação para satisfação abaixo da meta"},
-      ]},
-      {num:"9.2",name:"Auditoria Interna",criterios:[
-        {id:"9.2.1",label:"Programa anual de auditoria interna elaborado"},
-        {id:"9.2.2",label:"Auditores qualificados e independentes designados"},
-        {id:"9.2.3",label:"Auditorias cobrindo todos os processos do SGQ"},
-        {id:"9.2.4",label:"Relatórios de auditoria emitidos e distribuídos"},
-        {id:"9.2.5",label:"Achados de auditoria com plano de ação definido"},
-      ]},
-      {num:"9.3",name:"Análise Crítica pela Direção",criterios:[
-        {id:"9.3.1",label:"Análise crítica realizada com entradas obrigatórias da ISO"},
-        {id:"9.3.2",label:"Saídas da análise crítica documentadas (decisões e recursos)"},
-        {id:"9.3.3",label:"Frequência mínima de 2x ao ano estabelecida"},
-        {id:"9.3.4",label:"Participação da alta direção registrada em ata"},
-      ]},
-    ]},
-  10:{title:"Melhoria Contínua",sub:"Não conformidades · Ações corretivas · Melhoria",
-    subitems:[
-      {num:"10.1",name:"Melhoria Geral",criterios:[
-        {id:"10.1.1",label:"Oportunidades de melhoria identificadas e registradas"},
-        {id:"10.1.2",label:"Priorização de melhorias com base em dados"},
-        {id:"10.1.3",label:"Resultados das melhorias mensurados e documentados"},
-      ]},
-      {num:"10.2",name:"NC e Ação Corretiva",criterios:[
-        {id:"10.2.1",label:"Processo de abertura de NC documentado e utilizado"},
-        {id:"10.2.2",label:"Análise de causa raiz realizada para todas as NCs"},
-        {id:"10.2.3",label:"Metodologia estruturada (5 Porquês / Ishikawa) adotada"},
-        {id:"10.2.4",label:"Prazos de ações corretivas definidos e monitorados"},
-        {id:"10.2.5",label:"Verificação de eficácia 30/60 dias após encerramento"},
-        {id:"10.2.6",label:"Registros de todas as NCs e ações mantidos"},
-      ]},
-      {num:"10.3",name:"Melhoria Contínua",criterios:[
-        {id:"10.3.1",label:"Canal formal para sugestões de melhoria implantado"},
-        {id:"10.3.2",label:"Melhorias proativas registradas no último trimestre"},
-        {id:"10.3.3",label:"Ciclo PDCA aplicado nas melhorias implementadas"},
-        {id:"10.3.4",label:"Resultados comparados antes e depois das melhorias"},
-      ]},
-    ]},
+  4:{title:"Contexto da Organização",sub:"Partes interessadas · Escopo · Processos do SGQ",subitems:[{num:"4.1",name:"Contexto Externo e Interno",criterios:[{id:"4.1.1",label:"Análise SWOT documentada e aprovada"},{id:"4.1.2",label:"Fatores externos identificados (políticos, econômicos, sociais, tecnológicos)"},{id:"4.1.3",label:"Fatores internos identificados (cultura, valores, desempenho)"},{id:"4.1.4",label:"Análise SWOT revisada nos últimos 6 meses"},{id:"4.1.5",label:"Evidência de uso da SWOT no planejamento estratégico"}]},{num:"4.2",name:"Partes Interessadas",criterios:[{id:"4.2.1",label:"Lista de partes interessadas documentada"},{id:"4.2.2",label:"Necessidades e expectativas de cada parte registradas"},{id:"4.2.3",label:"Requisitos legais e regulamentares identificados"},{id:"4.2.4",label:"Revisão das partes interessadas nos últimos 6 meses"},{id:"4.2.5",label:"Monitoramento periódico das partes interessadas definido"}]},{num:"4.3",name:"Escopo do SGQ",criterios:[{id:"4.3.1",label:"Escopo documentado e aprovado pela direção"},{id:"4.3.2",label:"Limites e aplicabilidade do SGQ definidos"},{id:"4.3.3",label:"Exclusões justificadas (se houver)"},{id:"4.3.4",label:"Escopo disponível e comunicado às partes interessadas"},{id:"4.3.5",label:"Escopo revisado após mudanças organizacionais"}]},{num:"4.4",name:"Processos do SGQ",criterios:[{id:"4.4.1",label:"Mapa de processos elaborado e documentado"},{id:"4.4.2",label:"Entradas e saídas de cada processo definidas"},{id:"4.4.3",label:"Responsáveis por cada processo designados"},{id:"4.4.4",label:"Riscos e oportunidades de cada processo avaliados"},{id:"4.4.5",label:"Indicadores de desempenho definidos para cada processo"},{id:"4.4.6",label:"Interação entre processos documentada"}]}]},
+  5:{title:"Liderança",sub:"Política · Responsabilidades · Comprometimento",subitems:[{num:"5.1",name:"Liderança e Comprometimento",criterios:[{id:"5.1.1",label:"Alta direção preside reuniões do SGQ documentadas em ata"},{id:"5.1.2",label:"Recursos para o SGQ aprovados e disponibilizados"},{id:"5.1.3",label:"Política da Qualidade aprovada pela alta direção"},{id:"5.1.4",label:"Atas de reunião com pauta específica de SGQ nos últimos 2 meses"},{id:"5.1.5",label:"Análise de riscos que afetam satisfação do cliente pela liderança"}]},{num:"5.2",name:"Política da Qualidade",criterios:[{id:"5.2.1",label:"Política da Qualidade documentada e aprovada"},{id:"5.2.2",label:"Política adequada ao propósito e contexto da organização"},{id:"5.2.3",label:"Política comunicada a todos os colaboradores"},{id:"5.2.4",label:"Política disponível às partes interessadas externas"},{id:"5.2.5",label:"Revisão da política no último ciclo de análise crítica"}]},{num:"5.3",name:"Papéis e Responsabilidades",criterios:[{id:"5.3.1",label:"Matriz RACI do SGQ documentada"},{id:"5.3.2",label:"Representante da qualidade formalmente designado"},{id:"5.3.3",label:"Responsabilidades comunicadas a todos os envolvidos"},{id:"5.3.4",label:"Matriz RACI atualizada após última reestruturação"}]}]},
+  6:{title:"Planejamento",sub:"Riscos · Oportunidades · Objetivos · Mudanças",subitems:[{num:"6.1",name:"Riscos e Oportunidades",criterios:[{id:"6.1.1",label:"Metodologia de gestão de riscos definida"},{id:"6.1.2",label:"Matriz de riscos elaborada com probabilidade e impacto"},{id:"6.1.3",label:"Planos de ação para todos os riscos 'alto' definidos"},{id:"6.1.4",label:"Riscos revisados nos últimos 6 meses"},{id:"6.1.5",label:"Oportunidades formalizadas com plano de aproveitamento"},{id:"6.1.6",label:"Responsáveis pelos riscos designados"}]},{num:"6.2",name:"Objetivos da Qualidade",criterios:[{id:"6.2.1",label:"Objetivos da qualidade documentados e aprovados"},{id:"6.2.2",label:"Objetivos mensuráveis com indicadores associados"},{id:"6.2.3",label:"Prazos e responsáveis definidos para cada objetivo"},{id:"6.2.4",label:"Objetivos comunicados aos departamentos"},{id:"6.2.5",label:"Monitoramento periódico dos objetivos registrado"}]},{num:"6.3",name:"Planejamento de Mudanças",criterios:[{id:"6.3.1",label:"Processo formal de planejamento de mudanças definido"},{id:"6.3.2",label:"Mudanças recentes passaram pelo processo formal"},{id:"6.3.3",label:"Impactos das mudanças avaliados antes da implementação"},{id:"6.3.4",label:"Registro de mudanças realizadas mantido"}]}]},
+  7:{title:"Apoio e Recursos",sub:"Recursos · Competências · Comunicação · Documentos",subitems:[{num:"7.1",name:"Recursos e Infraestrutura",criterios:[{id:"7.1.1",label:"Infraestrutura necessária identificada e disponível"},{id:"7.1.2",label:"Ambiente de trabalho adequado documentado"},{id:"7.1.3",label:"Plano de manutenção preventiva documentado"},{id:"7.1.4",label:"Registros de calibração de instrumentos atualizados"},{id:"7.1.5",label:"Rastreabilidade de medições garantida"}]},{num:"7.2",name:"Competência",criterios:[{id:"7.2.1",label:"Competências necessárias para cada função definidas"},{id:"7.2.2",label:"Plano de treinamento anual elaborado"},{id:"7.2.3",label:"Registros de treinamento de todos os colaboradores"},{id:"7.2.4",label:"Avaliação de eficácia dos treinamentos realizada"},{id:"7.2.5",label:"Evidências de competência arquivadas (diplomas, certificados)"}]},{num:"7.3",name:"Conscientização",criterios:[{id:"7.3.1",label:"Colaboradores conscientes da Política da Qualidade"},{id:"7.3.2",label:"Contribuição de cada função para o SGQ comunicada"},{id:"7.3.3",label:"Consequências do não atendimento aos requisitos comunicadas"}]},{num:"7.5",name:"Informação Documentada",criterios:[{id:"7.5.1",label:"Lista mestre de documentos atualizada"},{id:"7.5.2",label:"Todos os documentos com versão, data e aprovação"},{id:"7.5.3",label:"POP-007 revisado e aprovado"},{id:"7.5.4",label:"IT-012 revisada e aprovada"},{id:"7.5.5",label:"Documentos obsoletos retirados de circulação"},{id:"7.5.6",label:"Controle de documentos externos implementado"}]}]},
+  8:{title:"Operação",sub:"Processos · Fornecedores · Clientes · Produto",subitems:[{num:"8.1",name:"Planejamento Operacional",criterios:[{id:"8.1.1",label:"Critérios de aceitação de processos definidos"},{id:"8.1.2",label:"Plano de controle de processos documentado"},{id:"8.1.3",label:"Recursos necessários por processo identificados"},{id:"8.1.4",label:"Rastreabilidade de todas as etapas implementada"}]},{num:"8.2",name:"Requisitos do Cliente",criterios:[{id:"8.2.1",label:"Canais de comunicação com clientes formalizados"},{id:"8.2.2",label:"Requisitos do produto/serviço determinados"},{id:"8.2.3",label:"Análise crítica dos requisitos antes do fornecimento"},{id:"8.2.4",label:"Registro de análise crítica de contratos mantido"}]},{num:"8.4",name:"Controle de Fornecedores",criterios:[{id:"8.4.1",label:"Lista de fornecedores aprovados documentada"},{id:"8.4.2",label:"Critérios de avaliação de fornecedores definidos"},{id:"8.4.3",label:"Avaliação inicial de todos os fornecedores críticos"},{id:"8.4.4",label:"Reavaliação periódica anual realizada e registrada"},{id:"8.4.5",label:"Requisitos comunicados formalmente aos fornecedores"}]},{num:"8.7",name:"Controle de Saídas Não Conformes",criterios:[{id:"8.7.1",label:"Processo de identificação de produtos/serviços NC definido"},{id:"8.7.2",label:"Disposição de NC documentada (rejeitar, retrabalhar, liberar)"},{id:"8.7.3",label:"Registros de NC mantidos com descrição e tratamento"}]}]},
+  9:{title:"Avaliação de Desempenho",sub:"Indicadores · Auditoria · Satisfação · Análise crítica",subitems:[{num:"9.1",name:"Monitoramento e Medição",criterios:[{id:"9.1.1",label:"Indicadores de desempenho definidos para os processos"},{id:"9.1.2",label:"Coleta de dados regular e registrada mensalmente"},{id:"9.1.3",label:"Análise de dados usada para tomada de decisão documentada"},{id:"9.1.4",label:"Pesquisa de satisfação do cliente realizada"},{id:"9.1.5",label:"Plano de ação para satisfação abaixo da meta"}]},{num:"9.2",name:"Auditoria Interna",criterios:[{id:"9.2.1",label:"Programa anual de auditoria interna elaborado"},{id:"9.2.2",label:"Auditores qualificados e independentes designados"},{id:"9.2.3",label:"Auditorias cobrindo todos os processos do SGQ"},{id:"9.2.4",label:"Relatórios de auditoria emitidos e distribuídos"},{id:"9.2.5",label:"Achados de auditoria com plano de ação definido"}]},{num:"9.3",name:"Análise Crítica pela Direção",criterios:[{id:"9.3.1",label:"Análise crítica realizada com entradas obrigatórias da ISO"},{id:"9.3.2",label:"Saídas da análise crítica documentadas (decisões e recursos)"},{id:"9.3.3",label:"Frequência mínima de 2x ao ano estabelecida"},{id:"9.3.4",label:"Participação da alta direção registrada em ata"}]}]},
+  10:{title:"Melhoria Contínua",sub:"Não conformidades · Ações corretivas · Melhoria",subitems:[{num:"10.1",name:"Melhoria Geral",criterios:[{id:"10.1.1",label:"Oportunidades de melhoria identificadas e registradas"},{id:"10.1.2",label:"Priorização de melhorias com base em dados"},{id:"10.1.3",label:"Resultados das melhorias mensurados e documentados"}]},{num:"10.2",name:"NC e Ação Corretiva",criterios:[{id:"10.2.1",label:"Processo de abertura de NC documentado e utilizado"},{id:"10.2.2",label:"Análise de causa raiz realizada para todas as NCs"},{id:"10.2.3",label:"Metodologia estruturada (5 Porquês / Ishikawa) adotada"},{id:"10.2.4",label:"Prazos de ações corretivas definidos e monitorados"},{id:"10.2.5",label:"Verificação de eficácia 30/60 dias após encerramento"},{id:"10.2.6",label:"Registros de todas as NCs e ações mantidos"}]},{num:"10.3",name:"Melhoria Contínua",criterios:[{id:"10.3.1",label:"Canal formal para sugestões de melhoria implantado"},{id:"10.3.2",label:"Melhorias proativas registradas no último trimestre"},{id:"10.3.3",label:"Ciclo PDCA aplicado nas melhorias implementadas"},{id:"10.3.4",label:"Resultados comparados antes e depois das melhorias"}]}]}
+};
+
+// ══ ISO 27001 CHECKLIST — NOVO ══
+const CHECKLIST_27001 = {
+  4:{title:"Contexto da Organização",sub:"Contexto · Partes interessadas · Escopo do SGSI",color:"#a050ff",subitems:[{num:"4.1",name:"Contexto Externo e Interno",criterios:[{id:"27_4.1.1",label:"Questões externas relevantes para o SGSI identificadas"},{id:"27_4.1.2",label:"Questões internas relevantes para o SGSI identificadas"},{id:"27_4.1.3",label:"Contexto documentado e revisado periodicamente"}]},{num:"4.2",name:"Partes Interessadas",criterios:[{id:"27_4.2.1",label:"Partes interessadas do SGSI identificadas"},{id:"27_4.2.2",label:"Requisitos de segurança das partes interessadas levantados"},{id:"27_4.2.3",label:"Requisitos legais e regulatórios de SI mapeados (LGPD, etc.)"}]},{num:"4.3",name:"Escopo do SGSI",criterios:[{id:"27_4.3.1",label:"Escopo do SGSI documentado e aprovado"},{id:"27_4.3.2",label:"Interfaces e dependências com outras organizações definidas"},{id:"27_4.3.3",label:"Ativos de informação no escopo identificados"}]}]},
+  5:{title:"Liderança",sub:"Comprometimento · Política de SI · Papéis e responsabilidades",color:"#a050ff",subitems:[{num:"5.1",name:"Liderança e Comprometimento",criterios:[{id:"27_5.1.1",label:"Alta direção comprometida com o SGSI formalmente"},{id:"27_5.1.2",label:"Política de Segurança da Informação aprovada pela direção"},{id:"27_5.1.3",label:"Recursos para o SGSI aprovados e disponibilizados"},{id:"27_5.1.4",label:"Integração do SGSI aos processos de negócio promovida"}]},{num:"5.2",name:"Política de Segurança da Informação",criterios:[{id:"27_5.2.1",label:"Política de SI documentada com objetivos claros"},{id:"27_5.2.2",label:"Política adequada ao contexto e aos riscos da organização"},{id:"27_5.2.3",label:"Política comunicada internamente e disponível externamente"},{id:"27_5.2.4",label:"Política revisada anualmente ou após mudanças significativas"}]},{num:"5.3",name:"Papéis e Responsabilidades",criterios:[{id:"27_5.3.1",label:"Responsável pelo SGSI (CISO ou equivalente) designado"},{id:"27_5.3.2",label:"Responsabilidades de SI comunicadas e documentadas"},{id:"27_5.3.3",label:"Conflitos de interesse na gestão do SGSI tratados"}]}]},
+  6:{title:"Planejamento",sub:"Riscos · Oportunidades · Objetivos de SI · Tratamento",color:"#a050ff",subitems:[{num:"6.1",name:"Riscos e Oportunidades",criterios:[{id:"27_6.1.1",label:"Processo de avaliação de riscos de SI definido e documentado"},{id:"27_6.1.2",label:"Critérios de aceitação de riscos estabelecidos"},{id:"27_6.1.3",label:"Inventário de ativos de informação elaborado"},{id:"27_6.1.4",label:"Ameaças e vulnerabilidades identificadas por ativo"},{id:"27_6.1.5",label:"Nível de risco calculado (probabilidade x impacto)"},{id:"27_6.1.6",label:"Plano de tratamento de riscos (PTR) documentado e aprovado"}]},{num:"6.2",name:"Objetivos de Segurança da Informação",criterios:[{id:"27_6.2.1",label:"Objetivos de SI definidos, mensuráveis e aprovados"},{id:"27_6.2.2",label:"Plano de ação para cada objetivo com responsável e prazo"},{id:"27_6.2.3",label:"Objetivos comunicados às áreas relevantes"},{id:"27_6.2.4",label:"Monitoramento periódico dos objetivos documentado"}]}]},
+  7:{title:"Apoio",sub:"Recursos · Competências · Conscientização · Comunicação · Documentação",color:"#a050ff",subitems:[{num:"7.1",name:"Recursos",criterios:[{id:"27_7.1.1",label:"Recursos humanos e técnicos para o SGSI disponibilizados"},{id:"27_7.1.2",label:"Ferramentas de SI (firewall, antivírus, SIEM, etc.) implantadas"}]},{num:"7.2",name:"Competência",criterios:[{id:"27_7.2.1",label:"Competências em SI definidas para funções críticas"},{id:"27_7.2.2",label:"Treinamentos de SI realizados e registrados"},{id:"27_7.2.3",label:"Certificações relevantes de SI (CISSP, ISO 27001 LA, etc.) mapeadas"}]},{num:"7.3",name:"Conscientização e Comunicação",criterios:[{id:"27_7.3.1",label:"Programa de conscientização de SI implantado"},{id:"27_7.3.2",label:"Campanhas anti-phishing e treinamentos periódicos realizados"},{id:"27_7.3.3",label:"Canal de comunicação de incidentes de SI disponível"},{id:"27_7.3.4",label:"Política de SI assinada por todos os colaboradores"}]},{num:"7.5",name:"Informação Documentada",criterios:[{id:"27_7.5.1",label:"Lista mestre de documentos do SGSI mantida"},{id:"27_7.5.2",label:"Procedimentos de SI documentados e aprovados"},{id:"27_7.5.3",label:"Registros de incidentes, auditorias e tratamentos mantidos"},{id:"27_7.5.4",label:"Controle de acesso à documentação do SGSI implementado"}]}]},
+  8:{title:"Operação",sub:"Controles · Tratamento de Riscos · Gestão de Incidentes",color:"#a050ff",subitems:[{num:"8.1",name:"Planejamento e Controle Operacional",criterios:[{id:"27_8.1.1",label:"Plano de tratamento de riscos executado e monitorado"},{id:"27_8.1.2",label:"Controles do Anexo A selecionados e implementados"},{id:"27_8.1.3",label:"Declaração de Aplicabilidade (SoA) elaborada e aprovada"},{id:"27_8.1.4",label:"Gestão de mudanças com avaliação de impacto em SI"}]},{num:"8.2",name:"Avaliação de Riscos de SI",criterios:[{id:"27_8.2.1",label:"Avaliação de riscos realizada em intervalos planejados"},{id:"27_8.2.2",label:"Avaliação realizada após mudanças significativas"},{id:"27_8.2.3",label:"Resultados das avaliações documentados e aprovados"}]},{num:"8.3",name:"Tratamento de Riscos de SI",criterios:[{id:"27_8.3.1",label:"Plano de tratamento de riscos atualizado e executado"},{id:"27_8.3.2",label:"Proprietários dos riscos formalmente designados"},{id:"27_8.3.3",label:"Eficácia dos controles verificada após implantação"}]}]},
+  9:{title:"Avaliação de Desempenho",sub:"Monitoramento · Auditoria Interna · Análise Crítica",color:"#a050ff",subitems:[{num:"9.1",name:"Monitoramento, Medição e Avaliação",criterios:[{id:"27_9.1.1",label:"Indicadores de desempenho do SGSI definidos (KPIs de SI)"},{id:"27_9.1.2",label:"Logs de segurança coletados e analisados regularmente"},{id:"27_9.1.3",label:"Relatório de desempenho do SGSI emitido periodicamente"},{id:"27_9.1.4",label:"Tempo médio de resposta a incidentes monitorado"}]},{num:"9.2",name:"Auditoria Interna do SGSI",criterios:[{id:"27_9.2.1",label:"Programa anual de auditoria interna do SGSI elaborado"},{id:"27_9.2.2",label:"Auditores competentes e independentes designados"},{id:"27_9.2.3",label:"Relatórios de auditoria emitidos com achados e recomendações"},{id:"27_9.2.4",label:"Planos de ação para achados de auditoria definidos"}]},{num:"9.3",name:"Análise Crítica pela Direção",criterios:[{id:"27_9.3.1",label:"Análise crítica do SGSI realizada pela alta direção"},{id:"27_9.3.2",label:"Entradas obrigatórias da análise crítica consideradas"},{id:"27_9.3.3",label:"Decisões e ações de melhoria documentadas em ata"}]}]},
+  10:{title:"Melhoria",sub:"NC · Ações Corretivas · Melhoria Contínua do SGSI",color:"#a050ff",subitems:[{num:"10.1",name:"NC e Ação Corretiva",criterios:[{id:"27_10.1.1",label:"Processo de registro e tratamento de NCs do SGSI implantado"},{id:"27_10.1.2",label:"Análise de causa raiz para NCs realizada"},{id:"27_10.1.3",label:"Eficácia das ações corretivas verificada"},{id:"27_10.1.4",label:"Lições aprendidas de incidentes documentadas e disseminadas"}]},{num:"10.2",name:"Melhoria Contínua",criterios:[{id:"27_10.2.1",label:"Oportunidades de melhoria do SGSI identificadas"},{id:"27_10.2.2",label:"Melhorias proativas registradas e implementadas"},{id:"27_10.2.3",label:"Resultados de melhorias avaliados e documentados"}]}]}
+};
+
+// ══ ISO 42001 CHECKLIST — NOVO ══
+const CHECKLIST_42001 = {
+  4:{title:"Contexto da Organização",sub:"Contexto · Partes interessadas · Escopo do SGAI",color:"#00e676",subitems:[{num:"4.1",name:"Contexto e Uso de IA",criterios:[{id:"42_4.1.1",label:"Contexto organizacional para uso de IA documentado"},{id:"42_4.1.2",label:"Sistemas de IA utilizados/desenvolvidos inventariados"},{id:"42_4.1.3",label:"Impactos da IA na estratégia organizacional avaliados"}]},{num:"4.2",name:"Partes Interessadas",criterios:[{id:"42_4.2.1",label:"Partes interessadas do SGAI identificadas (usuários, afetados, reguladores)"},{id:"42_4.2.2",label:"Requisitos de IA responsável das partes interessadas levantados"},{id:"42_4.2.3",label:"Requisitos legais de IA mapeados (AI Act, LGPD, etc.)"}]},{num:"4.3",name:"Escopo do SGAI",criterios:[{id:"42_4.3.1",label:"Escopo do SGAI definido com sistemas de IA incluídos"},{id:"42_4.3.2",label:"Exclusões do escopo justificadas"},{id:"42_4.3.3",label:"Ciclo de vida dos sistemas de IA no escopo mapeado"}]}]},
+  5:{title:"Liderança",sub:"Comprometimento · Política de IA · Responsabilidades",color:"#00e676",subitems:[{num:"5.1",name:"Liderança e Comprometimento",criterios:[{id:"42_5.1.1",label:"Alta direção comprometida com IA responsável formalmente"},{id:"42_5.1.2",label:"Política de IA aprovada pela alta direção"},{id:"42_5.1.3",label:"Recursos para o SGAI aprovados e disponibilizados"}]},{num:"5.2",name:"Política de IA Responsável",criterios:[{id:"42_5.2.1",label:"Política de IA com princípios éticos documentada (transparência, equidade, privacidade)"},{id:"42_5.2.2",label:"Política alinhada ao contexto e riscos de IA da organização"},{id:"42_5.2.3",label:"Política comunicada internamente e disponível externamente"},{id:"42_5.2.4",label:"Política revisada após mudanças em sistemas de IA ou regulamentação"}]},{num:"5.3",name:"Papéis e Responsabilidades",criterios:[{id:"42_5.3.1",label:"Responsável pelo SGAI designado formalmente"},{id:"42_5.3.2",label:"Comitê de Ética em IA constituído"},{id:"42_5.3.3",label:"Responsabilidades de IA comunicadas a todas as equipes envolvidas"}]}]},
+  6:{title:"Planejamento",sub:"Riscos de IA · Oportunidades · Objetivos · Impactos",color:"#00e676",subitems:[{num:"6.1",name:"Riscos e Impactos de IA",criterios:[{id:"42_6.1.1",label:"Metodologia de avaliação de riscos de IA definida"},{id:"42_6.1.2",label:"Avaliação de impacto em direitos e liberdades realizada (DPIA/AIIA)"},{id:"42_6.1.3",label:"Riscos de viés, discriminação e explicabilidade avaliados"},{id:"42_6.1.4",label:"Plano de tratamento de riscos de IA elaborado"},{id:"42_6.1.5",label:"Riscos de segurança e ataques adversariais considerados"}]},{num:"6.2",name:"Objetivos de IA Responsável",criterios:[{id:"42_6.2.1",label:"Objetivos de IA responsável definidos e mensuráveis"},{id:"42_6.2.2",label:"Métricas de equidade, explicabilidade e robustez definidas"},{id:"42_6.2.3",label:"Planos de ação para cada objetivo com responsável e prazo"}]}]},
+  7:{title:"Apoio",sub:"Recursos · Competências · Conscientização · Documentação de IA",color:"#00e676",subitems:[{num:"7.1",name:"Recursos",criterios:[{id:"42_7.1.1",label:"Infraestrutura técnica para sistemas de IA disponível e adequada"},{id:"42_7.1.2",label:"Dados de treinamento com qualidade e governança adequadas"},{id:"42_7.1.3",label:"Ferramentas de monitoramento e explicabilidade de IA disponíveis"}]},{num:"7.2",name:"Competência em IA",criterios:[{id:"42_7.2.1",label:"Competências em IA e ética definidas para funções-chave"},{id:"42_7.2.2",label:"Treinamentos em IA responsável e ética realizados"},{id:"42_7.2.3",label:"Especialistas em ética de IA disponíveis para consulta"}]},{num:"7.3",name:"Conscientização e Comunicação",criterios:[{id:"42_7.3.1",label:"Colaboradores conscientes dos princípios de IA responsável"},{id:"42_7.3.2",label:"Usuários finais informados sobre uso de IA (transparência)"},{id:"42_7.3.3",label:"Canal de denúncias sobre uso indevido de IA disponível"}]},{num:"7.5",name:"Documentação de Sistemas de IA",criterios:[{id:"42_7.5.1",label:"Ficha técnica de cada sistema de IA documentada (model card)"},{id:"42_7.5.2",label:"Dados de treinamento, validação e teste documentados"},{id:"42_7.5.3",label:"Decisões de design e arquitetura dos modelos registradas"},{id:"42_7.5.4",label:"Versões e mudanças nos modelos controladas"}]}]},
+  8:{title:"Operação",sub:"Desenvolvimento · Implantação · Monitoramento · Incidentes de IA",color:"#00e676",subitems:[{num:"8.1",name:"Planejamento e Desenvolvimento de IA",criterios:[{id:"42_8.1.1",label:"Processo de desenvolvimento de IA com controles éticos definido"},{id:"42_8.1.2",label:"Avaliação de equidade e viés realizada antes da implantação"},{id:"42_8.1.3",label:"Testes de robustez e segurança dos modelos realizados"},{id:"42_8.1.4",label:"Critérios de aceitação para implantação de modelos definidos"}]},{num:"8.2",name:"Implantação e Uso de IA",criterios:[{id:"42_8.2.1",label:"Processo de aprovação para implantação de modelos em produção"},{id:"42_8.2.2",label:"Monitoramento de desempenho e deriva dos modelos em produção"},{id:"42_8.2.3",label:"Mecanismo de supervisão humana (human-in-the-loop) implantado"},{id:"42_8.2.4",label:"Processo de retirada de modelos obsoletos ou problemáticos definido"}]},{num:"8.3",name:"Gestão de Incidentes de IA",criterios:[{id:"42_8.3.1",label:"Processo de identificação e registro de incidentes de IA definido"},{id:"42_8.3.2",label:"Análise de causa raiz de incidentes de IA realizada"},{id:"42_8.3.3",label:"Comunicação de incidentes relevantes às partes interessadas"}]}]},
+  9:{title:"Avaliação de Desempenho",sub:"Monitoramento · Auditoria · Análise Crítica do SGAI",color:"#00e676",subitems:[{num:"9.1",name:"Monitoramento e Medição",criterios:[{id:"42_9.1.1",label:"KPIs de IA responsável definidos e monitorados"},{id:"42_9.1.2",label:"Métricas de equidade dos modelos monitoradas continuamente"},{id:"42_9.1.3",label:"Relatório de desempenho e impacto dos sistemas de IA emitido"},{id:"42_9.1.4",label:"Feedback de usuários sobre sistemas de IA coletado e analisado"}]},{num:"9.2",name:"Auditoria Interna do SGAI",criterios:[{id:"42_9.2.1",label:"Programa de auditoria interna dos sistemas de IA elaborado"},{id:"42_9.2.2",label:"Auditores com competência em IA e ética designados"},{id:"42_9.2.3",label:"Relatórios de auditoria com achados e recomendações emitidos"}]},{num:"9.3",name:"Análise Crítica pela Direção",criterios:[{id:"42_9.3.1",label:"Análise crítica do SGAI realizada pela alta direção"},{id:"42_9.3.2",label:"Desempenho, riscos e incidentes de IA revisados"},{id:"42_9.3.3",label:"Decisões de melhoria documentadas e comunicadas"}]}]},
+  10:{title:"Melhoria",sub:"NC · Ações Corretivas · Melhoria Contínua do SGAI",color:"#00e676",subitems:[{num:"10.1",name:"NC e Ação Corretiva",criterios:[{id:"42_10.1.1",label:"Processo de NCs de IA (viés detectado, falhas éticas) documentado"},{id:"42_10.1.2",label:"Análise de causa raiz para NCs de IA realizada"},{id:"42_10.1.3",label:"Eficácia das correções em modelos verificada"}]},{num:"10.2",name:"Melhoria Contínua",criterios:[{id:"42_10.2.1",label:"Ciclo de melhoria contínua dos sistemas de IA estabelecido"},{id:"42_10.2.2",label:"Avanços em IA responsável e boas práticas incorporados"},{id:"42_10.2.3",label:"Resultados de melhorias documentados e divulgados"}]}]}
 };
 
 const SYSTEM_PROMPT = `Você é auditor ISO 9001 especialista. Analise o documento enviado e avalie se ele atende ao critério ISO informado.
 Responda APENAS com JSON válido, sem texto adicional, sem markdown:
 {"aprovado":true,"conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}`;
 
-const CHAT_SYSTEM = `Você é o Assistente Inteligente do SGQ, especialista em ISO 9001.
-Apoie a organização na manutenção, análise e melhoria do Sistema de Gestão da Qualidade.
+const CHAT_SYSTEM = `Você é o Assistente Inteligente do SGQ, especialista em ISO 9001, ISO 27001 e ISO 42001.
+Apoie a organização na manutenção, análise e melhoria dos Sistemas de Gestão.
 Sempre que analisar dados apresente: nível de conformidade, riscos, observações e recomendações.
 Ao criar documentos SGQ use: Objetivo, Escopo, Referências, Definições, Responsabilidades, Descrição do processo, Registros gerados, Indicadores, Riscos, Melhoria contínua.
 Responda em português do Brasil. Seja técnico e estruturado.`;
 
 const EXTRA_MODULES = [
-  {id:'chat',     icon:'🤖', label:'Assistente IA',         badge:''},
-  {id:'auditInt', icon:'🔍', label:'Auditoria Interna',     badge:''},
-  {id:'auditExt', icon:'🏅', label:'Pré-Auditoria Externa', badge:''},
-  {id:'docs',     icon:'📄', label:'Documentos',            badge:''},
-  {id:'alertas',  icon:'🔔', label:'Alertas',               badge:'3'},
-  {id:'usuarios', icon:'👥', label:'Usuários',              badge:''},
+  {id:'chat',icon:'🤖',label:'Assistente IA',badge:''},
+  {id:'auditInt',icon:'🔍',label:'Auditoria Interna',badge:''},
+  {id:'auditExt',icon:'🏅',label:'Pré-Auditoria Externa',badge:''},
+  {id:'docs',icon:'📄',label:'Documentos',badge:''},
+  {id:'alertas',icon:'🔔',label:'Alertas',badge:'3'},
+  {id:'usuarios',icon:'👥',label:'Usuários',badge:''},
 ];
 
 const MAIN_IDS = {
-  req:'mainReq', chat:'mainChat', auditInt:'mainAuditInt',
-  auditExt:'mainAuditExt', docs:'mainDocs', alertas:'mainAlertas',
+  req:'mainReq',chat:'mainChat',auditInt:'mainAuditInt',
+  auditExt:'mainAuditExt',docs:'mainDocs',alertas:'mainAlertas',
   usuarios:'mainUsuarios'
 };
 
@@ -854,42 +617,28 @@ const docListDefault = [
 // ══════════════════════════════════════════════════════════════
 // 2. ESTADO GLOBAL
 // ══════════════════════════════════════════════════════════════
-let currentReq = 4;
-let done = {};
-let results = {};
-let openSubs = {"4.1":true};
-let uploading = null;
-let pendingUpload = null;
-let activeModule = 'req';
-let docFiltro = 'todos';
-let docList = [];
-let chatHistory = [];
-let chatLoading = false;
-let loggedUser = null;
-let sbSession = null;
-let sbUsers = [];
-const anoData = {};
-let anoAtual = 2025;
+let currentReq=4,done={},results={},openSubs={"4.1":true},uploading=null,pendingUpload=null,activeModule='req';
+let docFiltro='todos',docList=[],chatHistory=[],chatLoading=false,loggedUser=null,sbSession=null,sbUsers=[];
+const anoData={};let anoAtual=2025;
+// Estado ISO 27001 e 42001
+let normaAtiva='9001',currentReq27=4,currentReq42=4;
+const done27={},done42={},results27={},results42={},openSubs27={"4.1":true},openSubs42={"4.1":true};
 
 // ══════════════════════════════════════════════════════════════
 // 3. SUPABASE HELPER
 // ══════════════════════════════════════════════════════════════
-async function sb(path, opts={}){
+async function sb(path,opts={}){
   const headers={'Content-Type':'application/json','apikey':SUPABASE_KEY,...(opts.headers||{})};
   const session=JSON.parse(localStorage.getItem('sgq_session')||'null');
   if(session?.access_token) headers['Authorization']='Bearer '+session.access_token;
   const res=await fetch(SUPABASE_URL+path,{...opts,headers});
-  if(!res.ok){
-    const e=await res.json().catch(()=>({}));
-    const msg=e.msg||e.message||e.error_description||e.error||JSON.stringify(e)||res.status;
-    throw new Error(msg);
-  }
+  if(!res.ok){const e=await res.json().catch(()=>({}));const msg=e.msg||e.message||e.error_description||e.error||JSON.stringify(e)||res.status;throw new Error(msg);}
   const ct=res.headers.get('content-type')||'';
   return ct.includes('json')?res.json():null;
 }
 
 // ══════════════════════════════════════════════════════════════
-// 4. AUTH — LOGIN / LOGOUT
+// 4. AUTH
 // ══════════════════════════════════════════════════════════════
 async function doLogin(){
   const email=document.getElementById('loginUser').value.trim();
@@ -897,58 +646,35 @@ async function doLogin(){
   const errEl=document.getElementById('loginError');
   const btn=document.getElementById('loginBtn');
   if(!email||!pass){errEl.textContent='Preencha email e senha.';return;}
-  btn.textContent='Entrando...';btn.disabled=true;
-  errEl.textContent='';
+  btn.textContent='Entrando...';btn.disabled=true;errEl.textContent='';
   try{
-    // Chama diretamente com fetch para capturar o erro bruto do Supabase
-    const res=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
-      body:JSON.stringify({email,password:pass})
-    });
+    const res=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({email,password:pass})});
     const data=await res.json();
     if(!res.ok){
-      // Mensagens amigáveis para cada código de erro do Supabase
       const msg=data.msg||data.message||data.error_description||data.error||'Erro desconhecido';
-      if(msg.includes('Email not confirmed')||msg.includes('email not confirmed'))
-        errEl.textContent='⚠️ Email não confirmado. Vá ao Supabase → Authentication → Users → clique no seu usuário → "Confirm email".';
-      else if(msg.includes('Invalid login')||msg.includes('invalid')||msg.includes('Wrong'))
-        errEl.textContent='❌ Email ou senha incorretos.';
-      else if(msg.includes('rate limit')||msg.includes('too many'))
-        errEl.textContent='⏳ Muitas tentativas. Aguarde alguns minutos.';
-      else
-        errEl.textContent='Erro: '+msg;
+      if(msg.includes('Email not confirmed')||msg.includes('email not confirmed')) errEl.textContent='⚠️ Email não confirmado. Vá ao Supabase → Authentication → Users → confirme o email.';
+      else if(msg.includes('Invalid login')||msg.includes('invalid')||msg.includes('Wrong')) errEl.textContent='❌ Email ou senha incorretos.';
+      else if(msg.includes('rate limit')||msg.includes('too many')) errEl.textContent='⏳ Muitas tentativas. Aguarde alguns minutos.';
+      else errEl.textContent='Erro: '+msg;
       btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
-      document.getElementById('loginPass').value='';
-      return;
+      document.getElementById('loginPass').value='';return;
     }
-    sbSession=data;
-    localStorage.setItem('sgq_session',JSON.stringify(data));
+    sbSession=data;localStorage.setItem('sgq_session',JSON.stringify(data));
     const perfis=await sb('/rest/v1/perfis?id=eq.'+data.user.id+'&select=*');
     const perfil=perfis&&perfis[0]?perfis[0]:{nome:email,perfil:'Colaborador',email};
-    if(perfil.ativo===false){
-      errEl.textContent='Conta desativada. Contate o administrador.';
-      localStorage.removeItem('sgq_session');
-      btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
-      return;
-    }
+    if(perfil.ativo===false){errEl.textContent='Conta desativada. Contate o administrador.';localStorage.removeItem('sgq_session');btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;return;}
     loggedUser={...perfil,id:data.user.id};
     await registrarLog('login','Acesso ao sistema SGQ');
     abrirSistema();
-  }catch(e){
-    errEl.textContent='Erro de conexão: '+e.message;
-    document.getElementById('loginPass').value='';
-  }
+  }catch(e){errEl.textContent='Erro de conexão: '+e.message;document.getElementById('loginPass').value='';}
   btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
 }
 
 async function doLogout(){
   if(!confirm('Deseja sair do sistema?')) return;
   try{await registrarLog('logout','Saiu do sistema');await sb('/auth/v1/logout',{method:'POST'});}catch{}
-  loggedUser=null;sbSession=null;
-  localStorage.removeItem('sgq_session');
-  document.getElementById('loginUser').value='';
-  document.getElementById('loginPass').value='';
+  loggedUser=null;sbSession=null;localStorage.removeItem('sgq_session');
+  document.getElementById('loginUser').value='';document.getElementById('loginPass').value='';
   document.getElementById('loginScreen').style.display='flex';
 }
 
@@ -956,13 +682,10 @@ function abrirSistema(){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('sidebarUser').textContent=loggedUser.nome||loggedUser.email;
   document.getElementById('loginError').textContent='';
-  carregarAnos().then(()=>{
-    renderYearPills();
-    carregarAno(anoAtual).then(()=>{updateExtraNav();render();});
-  });
+  carregarAnos().then(()=>{renderYearPills();carregarAno(anoAtual).then(()=>{updateExtraNav();render();});});
 }
 
-async function registrarLog(acao, detalhe){
+async function registrarLog(acao,detalhe){
   try{await sb('/rest/v1/log_acesso',{method:'POST',body:JSON.stringify({usuario_id:loggedUser?.id,email:loggedUser?.email,acao,detalhe,criado_em:new Date().toISOString()})});}catch{}
 }
 
@@ -972,14 +695,8 @@ async function registrarLog(acao, detalhe){
 async function carregarAnos(){
   try{
     const rows=await sb('/rest/v1/anos_sgq?select=ano&order=ano.asc');
-    if(rows&&rows.length){
-      rows.forEach(r=>{if(!anoData[r.ano]) anoData[r.ano]={done:{},results:{},openSubs:{'4.1':true},docList:[]};});
-      anoAtual=rows[0].ano;
-    }else{
-      await sb('/rest/v1/anos_sgq',{method:'POST',body:JSON.stringify({ano:2025})});
-      anoData[2025]={done:{},results:{},openSubs:{'4.1':true},docList:[]};
-      anoAtual=2025;
-    }
+    if(rows&&rows.length){rows.forEach(r=>{if(!anoData[r.ano]) anoData[r.ano]={done:{},results:{},openSubs:{'4.1':true},docList:[]};});anoAtual=rows[0].ano;}
+    else{await sb('/rest/v1/anos_sgq',{method:'POST',body:JSON.stringify({ano:2025})});anoData[2025]={done:{},results:{},openSubs:{'4.1':true},docList:[]};anoAtual=2025;}
   }catch{anoData[2025]={done:{},results:{},openSubs:{'4.1':true},docList:[]};anoAtual=2025;}
 }
 
@@ -987,83 +704,64 @@ async function carregarAno(ano){
   if(!anoData[ano]) anoData[ano]={done:{},results:{},openSubs:{'4.1':true},docList:[]};
   try{
     const ck=await sb('/rest/v1/checklist?ano=eq.'+ano+'&select=criterio_id,feito');
-    if(ck) ck.forEach(r=>{anoData[ano].done[r.criterio_id]=r.feito;});
+    if(ck) ck.forEach(r=>{
+      if(r.criterio_id.startsWith('27001_')) done27[r.criterio_id.replace('27001_','')]=r.feito;
+      else if(r.criterio_id.startsWith('42001_')) done42[r.criterio_id.replace('42001_','')]=r.feito;
+      else anoData[ano].done[r.criterio_id]=r.feito;
+    });
     const ri=await sb('/rest/v1/resultados_ia?ano=eq.'+ano+'&select=*');
-    if(ri) ri.forEach(r=>{anoData[ano].results[r.criterio_id]={aprovado:r.aprovado,conformidade:r.conformidade,pontos_atendidos:r.pontos_atendidos||[],pontos_faltando:r.pontos_faltando||[],recomendacao:r.recomendacao,filename:r.filename,erro:r.erro};});
+    if(ri) ri.forEach(r=>{
+      const obj={aprovado:r.aprovado,conformidade:r.conformidade,pontos_atendidos:r.pontos_atendidos||[],pontos_faltando:r.pontos_faltando||[],recomendacao:r.recomendacao,filename:r.filename,erro:r.erro};
+      if(r.criterio_id.startsWith('27001_')) results27[r.criterio_id.replace('27001_','')]=obj;
+      else if(r.criterio_id.startsWith('42001_')) results42[r.criterio_id.replace('42001_','')]=obj;
+      else anoData[ano].results[r.criterio_id]=obj;
+    });
     const docs=await sb('/rest/v1/documentos?ano=eq.'+ano+'&select=*&order=criado_em.asc');
-    if(docs&&docs.length) anoData[ano].docList=docs.map(d=>(({cod:d.codigo,titulo:d.titulo,tipo:d.tipo,req:d.requisito_iso,versao:d.versao,resp:d.responsavel,aprv:d.data_aprovacao,val:d.data_validade,status:d.status,desc:d.descricao,arquivo:d.arquivo||'',_id:d.id})));
+    if(docs&&docs.length) anoData[ano].docList=docs.map(d=>({cod:d.codigo,titulo:d.titulo,tipo:d.tipo,req:d.requisito_iso,versao:d.versao,resp:d.responsavel,aprv:d.data_aprovacao,val:d.data_validade,status:d.status,desc:d.descricao,arquivo:d.arquivo||'',_id:d.id}));
     else if(ano===2025) anoData[ano].docList=JSON.parse(JSON.stringify(docListDefault));
   }catch(e){console.warn('carregarAno:',e);}
-  done=anoData[ano].done;
-  results=anoData[ano].results;
-  openSubs=anoData[ano].openSubs;
-  docList=anoData[ano].docList;
+  done=anoData[ano].done;results=anoData[ano].results;openSubs=anoData[ano].openSubs;docList=anoData[ano].docList;
 }
 
 async function trocarAno(ano){
-  anoAtual=ano;
-  await carregarAno(ano);
-  currentReq=4;
-  renderYearPills();
-  render();
+  anoAtual=ano;await carregarAno(ano);currentReq=4;renderYearPills();render();
   if(activeModule==='docs') renderDocs();
 }
 
 async function adicionarAno(){
-  const anos=Object.keys(anoData).map(Number);
-  const proximo=Math.max(...anos)+1;
+  const anos=Object.keys(anoData).map(Number);const proximo=Math.max(...anos)+1;
   if(anos.length>=10){alert('Máximo de 10 anos.');return;}
   try{await sb('/rest/v1/anos_sgq',{method:'POST',body:JSON.stringify({ano:proximo})});}catch{}
-  anoData[proximo]={done:{},results:{},openSubs:{'4.1':true},docList:[]};
-  await trocarAno(proximo);
+  anoData[proximo]={done:{},results:{},openSubs:{'4.1':true},docList:[]};await trocarAno(proximo);
 }
 
 function renderYearPills(){
-  const container=document.getElementById('yearPills');
-  if(!container) return;
+  const container=document.getElementById('yearPills');if(!container) return;
   const anos=Object.keys(anoData).map(Number).sort();
-  container.innerHTML='';
-  container.style.cssText='display:flex;gap:5px;flex-wrap:wrap;flex:1';
-  anos.forEach(a=>{
-    const btn=document.createElement('button');
-    btn.className='year-pill'+(a===anoAtual?' active':'');
-    btn.textContent=a;
-    btn.onclick=()=>trocarAno(a);
-    container.appendChild(btn);
-  });
+  container.innerHTML='';container.style.cssText='display:flex;gap:5px;flex-wrap:wrap;flex:1';
+  anos.forEach(a=>{const btn=document.createElement('button');btn.className='year-pill'+(a===anoAtual?' active':'');btn.textContent=a;btn.onclick=()=>trocarAno(a);container.appendChild(btn);});
 }
 
 // ══════════════════════════════════════════════════════════════
 // 6. SUPABASE SAVE HELPERS
 // ══════════════════════════════════════════════════════════════
-async function saveCriterio(id, feito){
+async function saveCriterio(id,feito){
   try{await sb('/rest/v1/checklist',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({ano:anoAtual,criterio_id:id,feito,usuario_id:loggedUser?.id,atualizado_em:new Date().toISOString()})});}catch(e){console.warn('saveCriterio:',e);}
 }
 
-async function saveResultadoIA(id, resultado){
-  try{
-    await sb('/rest/v1/resultados_ia',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({
-      ano:anoAtual,criterio_id:id,aprovado:resultado.aprovado,conformidade:resultado.conformidade,
-      pontos_atendidos:resultado.pontos_atendidos,pontos_faltando:resultado.pontos_faltando,
-      recomendacao:resultado.recomendacao,filename:resultado.filename,erro:resultado.erro||false,
-      usuario_id:loggedUser?.id,criado_em:new Date().toISOString()
-    })});
-  }catch(e){console.warn('saveResultadoIA:',e);}
+async function saveResultadoIA(id,resultado){
+  try{await sb('/rest/v1/resultados_ia',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({ano:anoAtual,criterio_id:id,aprovado:resultado.aprovado,conformidade:resultado.conformidade,pontos_atendidos:resultado.pontos_atendidos,pontos_faltando:resultado.pontos_faltando,recomendacao:resultado.recomendacao,filename:resultado.filename,erro:resultado.erro||false,usuario_id:loggedUser?.id,criado_em:new Date().toISOString()})});}catch(e){console.warn('saveResultadoIA:',e);}
 }
 
 async function salvarDocumentoSb(doc){
   try{
-    if(doc._id){
-      await sb('/rest/v1/documentos?id=eq.'+doc._id,{method:'PATCH',body:JSON.stringify({status:doc.status,atualizado_em:new Date().toISOString()})});
-    }else{
-      const res=await sb('/rest/v1/documentos',{method:'POST',headers:{'Prefer':'return=representation'},body:JSON.stringify({ano:anoAtual,codigo:doc.cod,titulo:doc.titulo,tipo:doc.tipo,requisito_iso:doc.req,versao:doc.versao,responsavel:doc.resp,data_aprovacao:doc.aprv||null,data_validade:doc.val||null,status:doc.status,descricao:doc.desc,arquivo:doc.arquivo||'',usuario_id:loggedUser?.id})});
-      if(res&&res[0]) doc._id=res[0].id;
-    }
+    if(doc._id){await sb('/rest/v1/documentos?id=eq.'+doc._id,{method:'PATCH',body:JSON.stringify({status:doc.status,atualizado_em:new Date().toISOString()})});}
+    else{const res=await sb('/rest/v1/documentos',{method:'POST',headers:{'Prefer':'return=representation'},body:JSON.stringify({ano:anoAtual,codigo:doc.cod,titulo:doc.titulo,tipo:doc.tipo,requisito_iso:doc.req,versao:doc.versao,responsavel:doc.resp,data_aprovacao:doc.aprv||null,data_validade:doc.val||null,status:doc.status,descricao:doc.desc,arquivo:doc.arquivo||'',usuario_id:loggedUser?.id})});if(res&&res[0]) doc._id=res[0].id;}
   }catch(e){console.warn('salvarDocumentoSb:',e);}
 }
 
 // ══════════════════════════════════════════════════════════════
-// 7. FUNÇÕES DE CÁLCULO
+// 7. CÁLCULO ISO 9001
 // ══════════════════════════════════════════════════════════════
 function pctColor(p){return p>=85?'#00e676':p>=50?'#ffea00':p>0?'#ff5252':'#607080';}
 function allCriterios(rn){return CHECKLIST[rn].subitems.flatMap(s=>s.criterios);}
@@ -1072,106 +770,56 @@ function subPct(sub){if(!sub.criterios.length) return 0;return Math.round(sub.cr
 function totalPct(){const all=Object.values(CHECKLIST).flatMap(r=>r.subitems.flatMap(s=>s.criterios));if(!all.length) return 0;return Math.round(all.filter(c=>done[c.id]).length/all.length*100);}
 
 // ══════════════════════════════════════════════════════════════
-// 8. RENDER — TOPBAR, SIDEBAR, CONTEÚDO ISO
+// 8. RENDER ISO 9001
 // ══════════════════════════════════════════════════════════════
 function updateTopbar(){
-  const req=CHECKLIST[currentReq];
-  const pct=reqPct(currentReq);
-  const all=allCriterios(currentReq);
-  const dc=all.filter(c=>done[c.id]).length;
-  const col=pctColor(pct);
-  document.getElementById('topReqNum').textContent=currentReq;
-  document.getElementById('topReqTitle').textContent=req.title;
-  document.getElementById('topReqSub').textContent=req.sub;
-  document.getElementById('topReqPct').textContent=pct+'%';
-  document.getElementById('topReqPct').style.color=col;
-  document.getElementById('topReqCriterios').textContent=dc+' de '+all.length+' critérios';
-  document.getElementById('topBarFill').style.width=pct+'%';
-  document.getElementById('topBarFill').style.background=col;
+  const req=CHECKLIST[currentReq];const pct=reqPct(currentReq);const all=allCriterios(currentReq);const dc=all.filter(c=>done[c.id]).length;const col=pctColor(pct);
+  document.getElementById('topReqNum').textContent=currentReq;document.getElementById('topReqTitle').textContent=req.title;document.getElementById('topReqSub').textContent=req.sub;
+  document.getElementById('topReqPct').textContent=pct+'%';document.getElementById('topReqPct').style.color=col;document.getElementById('topReqCriterios').textContent=dc+' de '+all.length+' critérios';
+  document.getElementById('topBarFill').style.width=pct+'%';document.getElementById('topBarFill').style.background=col;
   const falta=all.length-dc;
   document.getElementById('topHint').textContent=pct===100?'✅ Requisito '+currentReq+' 100% conforme com a ISO 9001!':'Faltam '+falta+' critério'+(falta>1?'s':'')+' para 100% — clique em 📎 Enviar doc em cada critério pendente.';
   document.getElementById('topHint').style.color=pct===100?'#00e676':'#607080';
 }
 
 function updateSidebar(){
-  const tp=totalPct();
-  const tCol=pctColor(tp);
-  document.getElementById('totalPctLabel').textContent=tp+'%';
-  document.getElementById('totalPctLabel').style.color=tCol;
-  document.getElementById('totalBarFill').style.width=tp+'%';
-  document.getElementById('totalBarFill').style.background=tCol;
+  const tp=totalPct();const tCol=pctColor(tp);
+  document.getElementById('totalPctLabel').textContent=tp+'%';document.getElementById('totalPctLabel').style.color=tCol;
+  document.getElementById('totalBarFill').style.width=tp+'%';document.getElementById('totalBarFill').style.background=tCol;
   updateExtraNav();
-  const nav=document.getElementById('navItems');
-  nav.innerHTML='';
+  const nav=document.getElementById('navItems');nav.innerHTML='';
   Object.entries(CHECKLIST).forEach(([n,d])=>{
-    const p=reqPct(parseInt(n));
-    const col=pctColor(p);
-    const active=activeModule==='req'&&currentReq===parseInt(n);
-    const div=document.createElement('div');
-    div.className='nav-item'+(active?' active':'');
+    const p=reqPct(parseInt(n));const col=pctColor(p);const active=activeModule==='req'&&currentReq===parseInt(n);
+    const div=document.createElement('div');div.className='nav-item'+(active?' active':'');
     div.innerHTML=`<div class="nav-item-row"><span class="nav-item-name">Req. ${n} · ${d.title}</span><span class="nav-item-pct" style="color:${p===0?'#607080':col}">${p}%</span></div><div class="nav-mini-bar"><div style="width:${p}%;height:100%;background:${p===0?'#1e2d3d':col};border-radius:2px;transition:width .5s"></div></div>`;
-    div.onclick=()=>{currentReq=parseInt(n);showModule('req');render();};
-    nav.appendChild(div);
+    div.onclick=()=>{currentReq=parseInt(n);showModule('req');render();};nav.appendChild(div);
   });
 }
 
 function renderContent(){
-  const req=CHECKLIST[currentReq];
-  const content=document.getElementById('content');
-  content.innerHTML='';
+  const req=CHECKLIST[currentReq];const content=document.getElementById('content');content.innerHTML='';
   req.subitems.forEach(sub=>{
-    const sp=subPct(sub);
-    const col=pctColor(sp);
-    const isOpen=!!openSubs[sub.num];
-    const pending=sub.criterios.filter(c=>!done[c.id]);
-    const doneCnt=sub.criterios.filter(c=>done[c.id]).length;
-    const card=document.createElement('div');
-    card.className='sub-card';
-    card.id='subcard-'+sub.num;
-    const header=document.createElement('div');
-    header.className='sub-header';
+    const sp=subPct(sub);const col=pctColor(sp);const isOpen=!!openSubs[sub.num];
+    const pending=sub.criterios.filter(c=>!done[c.id]);const doneCnt=sub.criterios.filter(c=>done[c.id]).length;
+    const card=document.createElement('div');card.className='sub-card';card.id='subcard-'+sub.num;
+    const header=document.createElement('div');header.className='sub-header';
     header.innerHTML=`<div class="sub-num">${sub.num}</div><div style="flex:1"><div class="sub-name">${sub.name}</div><div class="sub-meta">${doneCnt}/${sub.criterios.length} critérios${pending.length>0?' · <span style="color:#ffea00">'+pending.length+' pendente'+(pending.length>1?'s':'')+'</span>':''}${sp===100?' · <span style="color:#00e676">✅ Completo</span>':''}</div></div><div class="sub-pct" style="color:${sp===0?'#607080':col}">${sp}%</div><div class="sub-chevron" style="transform:${isOpen?'rotate(180deg)':'rotate(0)'}">▼</div>`;
-    header.onclick=()=>{openSubs[sub.num]=!openSubs[sub.num];render();};
-    card.appendChild(header);
-    const miniBar=document.createElement('div');
-    miniBar.className='sub-minibar';
-    miniBar.innerHTML=`<div style="height:3px;width:${sp}%;background:${sp===0?'#1e2d3d':col};transition:width .5s;border-radius:2px"></div>`;
-    card.appendChild(miniBar);
+    header.onclick=()=>{openSubs[sub.num]=!openSubs[sub.num];render();};card.appendChild(header);
+    const miniBar=document.createElement('div');miniBar.className='sub-minibar';
+    miniBar.innerHTML=`<div style="height:3px;width:${sp}%;background:${sp===0?'#1e2d3d':col};transition:width .5s;border-radius:2px"></div>`;card.appendChild(miniBar);
     if(isOpen){
-      const criteriosDiv=document.createElement('div');
-      criteriosDiv.className='criterios';
+      const criteriosDiv=document.createElement('div');criteriosDiv.className='criterios';
       sub.criterios.forEach(c=>{
-        const isDone=!!done[c.id];
-        const result=results[c.id];
-        const isUp=uploading===c.id;
-        const cDiv=document.createElement('div');
-        cDiv.className='criterio'+(isDone?' done':'');
-        cDiv.id='crit-'+c.id;
+        const isDone=!!done[c.id];const result=results[c.id];const isUp=uploading===c.id;
+        const cDiv=document.createElement('div');cDiv.className='criterio'+(isDone?' done':'');cDiv.id='crit-'+c.id;
         let resultHTML='';
-        if(result&&!result.erro){
-          const rClass=result.aprovado?'ok':'warn';
-          const rColor=result.aprovado?'#00e676':'#ffea00';
-          const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');
-          const falta=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');
-          resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span></div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falta?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falta}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
-        }else if(result&&result.erro){
-          resultHTML="";
-         }
+        if(result&&!result.erro){const rClass=result.aprovado?'ok':'warn';const rColor=result.aprovado?'#00e676':'#ffea00';const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');const falt=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span></div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falt?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falt}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
+        }else if(result&&result.erro){resultHTML=`<div class="ia-result err"><span style="color:#ff5252">❌ Erro ao analisar. Tente novamente.</span></div>`;}
         cDiv.innerHTML=`<div class="criterio-row"><div class="checkbox${isDone?' checked':''}" onclick="toggleDone('${c.id}')">${isDone?'<span class="checkbox-tick">✓</span>':''}</div><div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id}</span>${c.label}</div>${resultHTML}</div><button class="upload-btn ${isDone?'done':'pending'}" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button></div>`;
         criteriosDiv.appendChild(cDiv);
       });
-      if(pending.length>0){
-        const faltaDiv=document.createElement('div');
-        faltaDiv.className='falta-box';
-        faltaDiv.innerHTML=`<div class="falta-title">📋 Para chegar a 100% neste subitem, ainda falta:</div>`+pending.map(c=>`<div class="falta-item"><span>• ${c.label}</span><button class="falta-btn" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')">📎 Enviar →</button></div>`).join('');
-        criteriosDiv.appendChild(faltaDiv);
-      }
-      if(sp===100){
-        const completeDiv=document.createElement('div');
-        completeDiv.className='complete-box';
-        completeDiv.textContent='✅ Subitem '+sub.num+' 100% conforme com a ISO 9001!';
-        criteriosDiv.appendChild(completeDiv);
-      }
+      if(pending.length>0){const faltaDiv=document.createElement('div');faltaDiv.className='falta-box';faltaDiv.innerHTML=`<div class="falta-title">📋 Para chegar a 100% neste subitem, ainda falta:</div>`+pending.map(c=>`<div class="falta-item"><span>• ${c.label}</span><button class="falta-btn" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')">📎 Enviar →</button></div>`).join('');criteriosDiv.appendChild(faltaDiv);}
+      if(sp===100){const completeDiv=document.createElement('div');completeDiv.className='complete-box';completeDiv.textContent='✅ Subitem '+sub.num+' 100% conforme com a ISO 9001!';criteriosDiv.appendChild(completeDiv);}
       card.appendChild(criteriosDiv);
     }
     content.appendChild(card);
@@ -1186,196 +834,242 @@ function render(){updateTopbar();updateSidebar();renderContent();}
 function showModule(id){
   activeModule=id;
   Object.values(MAIN_IDS).forEach(mid=>{const el=document.getElementById(mid);if(el) el.style.display='none';});
+  document.getElementById('main27001').style.display='none';
+  document.getElementById('main42001').style.display='none';
   const target=id==='req'?MAIN_IDS.req:(MAIN_IDS[id]||MAIN_IDS.req);
-  const el=document.getElementById(target);
-  if(el) el.style.display='flex';
+  const el=document.getElementById(target);if(el) el.style.display='flex';
   if(id==='docs') renderDocs();
   if(id==='usuarios') renderUsuarios();
-  updateExtraNav();
-  updateSidebar();
+  updateExtraNav();updateSidebar();
 }
 
 function updateExtraNav(){
-  const nav=document.getElementById('extraNav');
-  nav.innerHTML='';
+  const nav=document.getElementById('extraNav');nav.innerHTML='';
   EXTRA_MODULES.forEach(m=>{
     const active=activeModule===m.id;
-    const div=document.createElement('div');
-    div.className='nav-item'+(active?' active':'');
+    const div=document.createElement('div');div.className='nav-item'+(active?' active':'');
     div.style.cssText='display:flex;align-items:center;gap:9px;padding:8px 12px;margin:0 6px 3px;border-radius:8px;cursor:pointer;border:1px solid '+(active?'rgba(0,200,255,.2)':'transparent')+';background:'+(active?'rgba(0,200,255,.08)':'transparent');
     div.innerHTML=`<span style="font-size:14px;width:18px;text-align:center">${m.icon}</span><span class="nav-item-name" style="flex:1;font-size:12.5px;color:${active?'#00c8ff':'#e8edf3'};font-weight:${active?600:400}">${m.label}</span>${m.badge?`<span style="background:#ff5252;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px">${m.badge}</span>`:''}`;
-    div.onclick=()=>showModule(m.id);
-    nav.appendChild(div);
+    div.onclick=()=>showModule(m.id);nav.appendChild(div);
   });
 }
 
 // ══════════════════════════════════════════════════════════════
-// 10. CHECKLIST — TOGGLE + UPLOAD IA
+// 10. ISO NORMA SWITCHER — NOVO
 // ══════════════════════════════════════════════════════════════
-
-// Chave da API Google Gemini — salva no localStorage do navegador
-const GEMINI_KEY_FIXED='AIzaSyC-51e7PlbbP5nEVRwGYiw70J_DfZfm9sk';
-
-async function callGemini(userText, system, fileBase64, fileMime){
-  const res=await fetch('https://vfylzwrijfxcojbrpopf.supabase.co/functions/v1/quick-handler',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},
-    body:JSON.stringify({userText:userText||'',system:system||'',fileBase64:fileBase64||null,fileMime:fileMime||null})
+function trocarNorma(norma){
+  normaAtiva=norma;
+  const labelMap={'9001':'Requisitos ISO 9001','27001':'Requisitos ISO 27001','42001':'Requisitos ISO 42001'};
+  const labelEl=document.getElementById('navSectionLabel');if(labelEl) labelEl.textContent=labelMap[norma]||'Requisitos ISO';
+  ['9001','27001','42001'].forEach(n=>{
+    const tab=document.getElementById('isoTab'+n);if(!tab) return;
+    tab.className='iso-tab'+(n===norma?' active-'+n:'');
   });
+  if(norma==='9001'){showModule('req');}
+  else if(norma==='27001'){showModuleISO('27001');}
+  else if(norma==='42001'){showModuleISO('42001');}
+}
+
+function showModuleISO(norma){
+  activeModule='iso'+norma;
+  Object.values(MAIN_IDS).forEach(mid=>{const el=document.getElementById(mid);if(el) el.style.display='none';});
+  document.getElementById('main27001').style.display='none';
+  document.getElementById('main42001').style.display='none';
+  document.getElementById('main'+norma).style.display='flex';
+  updateExtraNav();
+  renderISO(norma);
+}
+
+// ══ Cálculos ISO 27001 ══
+function allC27(rn){return CHECKLIST_27001[rn].subitems.flatMap(s=>s.criterios);}
+function rPct27(rn){const all=allC27(rn);if(!all.length) return 0;return Math.round(all.filter(c=>done27[c.id]).length/all.length*100);}
+function sPct27(sub){if(!sub.criterios.length) return 0;return Math.round(sub.criterios.filter(c=>done27[c.id]).length/sub.criterios.length*100);}
+function tPct27(){const all=Object.values(CHECKLIST_27001).flatMap(r=>r.subitems.flatMap(s=>s.criterios));if(!all.length) return 0;return Math.round(all.filter(c=>done27[c.id]).length/all.length*100);}
+
+// ══ Cálculos ISO 42001 ══
+function allC42(rn){return CHECKLIST_42001[rn].subitems.flatMap(s=>s.criterios);}
+function rPct42(rn){const all=allC42(rn);if(!all.length) return 0;return Math.round(all.filter(c=>done42[c.id]).length/all.length*100);}
+function sPct42(sub){if(!sub.criterios.length) return 0;return Math.round(sub.criterios.filter(c=>done42[c.id]).length/sub.criterios.length*100);}
+function tPct42(){const all=Object.values(CHECKLIST_42001).flatMap(r=>r.subitems.flatMap(s=>s.criterios));if(!all.length) return 0;return Math.round(all.filter(c=>done42[c.id]).length/all.length*100);}
+
+function renderISO(norma){
+  const cl=norma==='27001'?CHECKLIST_27001:CHECKLIST_42001;
+  const cr=norma==='27001'?currentReq27:currentReq42;
+  const pctFn=norma==='27001'?rPct27:rPct42;
+  const tPctFn=norma==='27001'?tPct27:tPct42;
+  const doneMap=norma==='27001'?done27:done42;
+  const resultsMap=norma==='27001'?results27:results42;
+  const openSubsMap=norma==='27001'?openSubs27:openSubs42;
+  const color=norma==='27001'?'#a050ff':'#00e676';
+  const suffix=norma==='27001'?'27':'42';
+  const req=cl[cr];
+  const pct=pctFn(cr);const all=(norma==='27001'?allC27:allC42)(cr);const dc=all.filter(c=>doneMap[c.id]).length;const col=pctColor(pct);
+  // Topbar
+  document.getElementById('topReqNum'+suffix).textContent=cr;
+  document.getElementById('topReqTitle'+suffix).textContent=req.title;
+  document.getElementById('topReqSub'+suffix).textContent='ISO '+norma+' · Req. '+cr+' — '+req.sub;
+  document.getElementById('topReqPct'+suffix).textContent=pct+'%';document.getElementById('topReqPct'+suffix).style.color=col;
+  document.getElementById('topReqCriterios'+suffix).textContent=dc+' de '+all.length+' critérios';
+  document.getElementById('topBarFill'+suffix).style.width=pct+'%';document.getElementById('topBarFill'+suffix).style.background=col;
+  const falta=all.length-dc;
+  document.getElementById('topHint'+suffix).textContent=pct===100?'✅ Requisito '+cr+' 100% conforme com a ISO '+norma+'!':'Faltam '+falta+' critério'+(falta>1?'s':'')+' para 100% — clique em 📎 Enviar doc em cada critério pendente.';
+  document.getElementById('topHint'+suffix).style.color=pct===100?'#00e676':'#607080';
+  // Total bar
+  const tp=tPctFn();const tCol=pctColor(tp);
+  document.getElementById('totalPctLabel').textContent=tp+'%';document.getElementById('totalPctLabel').style.color=tCol;
+  document.getElementById('totalBarFill').style.width=tp+'%';document.getElementById('totalBarFill').style.background=tCol;
+  // Nav sidebar
+  const nav=document.getElementById('navItems');nav.innerHTML='';
+  Object.entries(cl).forEach(([n,d])=>{
+    const p=pctFn(parseInt(n));const pCol=pctColor(p);const active=cr===parseInt(n);
+    const div=document.createElement('div');div.className='nav-item'+(active?' active':'');
+    if(active){div.style.background=norma==='27001'?'rgba(160,80,255,.08)':'rgba(0,230,118,.08)';div.style.borderColor=norma==='27001'?'rgba(160,80,255,.2)':'rgba(0,230,118,.2)';}
+    div.innerHTML=`<div class="nav-item-row"><span class="nav-item-name" style="${active?'color:'+color+';font-weight:600':''}">${n} · ${d.title}</span><span class="nav-item-pct" style="color:${p===0?'#607080':pCol}">${p}%</span></div><div class="nav-mini-bar"><div style="width:${p}%;height:100%;background:${p===0?'#1e2d3d':pCol};border-radius:2px;transition:width .5s"></div></div>`;
+    div.onclick=()=>{if(norma==='27001') currentReq27=parseInt(n);else currentReq42=parseInt(n);renderISO(norma);};nav.appendChild(div);
+  });
+  // Content
+  const contentEl=document.getElementById('content'+suffix);contentEl.innerHTML='';
+  req.subitems.forEach(sub=>{
+    const sPctFn=norma==='27001'?sPct27:sPct42;
+    const sp=sPctFn(sub);const scol=pctColor(sp);const isOpen=!!openSubsMap[sub.num];
+    const pending=sub.criterios.filter(c=>!doneMap[c.id]);const doneCnt=sub.criterios.filter(c=>doneMap[c.id]).length;
+    const card=document.createElement('div');card.className='sub-card';
+    const header=document.createElement('div');header.className='sub-header';
+    header.innerHTML=`<div class="sub-num" style="background:${color}18;border-color:${color}40;color:${color}">${sub.num}</div><div style="flex:1"><div class="sub-name">${sub.name}</div><div class="sub-meta">${doneCnt}/${sub.criterios.length} critérios${pending.length>0?' · <span style="color:#ffea00">'+pending.length+' pendente'+(pending.length>1?'s':'')+'</span>':''}${sp===100?' · <span style="color:#00e676">✅ Completo</span>':''}</div></div><div class="sub-pct" style="color:${sp===0?'#607080':scol}">${sp}%</div><div class="sub-chevron" style="transform:${isOpen?'rotate(180deg)':'rotate(0)'}">▼</div>`;
+    header.onclick=()=>{openSubsMap[sub.num]=!openSubsMap[sub.num];renderISO(norma);};card.appendChild(header);
+    const miniBar=document.createElement('div');miniBar.className='sub-minibar';
+    miniBar.innerHTML=`<div style="height:3px;width:${sp}%;background:${sp===0?'#1e2d3d':scol};transition:width .5s;border-radius:2px"></div>`;card.appendChild(miniBar);
+    if(isOpen){
+      const criteriosDiv=document.createElement('div');criteriosDiv.className='criterios';
+      sub.criterios.forEach(c=>{
+        const isDone=!!doneMap[c.id];const result=resultsMap[c.id];const isUp=uploading===c.id;
+        const cDiv=document.createElement('div');cDiv.className='criterio'+(isDone?' done':'');
+        let resultHTML='';
+        if(result&&!result.erro){const rClass=result.aprovado?'ok':'warn';const rColor=result.aprovado?'#00e676':'#ffea00';const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');const falt=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span></div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falt?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falt}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
+        }else if(result&&result.erro){resultHTML=`<div class="ia-result err"><span style="color:#ff5252">❌ Erro ao analisar. Tente novamente.</span></div>`;}
+        const lbl=c.label.replace(/'/g,"\\'");const cid=c.id;
+        const toggleFn=`toggleDoneISO('${norma}','${cid}')`;const uploadFn=`triggerUploadISO('${norma}','${cid}','${lbl}')`;
+        cDiv.innerHTML=`<div class="criterio-row"><div class="checkbox${isDone?' checked':''}" onclick="${toggleFn}">${isDone?'<span class="checkbox-tick">✓</span>':''}</div><div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id.replace('27_','').replace('42_','')}</span>${c.label}</div>${resultHTML}</div><button class="upload-btn ${isDone?'done':'pending'}" onclick="${uploadFn}" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button></div>`;
+        criteriosDiv.appendChild(cDiv);
+      });
+      if(pending.length>0){const faltaDiv=document.createElement('div');faltaDiv.className='falta-box';faltaDiv.innerHTML=`<div class="falta-title">📋 Para chegar a 100% neste subitem, ainda falta:</div>`+pending.map(c=>{const lbl=c.label.replace(/'/g,"\\'");const fn=`triggerUploadISO('${norma}','${c.id}','${lbl}')`;return`<div class="falta-item"><span>• ${c.label}</span><button class="falta-btn" onclick="${fn}">📎 Enviar →</button></div>`;}).join('');criteriosDiv.appendChild(faltaDiv);}
+      if(sp===100){const completeDiv=document.createElement('div');completeDiv.className='complete-box';completeDiv.textContent='✅ Subitem '+sub.num+' 100% conforme com a ISO '+norma+'!';criteriosDiv.appendChild(completeDiv);}
+      card.appendChild(criteriosDiv);
+    }
+    contentEl.appendChild(card);
+  });
+}
+
+async function toggleDoneISO(norma,id){
+  const doneMap=norma==='27001'?done27:done42;
+  doneMap[id]=!doneMap[id];
+  await saveCriterio(norma+'_'+id,doneMap[id]);
+  renderISO(norma);
+}
+
+function triggerUploadISO(norma,id,label){
+  pendingUpload={id,label,norma};document.getElementById('fileInput').click();
+}
+
+// ══════════════════════════════════════════════════════════════
+// 11. CHECKLIST ISO 9001 — TOGGLE + UPLOAD
+// ══════════════════════════════════════════════════════════════
+async function callGemini(userText,system,fileBase64,fileMime){
+  const res=await fetch('https://vfylzwrijfxcojbrpopf.supabase.co/functions/v1/quick-handler',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({userText:userText||'',system:system||'',fileBase64:fileBase64||null,fileMime:fileMime||null})});
   const data=await res.json();
   if(!res.ok) throw new Error(data.message||data.error||'Erro Gemini: '+res.status);
   return data.text||'';
 }
 
+async function toggleDone(id){done[id]=!done[id];await saveCriterio(id,done[id]);render();}
 
-async function toggleDone(id){
-  done[id]=!done[id];
-  await saveCriterio(id,done[id]);
-  render();
-}
-
-function triggerUpload(criterioId, criterioLabel, subNum){
-  pendingUpload={id:criterioId,label:criterioLabel,subNum};
-  document.getElementById('fileInput').click();
+function triggerUpload(criterioId,criterioLabel,subNum){
+  pendingUpload={id:criterioId,label:criterioLabel,norma:'9001'};document.getElementById('fileInput').click();
 }
 
 document.getElementById('fileInput').addEventListener('change',async function(e){
-  const file=e.target.files[0];
-  if(!file||!pendingUpload) return;
+  const file=e.target.files[0];if(!file||!pendingUpload) return;
   e.target.value='';
-  const {id,label}=pendingUpload;
-  pendingUpload=null;
+  const {id,label,norma}=pendingUpload;pendingUpload=null;
   uploading=id;
-  render();
+  if(!norma||norma==='9001') render();else renderISO(norma);
+  const systemISO=norma==='27001'
+    ?'Você é auditor ISO 27001 especialista. Analise o documento e avalie se atende ao critério informado. Responda APENAS com JSON válido, sem markdown: {"aprovado":true,"conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}'
+    :norma==='42001'
+    ?'Você é auditor ISO 42001 especialista em IA responsável. Analise o documento e avalie se atende ao critério informado. Responda APENAS com JSON válido, sem markdown: {"aprovado":true,"conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}'
+    :SYSTEM_PROMPT;
   try{
     const base64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
-    const isPdf=file.type==='application/pdf';
-    const isImg=file.type.startsWith('image/');
-    const fileMime=(isPdf||isImg)?file.type:null;
-    const userText='Critério ISO a validar: "'+label+'"\nArquivo: '+file.name+'\nAnalise e responda APENAS com JSON válido, sem markdown, sem explicações extras.';
-    const raw=await callGemini(userText,SYSTEM_PROMPT,fileMime?base64:null,fileMime);
-    const clean=raw.replace(/```json|```/g,'').trim();
-    const json=JSON.parse(clean);
-    results[id]={...json,filename:file.name};
-    if(json.aprovado){done[id]=true;await saveCriterio(id,true);}
-    await saveResultadoIA(id,results[id]);
+    const isPdf=file.type==='application/pdf';const isImg=file.type.startsWith('image/');const fileMime=(isPdf||isImg)?file.type:null;
+    const userText='Critério '+(norma||'ISO 9001')+' a validar: "'+label+'"\nArquivo: '+file.name+'\nAnalise e responda APENAS com JSON válido.';
+    const raw=await callGemini(userText,systemISO,fileMime?base64:null,fileMime);
+    const clean=raw.replace(/```json|```/g,'').trim();const json=JSON.parse(clean);
+    if(!norma||norma==='9001'){results[id]={...json,filename:file.name};if(json.aprovado){done[id]=true;await saveCriterio(id,true);}await saveResultadoIA(id,results[id]);}
+    else{const rm=norma==='27001'?results27:results42;const dm=norma==='27001'?done27:done42;rm[id]={...json,filename:file.name};if(json.aprovado){dm[id]=true;await saveCriterio(norma+'_'+id,true);}await saveResultadoIA(norma+'_'+id,rm[id]);}
   }catch(err){
     console.error('IA erro:',err);
-    results[id]={erro:true,erroMsg:err.message,filename:file?.name};
-    await saveResultadoIA(id,results[id]);
+    if(!norma||norma==='9001'){results[id]={erro:true,erroMsg:err.message,filename:file?.name};await saveResultadoIA(id,results[id]);}
+    else{const rm=norma==='27001'?results27:results42;rm[id]={erro:true,erroMsg:err.message,filename:file?.name};await saveResultadoIA(norma+'_'+id,rm[id]);}
   }
   uploading=null;
-  render();
+  if(!norma||norma==='9001') render();else renderISO(norma);
 });
 
 // ══════════════════════════════════════════════════════════════
-// 11. GESTÃO DOCUMENTAL
+// 12. GESTÃO DOCUMENTAL
 // ══════════════════════════════════════════════════════════════
 function fmtDate(d){if(!d) return '—';const p=d.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;}
 function statusClass(s){return s==='vigente'?'ds-vigente':s==='revisao'?'ds-revisao':'ds-vencido';}
 function statusLabel(s){return s==='vigente'?'Vigente':s==='revisao'?'Em Revisão':s==='vencido'?'Vencido':'Obsoleto';}
 
 function renderDocs(){
-  const stats=document.getElementById('docStats');
-  if(!stats) return;
+  const stats=document.getElementById('docStats');if(!stats) return;
   const total=docList.length,vig=docList.filter(d=>d.status==='vigente').length,rev=docList.filter(d=>d.status==='revisao').length,venc=docList.filter(d=>d.status==='vencido'||d.status==='obsoleto').length;
-  stats.innerHTML=`
-    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #00c8ff;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#00c8ff">${total}</div><div style="font-size:11px;color:#607080;margin-top:3px">Total de Documentos</div></div>
-    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #00e676;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#00e676">${vig}</div><div style="font-size:11px;color:#607080;margin-top:3px">Vigentes</div></div>
-    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #ffea00;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ffea00">${rev}</div><div style="font-size:11px;color:#607080;margin-top:3px">Em Revisão</div></div>
-    <div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #ff5252;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ff5252">${venc}</div><div style="font-size:11px;color:#607080;margin-top:3px">Vencidos / Obsoletos</div></div>`;
-  const tbody=document.getElementById('docTbody');
-  if(!tbody) return;
+  stats.innerHTML=`<div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #00c8ff;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#00c8ff">${total}</div><div style="font-size:11px;color:#607080;margin-top:3px">Total de Documentos</div></div><div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #00e676;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#00e676">${vig}</div><div style="font-size:11px;color:#607080;margin-top:3px">Vigentes</div></div><div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #ffea00;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ffea00">${rev}</div><div style="font-size:11px;color:#607080;margin-top:3px">Em Revisão</div></div><div style="background:#111820;border:1px solid #1e2d3d;border-top:3px solid #ff5252;border-radius:10px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ff5252">${venc}</div><div style="font-size:11px;color:#607080;margin-top:3px">Vencidos / Obsoletos</div></div>`;
+  const tbody=document.getElementById('docTbody');if(!tbody) return;
   const lista=docFiltro==='todos'?docList:docList.filter(d=>d.status===docFiltro);
   tbody.innerHTML='';
   if(!lista.length){tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;color:#607080;padding:24px">Nenhum documento encontrado.</td></tr>`;return;}
-  lista.forEach((d,i)=>{
-    const idx=docList.indexOf(d);
-    const sc=statusClass(d.status),sl=statusLabel(d.status);
+  lista.forEach((d)=>{
+    const idx=docList.indexOf(d);const sc=statusClass(d.status),sl=statusLabel(d.status);
     const row=document.createElement('tr');
     row.innerHTML=`<td style="color:#00c8ff;font-weight:600">${d.cod}</td><td><div style="font-weight:500">${d.titulo}</div>${d.desc?`<div style="font-size:11px;color:#607080;margin-top:2px">${d.desc}</div>`:''}</td><td style="color:#607080">${d.tipo}</td><td><span style="background:rgba(0,200,255,.08);color:#00c8ff;border:1px solid rgba(0,200,255,.2);padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600">Req.${d.req}</span></td><td style="color:#607080">${d.versao}</td><td>${d.resp}</td><td style="color:#607080">${fmtDate(d.aprv)}</td><td style="color:${d.status==='vencido'||d.status==='obsoleto'?'#ff5252':d.status==='revisao'?'#ffea00':'#607080'}">${fmtDate(d.val)}</td><td><span class="doc-status ${sc}">${sl}</span></td><td><div style="display:flex;gap:6px"><button onclick="editarStatus(${idx})" style="padding:4px 9px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:11px;cursor:pointer">✏️</button><button onclick="excluirDoc(${idx})" style="padding:4px 9px;border-radius:6px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:11px;cursor:pointer">🗑</button></div></td>`;
     tbody.appendChild(row);
   });
 }
 
-function toggleDocForm(){
-  const box=document.getElementById('docFormBox');
-  box.style.display=box.style.display==='none'?'block':'none';
-  if(box.style.display==='block'){
-    const hoje=new Date().toISOString().split('T')[0];
-    document.getElementById('df_aprv').value=hoje;
-    const val=new Date();val.setFullYear(val.getFullYear()+1);
-    document.getElementById('df_val').value=val.toISOString().split('T')[0];
-  }
-}
-
-function docFileSelected(inp){
-  const name=inp.files[0]?inp.files[0].name:'Nenhum arquivo selecionado';
-  document.getElementById('df_filename').textContent=name;
-  document.getElementById('df_filename').style.color=inp.files[0]?'#00e676':'#607080';
-}
+function toggleDocForm(){const box=document.getElementById('docFormBox');box.style.display=box.style.display==='none'?'block':'none';if(box.style.display==='block'){const hoje=new Date().toISOString().split('T')[0];document.getElementById('df_aprv').value=hoje;const val=new Date();val.setFullYear(val.getFullYear()+1);document.getElementById('df_val').value=val.toISOString().split('T')[0];}}
+function docFileSelected(inp){const name=inp.files[0]?inp.files[0].name:'Nenhum arquivo selecionado';document.getElementById('df_filename').textContent=name;document.getElementById('df_filename').style.color=inp.files[0]?'#00e676':'#607080';}
 
 async function salvarDocumento(){
-  const cod=document.getElementById('df_cod').value.trim();
-  const titulo=document.getElementById('df_titulo').value.trim();
+  const cod=document.getElementById('df_cod').value.trim();const titulo=document.getElementById('df_titulo').value.trim();
   if(!cod||!titulo){alert('Código e Título são obrigatórios.');return;}
-  const fileInp=document.getElementById('df_file');
-  const arquivo=fileInp.files[0]?fileInp.files[0].name:'';
+  const fileInp=document.getElementById('df_file');const arquivo=fileInp.files[0]?fileInp.files[0].name:'';
   const newDoc={cod,titulo,tipo:document.getElementById('df_tipo').value,req:document.getElementById('df_req').value,versao:document.getElementById('df_versao').value||'v1.0',resp:document.getElementById('df_resp').value,aprv:document.getElementById('df_aprv').value,val:document.getElementById('df_val').value,status:document.getElementById('df_status').value,desc:document.getElementById('df_desc').value,arquivo};
-  await salvarDocumentoSb(newDoc);
-  docList.push(newDoc);
+  await salvarDocumentoSb(newDoc);docList.push(newDoc);
   ['df_cod','df_titulo','df_versao','df_resp','df_desc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('df_versao').value='v1.0';
-  document.getElementById('df_filename').textContent='Nenhum arquivo selecionado';
-  document.getElementById('df_filename').style.color='#607080';
-  document.getElementById('docFormBox').style.display='none';
-  renderDocs();
+  document.getElementById('df_versao').value='v1.0';document.getElementById('df_filename').textContent='Nenhum arquivo selecionado';document.getElementById('df_filename').style.color='#607080';document.getElementById('docFormBox').style.display='none';renderDocs();
 }
 
 function filtrarDocs(tipo){
-  docFiltro=tipo;
-  ['todos','vigente','revisao','vencido','obsoleto'].forEach(t=>{
-    const btn=document.getElementById('filt_'+t);
-    if(!btn) return;
-    if(t===tipo){btn.style.background='rgba(0,200,255,.1)';btn.style.borderColor='#00c8ff';btn.style.color='#00c8ff';}
-    else{btn.style.background='transparent';btn.style.borderColor='#1e2d3d';btn.style.color='#607080';}
-  });
-  renderDocs();
+  docFiltro=tipo;['todos','vigente','revisao','vencido','obsoleto'].forEach(t=>{const btn=document.getElementById('filt_'+t);if(!btn) return;if(t===tipo){btn.style.background='rgba(0,200,255,.1)';btn.style.borderColor='#00c8ff';btn.style.color='#00c8ff';}else{btn.style.background='transparent';btn.style.borderColor='#1e2d3d';btn.style.color='#607080';}});renderDocs();
 }
 
-async function editarStatus(idx){
-  const opts=['vigente','revisao','vencido','obsoleto'];
-  docList[idx].status=opts[(opts.indexOf(docList[idx].status)+1)%opts.length];
-  await salvarDocumentoSb(docList[idx]);
-  renderDocs();
-}
-
-function excluirDoc(idx){
-  if(confirm('Excluir o documento "'+docList[idx].titulo+'"?')){docList.splice(idx,1);renderDocs();}
-}
+async function editarStatus(idx){const opts=['vigente','revisao','vencido','obsoleto'];docList[idx].status=opts[(opts.indexOf(docList[idx].status)+1)%opts.length];await salvarDocumentoSb(docList[idx]);renderDocs();}
+function excluirDoc(idx){if(confirm('Excluir o documento "'+docList[idx].titulo+'"?')){docList.splice(idx,1);renderDocs();}}
 
 // ══════════════════════════════════════════════════════════════
-// 12. CHAT IA
+// 13. CHAT IA
 // ══════════════════════════════════════════════════════════════
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
 function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
 function fillChat(text){const el=document.getElementById('chatInput');el.value=text;autoResize(el);el.focus();}
 function askChat(text){showModule('chat');setTimeout(()=>{fillChat(text);sendChat();},100);}
-function fmtChat(text){
-  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/^#{1,3}\s+(.+)$/gm,`<div style="font-weight:700;font-size:14px;color:#00c8ff;margin:10px 0 4px">$1</div>`)
-    .replace(/^[\-\*]\s+(.+)$/gm,`<div style="display:flex;gap:8px;margin-bottom:4px"><div style="width:6px;height:6px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:6px"></div><span>$1</span></div>`)
-    .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
-}
+function fmtChat(text){return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/^#{1,3}\s+(.+)$/gm,`<div style="font-weight:700;font-size:14px;color:#00c8ff;margin:10px 0 4px">$1</div>`).replace(/^[\-\*]\s+(.+)$/gm,`<div style="display:flex;gap:8px;margin-bottom:4px"><div style="width:6px;height:6px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:6px"></div><span>$1</span></div>`).replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');}
 
 async function sendChat(){
-  const inp=document.getElementById('chatInput');
-  const txt=inp.value.trim();
-  if(!txt||chatLoading) return;
-  inp.value='';inp.style.height='auto';
-  chatLoading=true;
-  document.getElementById('chatSendBtn').disabled=true;
+  const inp=document.getElementById('chatInput');const txt=inp.value.trim();if(!txt||chatLoading) return;
+  inp.value='';inp.style.height='auto';chatLoading=true;document.getElementById('chatSendBtn').disabled=true;
   chatHistory.push({role:'user',content:txt});
   const msgs=document.getElementById('chatMessages');
   msgs.insertAdjacentHTML('beforeend',`<div class="chat-msg user"><div class="chat-avatar user">👤</div><div style="flex:1"><div class="chat-sender user">Usuário</div><div class="chat-text">${txt.replace(/</g,'&lt;')}</div></div></div>`);
@@ -1383,60 +1077,36 @@ async function sendChat(){
   msgs.insertAdjacentHTML('beforeend',`<div class="chat-msg ai" id="${loadId}"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`);
   document.getElementById('chatArea').scrollTop=99999;
   try{
-    const reply=await callGemini(txt, CHAT_SYSTEM);
+    const reply=await callGemini(txt,CHAT_SYSTEM);
     chatHistory.push({role:'assistant',content:reply});
     document.getElementById(loadId).outerHTML=`<div class="chat-msg ai"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="chat-text">${fmtChat(reply)}</div></div></div>`;
-  }catch(err){
-    document.getElementById(loadId).outerHTML=`<div class="chat-msg ai"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="chat-text" style="color:#ff5252">❌ ${err.message||'Erro de conexão.'}</div></div></div>`;
-  }
-  chatLoading=false;
-  document.getElementById('chatSendBtn').disabled=false;
-  document.getElementById('chatArea').scrollTop=99999;
+  }catch(err){document.getElementById(loadId).outerHTML=`<div class="chat-msg ai"><div class="chat-avatar ai">🤖</div><div style="flex:1"><div class="chat-sender ai">Assistente SGQ · IA</div><div class="chat-text" style="color:#ff5252">❌ ${err.message||'Erro de conexão.'}</div></div></div>`;}
+  chatLoading=false;document.getElementById('chatSendBtn').disabled=false;document.getElementById('chatArea').scrollTop=99999;
 }
 
 // ══════════════════════════════════════════════════════════════
-// 13. GERENCIAR USUÁRIOS
+// 14. GERENCIAR USUÁRIOS
 // ══════════════════════════════════════════════════════════════
-function perfilColor(p){
-  if(p==='Administrador') return '#ff5252';
-  if(p==='Gestor da Qualidade') return '#00c8ff';
-  if(p==='Auditor Interno') return '#ffea00';
-  if(p==='Colaborador') return '#00e676';
-  return '#607080';
-}
+function perfilColor(p){if(p==='Administrador') return '#ff5252';if(p==='Gestor da Qualidade') return '#00c8ff';if(p==='Auditor Interno') return '#ffea00';if(p==='Colaborador') return '#00e676';return '#607080';}
 
 async function renderUsuarios(){
-  const tbody=document.getElementById('userTbody');
-  if(!tbody) return;
+  const tbody=document.getElementById('userTbody');if(!tbody) return;
   tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#607080;padding:20px">Carregando...</td></tr>';
   try{sbUsers=await sb('/rest/v1/perfis?select=*&order=criado_em.asc')||[];}catch{sbUsers=[];}
   tbody.innerHTML='';
   if(!sbUsers.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#607080;padding:20px">Nenhum usuário encontrado.</td></tr>';return;}
   sbUsers.forEach(u=>{
-    const isSelf=loggedUser&&loggedUser.id===u.id;
-    const cor=perfilColor(u.perfil);
+    const isSelf=loggedUser&&loggedUser.id===u.id;const cor=perfilColor(u.perfil);
     const row=document.createElement('tr');
     row.innerHTML=`<td style="font-weight:600">${u.nome||'—'} ${isSelf?'<span style="font-size:10px;background:rgba(0,200,255,.12);color:#00c8ff;border:1px solid rgba(0,200,255,.3);padding:2px 7px;border-radius:10px;margin-left:5px">Você</span>':''}</td><td style="color:#00c8ff;font-weight:600">${u.email||'—'}</td><td><span style="background:rgba(255,255,255,.05);color:${cor};border:1px solid ${cor}40;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">${u.perfil||'—'}</span></td><td style="color:#607080">${u.departamento||'—'}</td><td style="color:#607080">${u.email||'—'}</td><td><span class="doc-status ${u.ativo===false?'ds-vencido':'ds-vigente'}">${u.ativo===false?'Inativo':'Ativo'}</span></td><td><div style="display:flex;gap:6px"><button onclick="toggleUserAtivo('${u.id}',${u.ativo===false})" style="padding:4px 9px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:11px;cursor:pointer">${u.ativo===false?'▶ Ativar':'⏸ Desativar'}</button>${!isSelf?`<button onclick="excluirUsuarioSb('${u.id}','${(u.nome||'').replace(/'/g,"\\'")}','${u.email}')" style="padding:4px 9px;border-radius:6px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:11px;cursor:pointer">🗑</button>`:''}</div></td>`;
     tbody.appendChild(row);
   });
 }
 
-function toggleUserForm(){
-  const box=document.getElementById('userFormBox');
-  box.style.display=box.style.display==='none'?'block':'none';
-  if(box.style.display==='block'){
-    ['uf_nome','uf_user','uf_pass','uf_depto','uf_email'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
-    document.getElementById('userFormError').textContent='';
-  }
-}
+function toggleUserForm(){const box=document.getElementById('userFormBox');box.style.display=box.style.display==='none'?'block':'none';if(box.style.display==='block'){['uf_nome','uf_user','uf_pass','uf_depto','uf_email'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});document.getElementById('userFormError').textContent='';}}
 
 async function salvarUsuario(){
-  const nome=document.getElementById('uf_nome').value.trim();
-  const email=document.getElementById('uf_email').value.trim();
-  const pass=document.getElementById('uf_pass').value;
-  const perfil=document.getElementById('uf_perfil').value;
-  const depto=document.getElementById('uf_depto').value.trim();
-  const errEl=document.getElementById('userFormError');
+  const nome=document.getElementById('uf_nome').value.trim();const email=document.getElementById('uf_email').value.trim();const pass=document.getElementById('uf_pass').value;const perfil=document.getElementById('uf_perfil').value;const depto=document.getElementById('uf_depto').value.trim();const errEl=document.getElementById('userFormError');
   if(!nome||!email||!pass){errEl.textContent='Nome, email e senha são obrigatórios.';return;}
   if(pass.length<6){errEl.textContent='Senha deve ter pelo menos 6 caracteres.';return;}
   errEl.textContent='Criando usuário...';
@@ -1450,35 +1120,25 @@ async function salvarUsuario(){
   }catch(e){errEl.style.color='#ff5252';errEl.textContent='Erro: '+e.message;}
 }
 
-async function excluirUsuarioSb(id, nome, email){
+async function excluirUsuarioSb(id,nome,email){
   if(!confirm('Excluir o usuário "'+nome+'" ('+email+')?')) return;
-  try{
-    await fetch(SUPABASE_URL+'/auth/v1/admin/users/'+id,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sbSession.access_token}});
-    renderUsuarios();
-  }catch(e){alert('Erro ao excluir: '+e.message);}
+  try{await fetch(SUPABASE_URL+'/auth/v1/admin/users/'+id,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sbSession.access_token}});renderUsuarios();}catch(e){alert('Erro ao excluir: '+e.message);}
 }
 
-async function toggleUserAtivo(id, ativar){
+async function toggleUserAtivo(id,ativar){
   if(id===loggedUser?.id){alert('Não é possível desativar sua própria conta.');return;}
   try{await sb('/rest/v1/perfis?id=eq.'+id,{method:'PATCH',body:JSON.stringify({ativo:ativar})});renderUsuarios();}catch(e){alert('Erro: '+e.message);}
 }
 
 async function alterarSenha(){
-  const nova=document.getElementById('cp_nova').value;
-  const conf=document.getElementById('cp_conf').value;
-  const msgEl=document.getElementById('cpMsg');
+  const nova=document.getElementById('cp_nova').value;const conf=document.getElementById('cp_conf').value;const msgEl=document.getElementById('cpMsg');
   if(nova.length<6){msgEl.style.color='#ff5252';msgEl.textContent='Nova senha deve ter pelo menos 6 caracteres.';return;}
   if(nova!==conf){msgEl.style.color='#ff5252';msgEl.textContent='As senhas não coincidem.';return;}
-  try{
-    await sb('/auth/v1/user',{method:'PUT',body:JSON.stringify({password:nova})});
-    msgEl.style.color='#00e676';msgEl.textContent='✅ Senha alterada com sucesso!';
-    ['cp_atual','cp_nova','cp_conf'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
-    setTimeout(()=>msgEl.textContent='',3000);
-  }catch(e){msgEl.style.color='#ff5252';msgEl.textContent='Erro: '+e.message;}
+  try{await sb('/auth/v1/user',{method:'PUT',body:JSON.stringify({password:nova})});msgEl.style.color='#00e676';msgEl.textContent='✅ Senha alterada com sucesso!';['cp_atual','cp_nova','cp_conf'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});setTimeout(()=>msgEl.textContent='',3000);}catch(e){msgEl.style.color='#ff5252';msgEl.textContent='Erro: '+e.message;}
 }
 
 // ══════════════════════════════════════════════════════════════
-// 14. INIT — roda ao carregar a página
+// 15. INIT
 // ══════════════════════════════════════════════════════════════
 (async()=>{
   const saved=localStorage.getItem('sgq_session');
@@ -1490,9 +1150,7 @@ async function alterarSenha(){
         sbSession=session;
         const perfis=await sb('/rest/v1/perfis?id=eq.'+user.id+'&select=*');
         const perfil=perfis&&perfis[0]?perfis[0]:{nome:user.email,perfil:'Colaborador',email:user.email};
-        loggedUser={...perfil,id:user.id};
-        abrirSistema();
-        return;
+        loggedUser={...perfil,id:user.id};abrirSistema();return;
       }
     }catch{localStorage.removeItem('sgq_session');}
   }
@@ -1502,5 +1160,3 @@ async function alterarSenha(){
 </script>
 </body>
 </html>
-
-
