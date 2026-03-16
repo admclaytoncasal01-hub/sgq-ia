@@ -3119,49 +3119,45 @@ function triggerUploadAB2L(id, label) {
 // ★ HISTÓRICO DE INCLUSÕES (⋯)
 // ══════════════════════════════════════════════════════════════
 function toggleHistPopover(criterioId, evt) {
-  // Close other open popovers
-  document.querySelectorAll('.hist-popover').forEach(p => { if (p.id !== 'hist_' + criterioId) p.style.display = 'none'; });
+  document.querySelectorAll('.hist-popover').forEach(p => {
+    if (p.id !== 'hist_' + criterioId) p.style.display = 'none';
+  });
   const pop = document.getElementById('hist_' + criterioId);
   if (!pop) return;
   if (pop.style.display !== 'none') { pop.style.display = 'none'; return; }
-  // Position using fixed coords from button
-  const btn = (evt && evt.target) ? evt.target : document.querySelector('[onclick*="toggleHistPopover(\''+criterioId+'\'")']');
+
+  // Position with fixed coords
+  const btn = evt ? (evt.currentTarget || evt.target) : null;
   if (btn) {
     const rect = btn.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
-    const popH = 320;
-    if (spaceBelow > popH || spaceBelow > 150) {
+    if (spaceBelow > 200) {
       pop.style.top = (rect.bottom + 6) + 'px';
     } else {
-      pop.style.top = Math.max(10, rect.top - popH - 6) + 'px';
+      pop.style.top = Math.max(10, rect.top - 326) + 'px';
     }
-    const rightEdge = rect.right;
-    if (rightEdge + 320 > window.innerWidth) {
+    if (rect.right + 10 > window.innerWidth) {
       pop.style.left = Math.max(10, window.innerWidth - 330) + 'px';
     } else {
-      pop.style.left = Math.max(10, rect.left - 290) + 'px';
+      pop.style.left = Math.max(10, rect.left - 280) + 'px';
     }
   }
 
   const hist = docHistorico[criterioId] || [];
+  const closeBtn = '<span onclick="document.getElementById('hist_'+criterioId+'').style.display='none'" style="cursor:pointer;color:#607080">✕</span>';
   if (!hist.length) {
-    pop.innerHTML = `<div class="hist-popover-title"><span>Histórico de inclusões</span><span onclick="document.getElementById('hist_${criterioId}').style.display='none'" style="cursor:pointer;color:#607080">✕</span></div><div style="font-size:12px;color:#607080;text-align:center;padding:8px 0">Nenhuma inclusão registrada</div>`;
+    pop.innerHTML = '<div class="hist-popover-title"><span>Histórico de inclusões</span>'+closeBtn+'</div><div style="font-size:12px;color:#607080;text-align:center;padding:8px 0">Nenhuma inclusão registrada</div>';
   } else {
-    const rows = hist.slice().reverse().map(h => `
-      <div class="hist-entry">
-        <div style="display:flex;justify-content:space-between">
-          <span class="hist-user">👤 ${h.usuario || h.email}</span>
-          <span class="hist-date">${h.data ? new Date(h.data).toLocaleString('pt-BR') : '—'}</span>
-        </div>
-        <div style="margin-top:2px">📄 ${h.filename} <span class="hist-result" style="color:${h.resultado==='aprovado'?'#00e676':h.resultado==='insuficiente'?'ff5252':'#ffea00'}">${h.resultado||'—'}</span></div>
-        <div style="color:#607080;font-size:11px">Norma: ${h.norma||'—'}</div>
-      </div>`).join('');
-    pop.innerHTML = `<div class="hist-popover-title"><span>Histórico de inclusões (${hist.length})</span><span onclick="document.getElementById('hist_${criterioId}').style.display='none'" style="cursor:pointer;color:#607080">✕</span></div>${rows}`;
+    let rows = '';
+    hist.slice().reverse().forEach(h => {
+      const cor = h.resultado==='aprovado'?'#00e676':h.resultado==='insuficiente'?'#ff5252':'#ffea00';
+      rows += '<div class="hist-entry"><div style="display:flex;justify-content:space-between"><span class="hist-user">👤 '+(h.usuario||h.email)+'</span><span class="hist-date">'+(h.data?new Date(h.data).toLocaleString('pt-BR'):'—')+'</span></div><div style="margin-top:2px">📄 '+h.filename+' <span class="hist-result" style="color:'+cor+'">'+( h.resultado||'—')+'</span></div><div style="color:#607080;font-size:11px">Norma: '+(h.norma||'—')+'</div></div>';
+    });
+    pop.innerHTML = '<div class="hist-popover-title"><span>Histórico ('+hist.length+')</span>'+closeBtn+'</div>'+rows;
   }
   pop.style.display = 'block';
-  // Close on outside click
   setTimeout(() => {
-    const handler = (e) => { if (!pop.contains(e.target)) { pop.style.display = 'none'; document.removeEventListener('click', handler); } };
+    const handler = (e) => { if (!pop.contains(e.target) && e.target !== btn) { pop.style.display = 'none'; document.removeEventListener('click', handler); } };
     document.addEventListener('click', handler);
   }, 50);
 }
