@@ -4393,25 +4393,20 @@ carregarAno = async function(ano) {
 // ★ LOADING IA — ANIMAÇÃO DURANTE ANÁLISE
 // ══════════════════════════════════════════════════════════════
 function mostrarLoadingIA(criterioId) {
-  // Show a subtle overlay on the criterio card
   var cDiv = document.getElementById('crit-' + criterioId);
-  if (!cDiv) cDiv = document.getElementById('crit-9001-' + criterioId) || document.getElementById('crit-27001-' + criterioId) || document.getElementById('crit-42001-' + criterioId);
-  if (cDiv) {
-    var existing = cDiv.querySelector('.ia-analyzing-overlay');
-    if (!existing) {
-      var overlay = document.createElement('div');
-      overlay.className = 'ia-analyzing-overlay';
-      overlay.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.2);border-radius:8px;margin-top:8px">' +
-        '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>' +
-        '<span style="font-size:12px;color:#00c8ff;font-weight:600">🤖 Analisando documento com IA...</span>' +
-        '</div>';
-      cDiv.appendChild(overlay);
-    }
+  if (!cDiv) {
+    cDiv = document.getElementById('crit-9001-' + criterioId) ||
+           document.getElementById('crit-27001-' + criterioId) ||
+           document.getElementById('crit-42001-' + criterioId);
   }
-  // Also disable the upload button
-  var btn = document.querySelector('[onclick*="triggerUpload('' + criterioId + ''"]') ||
-            document.querySelector('[onclick*="triggerUploadISO"][onclick*="' + criterioId + '"]');
-  if (btn) btn.disabled = true;
+  if (cDiv && !cDiv.querySelector('.ia-analyzing-overlay')) {
+    var overlay = document.createElement('div');
+    overlay.className = 'ia-analyzing-overlay';
+    overlay.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.2);border-radius:8px;margin-top:8px';
+    overlay.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>' +
+      '<span style="font-size:12px;color:#00c8ff;font-weight:600">🤖 Analisando documento com IA...</span>';
+    cDiv.appendChild(overlay);
+  }
 }
 
 function esconderLoadingIA(criterioId) {
