@@ -241,6 +241,40 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
 .print-btn:hover{background:rgba(0,230,118,.08)}
 .gen-btn{padding:7px 16px;border-radius:7px;border:none;background:#00c8ff;color:#0a0e14;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
 
+
+/* ══ AB2L COLORS ══ */
+.iso-tab.active-ab2l{background:rgba(255,180,0,.12);border-color:#ffb400;color:#ffb400}
+/* ══ PERMISSION BADGE ══ */
+.perm-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700;white-space:nowrap}
+.perm-full{background:rgba(0,230,118,.12);color:#00e676;border:1px solid rgba(0,230,118,.3)}
+.perm-read{background:rgba(0,200,255,.08);color:#00c8ff;border:1px solid rgba(0,200,255,.2)}
+.perm-none{background:rgba(255,82,82,.08);color:#ff5252;border:1px solid rgba(255,82,82,.2)}
+/* ══ HISTORY POPOVER ══ */
+.hist-popover{position:absolute;right:0;top:32px;width:320px;background:#18222e;border:1px solid #2a3d52;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:200;padding:12px 14px}
+.hist-popover-title{font-size:11px;font-weight:700;color:#607080;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;justify-content:space-between}
+.hist-entry{padding:7px 0;border-bottom:1px solid rgba(30,45,61,.6);font-size:12px;line-height:1.5}
+.hist-entry:last-child{border-bottom:none}
+.hist-user{color:#00c8ff;font-weight:600}
+.hist-date{color:#607080;font-size:11px}
+.hist-result{font-size:11px;font-weight:700}
+/* ══ TEMPLATE UPLOAD ══ */
+.tpl-upload-card{background:#111820;border:2px dashed #1e2d3d;border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:12px}
+.tpl-upload-card:hover{border-color:#00c8ff;background:rgba(0,200,255,.03)}
+.tpl-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#111820;border:1px solid #1e2d3d;border-radius:9px;margin-bottom:8px}
+.tpl-item-name{flex:1;font-size:13px;font-weight:500}
+.tpl-item-meta{font-size:11px;color:#607080}
+/* ══ AB2L NIVEL BADGES ══ */
+.nivel-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;transition:all .12s;border:1px solid transparent}
+.nivel-excelente{background:rgba(0,200,255,.1);color:#00c8ff;border-color:rgba(0,200,255,.3)}
+.nivel-bom{background:rgba(0,230,118,.1);color:#00e676;border-color:rgba(0,230,118,.3)}
+.nivel-insuf{background:rgba(255,82,82,.08);color:#ff5252;border-color:rgba(255,82,82,.2)}
+.nivel-detail{margin-top:8px;padding:10px 12px;background:#0d1520;border-radius:8px;font-size:12px;line-height:1.6;color:#a0b4c8;display:none}
+.nivel-detail.open{display:block}
+/* ══ AB2L PILAR ══ */
+.ab2l-pilar{background:#111820;border:1px solid #1e2d3d;border-radius:12px;margin-bottom:12px;overflow:hidden}
+.ab2l-pilar-header{padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.ab2l-pilar-badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700}
+
 </style>
 </head>
 <body>
@@ -280,6 +314,7 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
     <button class="iso-tab active-9001" id="isoTab9001" onclick="trocarNorma('9001')">ISO 9001</button>
     <button class="iso-tab" id="isoTab27001" onclick="trocarNorma('27001')">ISO 27001</button>
     <button class="iso-tab" id="isoTab42001" onclick="trocarNorma('42001')">ISO 42001</button>
+    <button class="iso-tab" id="isoTabAB2L" onclick="trocarNorma('ab2l')">🏅 AB2L</button>
   </div>
 
   <!-- SELETOR DE ANO -->
@@ -666,6 +701,47 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
   <div class="mod-content" id="templatesContent"></div>
 </div>
 
+
+<!-- MÓDULO: AB2L CERTIFICAÇÃO -->
+<div class="main" id="mainAB2L" style="display:none">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="req-num-badge" id="topReqNumAB2L" style="background:rgba(255,180,0,.1);border-color:rgba(255,180,0,.3);color:#ffb400;font-size:14px">AB2L</div>
+      <div style="flex:1">
+        <div class="req-title" id="topReqTitleAB2L">Certificação AB2L Infinite</div>
+        <div class="req-sub" id="topReqSubAB2L">Inovação Jurídica · Pilares: Inovação · Pessoas · Eficiência · Parceiro de Negócios</div>
+      </div>
+      <div>
+        <div class="req-pct-big" id="topReqPctAB2L" style="color:#607080">0%</div>
+        <div class="req-pct-label" id="topReqCriteriosAB2L">0 de 20 critérios</div>
+      </div>
+    </div>
+    <div class="topbar-bar"><div class="bar-fill" id="topBarFillAB2L" style="width:0%;background:#607080"></div></div>
+    <div class="topbar-hint" id="topHintAB2L">Meta: 85% (17/20 critérios com BOM ou EXCELENTE)</div>
+  </div>
+  <div class="content" id="contentAB2L"></div>
+</div>
+
+<!-- MÓDULO: TEMPLATES DE USUÁRIO -->
+<div class="main" id="mainUserTemplates" style="display:none">
+  <div class="mod-topbar">
+    <div class="mod-icon-badge">📁</div>
+    <div style="flex:1"><div class="mod-title">Meus Modelos de Documentos</div><div class="mod-sub">Faça upload dos seus templates — a IA os usa como base nas emissões</div></div>
+    <button onclick="document.getElementById('tplFileInput').click()" style="padding:8px 18px;border-radius:8px;border:1px solid #00c8ff;background:transparent;color:#00c8ff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">+ Upload Template</button>
+  </div>
+  <div class="mod-content" id="userTemplatesContent"></div>
+  <input type="file" id="tplFileInput" accept=".pdf,.doc,.docx" style="display:none" onchange="handleTplUpload(this)">
+</div>
+
+<!-- MÓDULO: CONTROLE DE ACESSO -->
+<div class="main" id="mainAcessos" style="display:none">
+  <div class="mod-topbar">
+    <div class="mod-icon-badge">🔑</div>
+    <div style="flex:1"><div class="mod-title">Controle de Acesso</div><div class="mod-sub">Defina por usuário quais normas e requisitos cada um pode acessar</div></div>
+  </div>
+  <div class="mod-content" id="acessosContent"></div>
+</div>
+
 </div><!-- /app -->
 
 <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx" style="display:none">
@@ -729,13 +805,17 @@ const EXTRA_MODULES = [
   {id:'templates',icon:'📋',label:'Modelos de Docs',badge:''},
   {id:'alertas',icon:'🔔',label:'Alertas',badge:'3'},
   {id:'usuarios',icon:'👥',label:'Usuários',badge:''},
+  {id:'acessos',icon:'🔑',label:'Controle de Acesso',badge:''},
+  {id:'userTemplates',icon:'📁',label:'Meus Templates',badge:''},
 ];
 
 const MAIN_IDS = {
   req:'mainReq',chat:'mainChat',auditInt:'mainAuditInt',
   auditExt:'mainAuditExt',docs:'mainDocs',alertas:'mainAlertas',
   usuarios:'mainUsuarios',auditLive:'mainAuditLive',
-  templates:'mainTemplates'
+  templates:'mainTemplates',
+  acessos:'mainAcessos',
+  userTemplates:'mainUserTemplates'
 };
 
 const docListDefault = [
@@ -2418,6 +2498,1073 @@ document.getElementById('fileInput').addEventListener('change', async function(e
 
   // Multi-doc upload (handled by main listener for pendingUpload)
   // The main fileInput listener handles this — don't double-process
+}, false);
+
+
+
+// ══════════════════════════════════════════════════════════════
+// ★ AB2L · TEMPLATES · CONTROLE DE ACESSO · HISTÓRICO
+// ══════════════════════════════════════════════════════════════
+
+// ══ AB2L ESTADO ══
+const doneAB2L = {};     // criterioId -> 'excelente' | 'bom' | 'insuficiente' | null
+const resultsAB2L = {};  // criterioId -> {filename, result, ...}
+let currentPilarAB2L = 'inovacao';
+const openPilarAB2L = { inovacao: true, pessoas: false, eficiencia: false, parceiro: false };
+
+// ══ HISTÓRICO DE INCLUSÕES ══
+const docHistorico = {};  // criterioKey -> [{usuario, email, filename, norma, resultado, data}]
+let histPopoverOpen = null;
+
+// ══ USER TEMPLATES ══
+const userTemplates = [];  // [{id, nome, tipo, norma, conteudo_base64, mime, criado_em}]
+
+// ══ CONTROLE DE ACESSO ══
+// acessos[userId] = { normas: ['9001','27001','42001','ab2l'], requisitos: {'9001':[4,5,6,7,8,9,10], '27001':[4,5,6,7,8,9,10],...} }
+const acessosUsuarios = {};
+
+// ══════════════════════════════════════════════════════════════
+// ★ AB2L CHECKLIST — 4 PILARES, 20 CRITÉRIOS
+// ══════════════════════════════════════════════════════════════
+const CHECKLIST_AB2L = {
+  inovacao: {
+    titulo: "Inovação Jurídica",
+    icon: "🚀",
+    cor: "#ffb400",
+    selo: "Inovação",
+    criterios: [
+      {
+        id: "ab2l_6.1.1",
+        codigo: "6.1.1",
+        label: "Implementação de Softwares de Gestão de Processos e Contratos",
+        descricao: "Comprovar uso real de ferramentas tecnológicas para gerenciar processos e contratos, automatizar fluxos jurídicos, integrar soluções de lawtechs e aplicar IA.",
+        nivel_excelente: [
+          "Relatórios extraídos do sistema (com datas)",
+          "Dashboards reais antes/depois da automação",
+          "Fluxos automatizados (BPMN), prints do workflow",
+          "Logs de IA (contratos analisados, insights gerados)",
+          "Integração com outras áreas (TI, negócios, planejamento)",
+          "Descrição do software utilizado",
+          "Relatórios de melhorias operacionais geradas",
+          "Evidências de treinamentos realizados com a equipe"
+        ],
+        nivel_bom: [
+          "Prints de uso real",
+          "Relatórios simples",
+          "Registro de automações já implementadas",
+          "Comprovante de integração com lawtech/govtech",
+          "Contrato/licença ativa com descrição do uso",
+          "Prints da ferramenta funcionando"
+        ]
+      },
+      {
+        id: "ab2l_6.1.2",
+        codigo: "6.1.2",
+        label: "Participação em Eventos de Inovação no Mercado Jurídico",
+        descricao: "Demonstrar participação ou promoção de eventos de inovação jurídica com presença ativa do time.",
+        nivel_excelente: [
+          "Certificados, fotos, listas de presença com nome do jurídico",
+          "Participação como palestrante, painelista, mentor ou organizador",
+          "Relatórios internos pós-evento com aprendizados aplicados",
+          "Contratos de patrocínio ou comprovação de apoio institucional",
+          "Registro fotográfico + plano de aplicação interna",
+          "Setor público: notícias nos canais oficiais + relatório institucional"
+        ],
+        nivel_bom: [
+          "Inscrições e certificados de participação da equipe jurídica",
+          "Prints de participação, registros internos, convites enviados",
+          "Comprovação de presença (carteirinha digital, QR code, e-mail de confirmação)",
+          "Certificados e prints com relatórios curtos"
+        ]
+      },
+      {
+        id: "ab2l_6.1.3",
+        codigo: "6.1.3",
+        label: "Participação em Discussões e Benchmarking",
+        descricao: "Comprovar participação em grupos, fóruns e atividades de benchmarking jurídico.",
+        nivel_excelente: [
+          "Atas, registros ou relatórios formais de benchmarking",
+          "Produção de insights ou ações implementadas após discussões",
+          "Participação em grupos estruturados (ex: AB2L)",
+          "Fotos, vídeos, apresentações produzidas nessas trocas",
+          "Resultados de melhorias implementadas após discussões",
+          "Setor público: nota técnica ou relatório institucional"
+        ],
+        nivel_bom: [
+          "Prints dos encontros ou e-mails de participação",
+          "Relatórios simples das discussões",
+          "Comprovante de participação em grupos (WhatsApp/Telegram/Slack do setor)"
+        ]
+      },
+      {
+        id: "ab2l_6.1.4",
+        codigo: "6.1.4",
+        label: "Contratação de Lawtech/Legaltech",
+        descricao: "Comprovar a contratação e uso efetivo de pelo menos uma lawtech ou legaltech com impacto real.",
+        nivel_excelente: [
+          "Contrato + comprovante de uso real + relatórios da ferramenta",
+          "Evidências de indicadores melhorados com a implantação",
+          "Integração com outros sistemas",
+          "Casos de sucesso ou inovações geradas pela parceria",
+          "Setor público: contrato, ata de licitação, justificativa técnica"
+        ],
+        nivel_bom: [
+          "Contrato + prints de uso",
+          "Relatórios básicos da ferramenta"
+        ]
+      },
+      {
+        id: "ab2l_6.1.5",
+        codigo: "6.1.5",
+        label: "Participação em Imersões Internacionais",
+        descricao: "Comprovar participação em imersões internacionais ou eventos globais voltados à inovação jurídica.",
+        nivel_excelente: [
+          "Certificados oficiais + relatório completo pós-imersão",
+          "Fotos, vídeos e registros de atividades internacionais",
+          "Aplicação prática das aprendizagens (projetos criados após a viagem)",
+          "Setor público: publicação oficial de afastamento ou relatório de missão"
+        ],
+        nivel_bom: [
+          "Certificado de participação",
+          "Prints, agenda e registros de presença",
+          "Relatório simples do que foi aprendido",
+          "Comprovante de inscrição ou pagamento"
+        ]
+      }
+    ]
+  },
+  pessoas: {
+    titulo: "Gestão de Pessoas",
+    icon: "👥",
+    cor: "#00c8ff",
+    selo: "Pessoas",
+    criterios: [
+      {
+        id: "ab2l_6.2.1",
+        codigo: "6.2.1",
+        label: "Gestão Integrada de Pessoas com Multidisciplinaridade e Desenvolvimento",
+        descricao: "Comprovar estratégia integrada de gestão de pessoas com: profissionais multidisciplinares, plano de carreira e investimento em formação contínua. OBRIGATÓRIO cumprir os 3 requisitos.",
+        nivel_excelente: [
+          "Organograma oficial com profissionais multidisciplinares no jurídico",
+          "Plano de carreira documentado + trilhas de evolução",
+          "Relatórios de capacitação anual com horas, cursos e certificações",
+          "Projetos reais liderados por profissionais não jurídicos",
+          "Relatórios de impacto da integração multidisciplinar",
+          "Registros de promoções ou aumentos nos últimos 12 meses",
+          "Adm. pública: portaria de lotação, plano de capacitação, relatórios"
+        ],
+        nivel_bom: [
+          "Lista de profissionais multidisciplinares",
+          "Prova de capacitações esporádicas",
+          "Documento simples de progressão ou matriz de competências",
+          "Contratação de pelo menos 1 profissional multidisciplinar",
+          "Registros de participação em cursos isolados"
+        ]
+      },
+      {
+        id: "ab2l_6.2.2",
+        codigo: "6.2.2",
+        label: "Ser Associado AB2L e Participar Ativamente de Pelo Menos um Projeto Anual",
+        descricao: "Comprovar: (i) associação AB2L e (ii) participação ativa em ao menos um projeto institucional por ano. OBRIGATÓRIO cumprir os 2 requisitos.",
+        nivel_excelente: [
+          "Declaração de instituição associada AB2L (solicitar até 28/02/2026)",
+          "Participação em Imersões Internacionais da AB2L",
+          "Atuação como mentor(a), expositor(a) ou coautor(a)",
+          "Participação ativa em Grupos de Trabalho ou projetos no AB2L HUB",
+          "Atuação em eventos AB2L (expositor, palestrante, embaixador, patrocinador)",
+          "Certificados de participação + benefícios internos"
+        ],
+        nivel_bom: [
+          "E-mails, prints, agendas ou materiais institucionais de participação",
+          "Breve relato demonstrando aprendizados e impactos para a organização"
+        ]
+      },
+      {
+        id: "ab2l_6.2.3",
+        codigo: "6.2.3",
+        label: "Gestão de Conhecimento Jurídico e Padronização Operacional",
+        descricao: "Comprovar práticas estruturadas de gestão do conhecimento com documentação, padronização e atualização de rotinas e playbooks.",
+        nivel_excelente: [
+          "Repositório oficial de conhecimento (wiki, intranet, knowledge management)",
+          "Playbooks, manuais e SOPs formalizados com versão, data e responsável",
+          "Modelos padronizados (templates) de documentos jurídicos críticos",
+          "Registro de governança do conhecimento (comitê, responsável, rotina de revisão)",
+          "Evidência de uso prático (logs de acesso, treinamentos, onboarding)",
+          "Evidências de redução de retrabalho ou aumento de eficiência",
+          "Setor público: portaria, nota técnica, instrução normativa"
+        ],
+        nivel_bom: [
+          "Pasta ou repositório centralizado com documentos padronizados",
+          "Exemplos de playbooks em versão inicial",
+          "Registro de padronização mínima de rotinas",
+          "Evidências de comunicação interna sobre a base de conhecimento",
+          "Evidência de uso recorrente simples (print do local, indicação no onboarding)"
+        ]
+      },
+      {
+        id: "ab2l_6.2.4",
+        codigo: "6.2.4",
+        label: "Promoção da Saúde Integral",
+        descricao: "Comprovar ações estruturadas de promoção da saúde integral do time jurídico (emocional, físico, social ou espiritual).",
+        nivel_excelente: [
+          "Programa formal de bem-estar implementado",
+          "Relatórios anuais de atividades de saúde",
+          "Registros de benefícios e incentivos (psicólogos, academias, bem-estar)",
+          "Indicadores de adesão e impacto",
+          "Adm. pública: portaria institucional + relatórios de gestão de pessoas"
+        ],
+        nivel_bom: [
+          "Histórico de campanhas internas",
+          "Registros de eventos e atividades",
+          "Prints da divulgação de campanhas",
+          "Benefícios oferecidos (ex: Gympass, terapia)"
+        ]
+      },
+      {
+        id: "ab2l_6.2.5",
+        codigo: "6.2.5",
+        label: "Diversidade e Inclusão",
+        descricao: "Comprovar que o jurídico promove D&I por meio de práticas intencionais, políticas estruturadas e resultados concretos.",
+        nivel_excelente: [
+          "Relatórios de diversidade com indicadores",
+          "Políticas formais de D&I implementadas com ações contínuas",
+          "Programas internos de formação e inclusão",
+          "Comissão de diversidade ativa",
+          "Setor público: comissões por portaria e dados oficiais publicados"
+        ],
+        nivel_bom: [
+          "Participação em grupos de afinidade",
+          "Ações internas pontuais de D&I",
+          "Declaração de aderência às políticas corporativas de D&I"
+        ]
+      }
+    ]
+  },
+  eficiencia: {
+    titulo: "Eficiência Jurídica",
+    icon: "⚡",
+    cor: "#00e676",
+    selo: "Eficiência",
+    criterios: [
+      {
+        id: "ab2l_6.3.1",
+        codigo: "6.3.1",
+        label: "Indicadores e Metas Alinhados à Estratégia Institucional",
+        descricao: "Comprovar indicadores e metas específicas para o jurídico, alinhadas à estratégia institucional.",
+        nivel_excelente: [
+          "Dashboard oficial atualizado periodicamente",
+          "Documento formal de metas anuais alinhadas à estratégia",
+          "Justificativa técnica de cada indicador",
+          "Relatórios trimestrais de acompanhamento",
+          "Setor público: portarias/planejamento estratégico com indicadores"
+        ],
+        nivel_bom: [
+          "Relatórios simples com metas e resultados",
+          "Indicadores documentados",
+          "Comunicação interna feita por e-mail ou reuniões",
+          "Algum registro de acompanhamento (ex: planilha)"
+        ]
+      },
+      {
+        id: "ab2l_6.3.2",
+        codigo: "6.3.2",
+        label: "Governança, Orçamento e Autonomia da Inovação Jurídica",
+        descricao: "Comprovar: (i) pessoa/área responsável pela inovação jurídica, (ii) orçamento próprio e (iii) autonomia e atribuições claras.",
+        nivel_excelente: [
+          "Portaria interna, organograma oficial ou descrição de cargo formal",
+          "Orçamento anual da área de inovação",
+          "Plano de ação e projetos liderados com relatórios de impacto",
+          "Setor público: competências em decreto/ato interno, designação no Diário Oficial"
+        ],
+        nivel_bom: [
+          "Documento interno nomeando o responsável pela inovação",
+          "Algum orçamento indireto para projetos de inovação",
+          "Nomeação informal (ex: e-mail) com projetos conduzidos"
+        ]
+      },
+      {
+        id: "ab2l_6.3.3",
+        codigo: "6.3.3",
+        label: "Instrumentos para Evitar Judicialização e Métodos Adequados de Resolução de Conflitos",
+        descricao: "Comprovar uso de instrumentos estruturados para evitar judicialização (mediação, conciliação, arbitragem, ODR).",
+        nivel_excelente: [
+          "Políticas e fluxos documentados de resolução de conflitos",
+          "Adoção de mediação/arbitragem com parcerias com câmaras",
+          "Estatísticas de redução de litígios",
+          "Contrato com plataformas de ODR",
+          "Bases de dados com acordos celebrados",
+          "Setor público: câmaras administrativas, relatórios e políticas com resultados"
+        ],
+        nivel_bom: [
+          "Relatórios de acordos realizados",
+          "Cláusulas de resolução alternativa em contratos",
+          "Registros de mediações realizadas",
+          "Evidência de ao menos um fluxo alternativo de resolução"
+        ]
+      },
+      {
+        id: "ab2l_6.3.4",
+        codigo: "6.3.4",
+        label: "Metodologias Ágeis, Legal Design ou Visual Law",
+        descricao: "Comprovar utilização de metodologias ágeis, legal design ou visual law em processos ou documentos jurídicos.",
+        nivel_excelente: [
+          "Documentos remodelados com Visual Law + resultados obtidos",
+          "Descrição de como a metodologia ágil/Legal Design foi aplicada",
+          "Fluxos ágeis formalizados + resultados obtidos",
+          "Painéis visuais de acompanhamento com resultados",
+          "Resultados tangíveis (redução de tempo, custos)",
+          "Setor público: projetos em processo administrativo, cartilhas visuais"
+        ],
+        nivel_bom: [
+          "Prints de kanban ou sprints com resultados obtidos"
+        ]
+      },
+      {
+        id: "ab2l_6.3.5",
+        codigo: "6.3.5",
+        label: "Política e Treinamento de Proteção de Dados e Segurança da Informação",
+        descricao: "Comprovar política formal de proteção de dados (LGPD) e treinamentos recorrentes.",
+        nivel_excelente: [
+          "Política aprovada + treinamentos anuais obrigatórios",
+          "Relatórios de auditoria de proteção de dados",
+          "Registro de incidentes e planos de resposta",
+          "Setor público: portaria DPO, Relatório de Impacto, comitê de segurança"
+        ],
+        nivel_bom: [
+          "Treinamentos realizados + política vigente",
+          "Comprovantes de capacitação em proteção de dados",
+          "Registro de pelo menos um treinamento realizado"
+        ]
+      }
+    ]
+  },
+  parceiro: {
+    titulo: "Jurídico Parceiro de Negócios",
+    icon: "🤝",
+    cor: "#a050ff",
+    selo: "Parceiro",
+    criterios: [
+      {
+        id: "ab2l_6.4.1",
+        codigo: "6.4.1",
+        label: "Pauta Recorrente com Outras Áreas de Negócio",
+        descricao: "Comprovar que o jurídico participa regularmente de reuniões e pautas com outras áreas de negócio.",
+        nivel_excelente: [
+          "Calendário oficial de reuniões recorrentes com outras áreas",
+          "Atas ou pautas registradas com decisões tomadas",
+          "Projetos conjuntos implementados com outras áreas",
+          "Setor público: atas de comitês intersetoriais, portarias de GTs"
+        ],
+        nivel_bom: [
+          "Registros de reuniões e listas de presença",
+          "Exemplo de melhoria feita em conjunto com outra área",
+          "Print de calendário interno com reuniões interdepartamentais",
+          "Comprovante de ao menos uma reunião formal com outra área"
+        ]
+      },
+      {
+        id: "ab2l_6.4.2",
+        codigo: "6.4.2",
+        label: "Indicadores de Satisfação do Cliente",
+        descricao: "Comprovar medição da satisfação de clientes internos e/ou externos com indicadores formais e evolução.",
+        nivel_excelente: [
+          "NPS ou outro indicador com metodologia clara",
+          "Relatórios de resultados com evolução temporal",
+          "Ações implementadas com base no feedback recebido",
+          "Indicadores de SLA cumpridos",
+          "Setor público: relatório oficial de satisfação, dados de ouvidoria"
+        ],
+        nivel_bom: [
+          "Pesquisa interna simples com resultados",
+          "Painel básico de satisfação",
+          "Questionário simples aplicado ao menos uma vez",
+          "Registro de feedback de clientes/usuários"
+        ]
+      },
+      {
+        id: "ab2l_6.4.3",
+        codigo: "6.4.3",
+        label: "Compliance Anticorrupção e Ética Empresarial (ODS 16)",
+        descricao: "Comprovar práticas estruturadas de compliance, ética e anticorrupção com canal de denúncias, due diligence e treinamentos.",
+        nivel_excelente: [
+          "Programa de integridade documentado e atualizado",
+          "Relatórios de due diligence realizados",
+          "Canal de denúncias ativo com governança",
+          "Registros de treinamentos obrigatórios de compliance",
+          "Resultados de auditorias ou investigações internas",
+          "Setor público: Plano de Integridade publicado + relatórios de controle (>80%)"
+        ],
+        nivel_bom: [
+          "Canal ativo + treinamentos realizados",
+          "Documentos internos de compliance",
+          "Política de integridade documentada"
+        ]
+      },
+      {
+        id: "ab2l_6.4.4",
+        codigo: "6.4.4",
+        label: "Geração de Negócios a partir do Time Jurídico",
+        descricao: "Comprovar iniciativas do jurídico que geraram novos negócios, aumentaram receitas ou resultaram em economia relevante.",
+        nivel_excelente: [
+          "Caso completo com indicadores: receita gerada, economia obtida",
+          "Documentos e relatórios comparativos antes/depois",
+          "Iniciativas do jurídico que impactaram positivamente a receita",
+          "Relatórios sobre impacto de ações jurídicas na geração de receita",
+          "Setor público: economia orçamentária comprovada, pareceres com ganhos"
+        ],
+        nivel_bom: [
+          "Caso documentado sem métricas completas",
+          "Prints ou relatórios simples da iniciativa",
+          "Descrição da iniciativa com evidência mínima"
+        ]
+      },
+      {
+        id: "ab2l_6.4.5",
+        codigo: "6.4.5",
+        label: "Plano de Metas Alinhado à Estratégia ESG",
+        descricao: "Comprovar plano formal de metas do jurídico alinhado à estratégia ESG com objetivos, prazos e indicadores.",
+        nivel_excelente: [
+          "Plano formalizado de metas ESG (ambiental, social, governança)",
+          "Resultados mensuráveis alcançados em relação às metas ESG",
+          "Relatórios de monitoramento e acompanhamento das metas ESG",
+          "Setor público: metas ODS institucionais, portarias, relatórios de sustentabilidade"
+        ],
+        nivel_bom: [
+          "Agenda ESG com metas mínimas definidas",
+          "Indicadores simples de ESG documentados"
+        ]
+      }
+    ]
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+// ★ RENDER AB2L
+// ══════════════════════════════════════════════════════════════
+function totalPctAB2L() {
+  const todos = Object.values(CHECKLIST_AB2L).flatMap(p => p.criterios);
+  const validos = todos.filter(c => doneAB2L[c.id] === 'excelente' || doneAB2L[c.id] === 'bom').length;
+  return Math.round(validos / todos.length * 100);
+}
+
+function renderAB2L() {
+  const pct = totalPctAB2L();
+  const col = pct >= 85 ? '#00e676' : pct >= 50 ? '#ffea00' : pct > 0 ? '#ff5252' : '#607080';
+  const todos = Object.values(CHECKLIST_AB2L).flatMap(p => p.criterios);
+  const validos = todos.filter(c => doneAB2L[c.id] === 'excelente' || doneAB2L[c.id] === 'bom').length;
+
+  document.getElementById('topReqPctAB2L').textContent = pct + '%';
+  document.getElementById('topReqPctAB2L').style.color = col;
+  document.getElementById('topReqCriteriosAB2L').textContent = validos + ' de 20 critérios válidos';
+  document.getElementById('topBarFillAB2L').style.width = pct + '%';
+  document.getElementById('topBarFillAB2L').style.background = col;
+  document.getElementById('topHintAB2L').textContent = pct >= 85
+    ? '🏅 Parabéns! Você atingiu os 85% necessários para a Certificação AB2L Infinite!'
+    : `Meta: 85% (17/20 critérios BOM ou EXCELENTE) — faltam ${Math.max(0,17-validos)} critérios válidos`;
+  document.getElementById('topHintAB2L').style.color = pct >= 85 ? '#00e676' : '#607080';
+
+  // Sidebar
+  const tp = pct;
+  document.getElementById('totalPctLabel').textContent = tp + '%';
+  document.getElementById('totalPctLabel').style.color = col;
+  document.getElementById('totalBarFill').style.width = tp + '%';
+  document.getElementById('totalBarFill').style.background = col;
+
+  // Nav items
+  const nav = document.getElementById('navItems');
+  nav.innerHTML = '';
+  Object.entries(CHECKLIST_AB2L).forEach(([key, pilar]) => {
+    const tots = pilar.criterios.length;
+    const val = pilar.criterios.filter(c => doneAB2L[c.id] === 'excelente' || doneAB2L[c.id] === 'bom').length;
+    const pp = Math.round(val / tots * 100);
+    const pcol = pctColor(pp);
+    const active = currentPilarAB2L === key;
+    const div = document.createElement('div');
+    div.className = 'nav-item' + (active ? ' active' : '');
+    if (active) { div.style.background = 'rgba(255,180,0,.08)'; div.style.borderColor = 'rgba(255,180,0,.3)'; }
+    div.innerHTML = `<div class="nav-item-row"><span class="nav-item-name" style="${active ? 'color:#ffb400;font-weight:600' : ''}">${pilar.icon} ${pilar.titulo}</span><span class="nav-item-pct" style="color:${pp===0?'#607080':pcol}">${pp}%</span></div><div class="nav-mini-bar"><div style="width:${pp}%;height:100%;background:${pp===0?'#1e2d3d':pcol};border-radius:2px;transition:width .5s"></div></div>`;
+    div.onclick = () => { currentPilarAB2L = key; renderAB2L(); };
+    nav.appendChild(div);
+  });
+
+  // Content
+  const content = document.getElementById('contentAB2L');
+  content.innerHTML = '';
+
+  // Stats
+  const statsDiv = document.createElement('div');
+  statsDiv.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px';
+  Object.entries(CHECKLIST_AB2L).forEach(([key, pilar]) => {
+    const val = pilar.criterios.filter(c => doneAB2L[c.id] === 'excelente' || doneAB2L[c.id] === 'bom').length;
+    const tots = pilar.criterios.length;
+    const pp = Math.round(val / tots * 100);
+    const active = currentPilarAB2L === key;
+    statsDiv.innerHTML += `<div onclick="currentPilarAB2L='${key}';renderAB2L()" style="background:#111820;border:${active?'2px':'1px'} solid ${active?pilar.cor:'#1e2d3d'};border-top:3px solid ${pilar.cor};border-radius:10px;padding:12px;text-align:center;cursor:pointer"><div style="font-size:18px;margin-bottom:4px">${pilar.icon}</div><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:${pilar.cor}">${val}/${tots}</div><div style="font-size:10px;color:#607080;margin-top:2px">${pilar.titulo}</div></div>`;
+  });
+  content.appendChild(statsDiv);
+
+  // Meta alert
+  const metaDiv = document.createElement('div');
+  metaDiv.style.cssText = `padding:10px 14px;border-radius:9px;margin-bottom:14px;font-size:13px;background:${pct>=85?'rgba(0,230,118,.07)':'rgba(255,234,0,.05)'};border:1px solid ${pct>=85?'rgba(0,230,118,.2)':'rgba(255,234,0,.15)'}`;
+  metaDiv.innerHTML = `<strong style="color:${pct>=85?'#00e676':'#ffea00'}">Meta AB2L:</strong> 85% dos critérios com classificação <strong>BOM</strong> ou <strong>EXCELENTE</strong> (mínimo 17/20). <span style="color:${col}">Atual: ${validos}/20 válidos (${pct}%)</span>`;
+  content.appendChild(metaDiv);
+
+  // Render current pilar
+  const pilar = CHECKLIST_AB2L[currentPilarAB2L];
+  pilar.criterios.forEach(c => {
+    const nivel = doneAB2L[c.id] || null;
+    const result = resultsAB2L[c.id];
+    const cDiv = document.createElement('div');
+    cDiv.className = 'sub-card';
+    cDiv.id = 'ab2l-' + c.id;
+    cDiv.style.position = 'relative';
+
+    const nivelColor = nivel === 'excelente' ? '#00c8ff' : nivel === 'bom' ? '#00e676' : nivel === 'insuficiente' ? '#ff5252' : '#607080';
+    const nivelLabel = nivel === 'excelente' ? '⭐ EXCELENTE' : nivel === 'bom' ? '✅ BOM' : nivel === 'insuficiente' ? '❌ INSUFICIENTE' : '○ Não avaliado';
+
+    cDiv.innerHTML = `
+      <div style="padding:14px 18px;display:flex;align-items:flex-start;gap:12px">
+        <div style="width:38px;height:38px;border-radius:9px;background:rgba(255,180,0,.1);border:1px solid rgba(255,180,0,.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#ffb400;flex-shrink:0">${c.codigo}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600;margin-bottom:3px">${c.label}</div>
+          <div style="font-size:12px;color:#607080;margin-bottom:10px">${c.descricao}</div>
+
+          <!-- NÍVEL EXCELENTE -->
+          <div style="margin-bottom:8px">
+            <div class="nivel-badge nivel-excelente" onclick="toggleNivelDetail('exc_${c.id}')">⭐ EXCELENTE — clique para ver evidências</div>
+            <div class="nivel-detail" id="exc_${c.id}">
+              <div style="font-size:11px;font-weight:700;color:#00c8ff;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Evidências esperadas — Nível EXCELENTE:</div>
+              ${c.nivel_excelente.map(e => `<div style="display:flex;gap:7px;margin-bottom:4px"><div style="width:5px;height:5px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:6px"></div><span>${e}</span></div>`).join('')}
+            </div>
+          </div>
+
+          <!-- NÍVEL BOM -->
+          <div style="margin-bottom:12px">
+            <div class="nivel-badge nivel-bom" onclick="toggleNivelDetail('bom_${c.id}')">✅ BOM — clique para ver evidências</div>
+            <div class="nivel-detail" id="bom_${c.id}">
+              <div style="font-size:11px;font-weight:700;color:#00e676;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Evidências esperadas — Nível BOM:</div>
+              ${c.nivel_bom.map(e => `<div style="display:flex;gap:7px;margin-bottom:4px"><div style="width:5px;height:5px;border-radius:50%;background:#00e676;flex-shrink:0;margin-top:6px"></div><span>${e}</span></div>`).join('')}
+            </div>
+          </div>
+
+          <!-- CLASSIFICAÇÃO MANUAL -->
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <span style="font-size:11px;color:#607080">Sua classificação:</span>
+            <button onclick="setNivelAB2L('${c.id}','excelente')" style="padding:4px 12px;border-radius:20px;border:1px solid ${nivel==='excelente'?'#00c8ff':'#1e2d3d'};background:${nivel==='excelente'?'rgba(0,200,255,.12)':'transparent'};color:${nivel==='excelente'?'#00c8ff':'#607080'};font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">⭐ Excelente</button>
+            <button onclick="setNivelAB2L('${c.id}','bom')" style="padding:4px 12px;border-radius:20px;border:1px solid ${nivel==='bom'?'#00e676':'#1e2d3d'};background:${nivel==='bom'?'rgba(0,230,118,.12)':'transparent'};color:${nivel==='bom'?'#00e676':'#607080'};font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✅ Bom</button>
+            <button onclick="setNivelAB2L('${c.id}','insuficiente')" style="padding:4px 12px;border-radius:20px;border:1px solid ${nivel==='insuficiente'?'#ff5252':'#1e2d3d'};background:${nivel==='insuficiente'?'rgba(255,82,82,.08)':'transparent'};color:${nivel==='insuficiente'?'#ff5252':'#607080'};font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Insuficiente</button>
+            <span style="font-size:11px;font-weight:700;color:${nivelColor};margin-left:4px">${nivelLabel}</span>
+          </div>
+
+          <!-- UPLOAD EVIDÊNCIA + HISTÓRICO -->
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="upload-btn pending" onclick="triggerUploadAB2L('${c.id}','${c.label.replace(/'/g,"\\'")}')">📎 Enviar evidência</button>
+            ${result ? `<span style="font-size:11px;color:#607080">📄 ${result.filename} · <span style="color:${result.aprovado?'#00e676':'#ffea00'}">${result.aprovado?'Aprovado':'Insuficiente'}</span></span>` : ''}
+            <div style="position:relative;margin-left:auto">
+              <button onclick="toggleHistPopover('${c.id}')" title="Histórico de inclusões" style="width:28px;height:28px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">⋯</button>
+              <div class="hist-popover" id="hist_${c.id}" style="display:none"></div>
+            </div>
+          </div>
+
+          ${buildArgWidget(c.id, !!result)}
+        </div>
+      </div>`;
+    content.appendChild(cDiv);
+  });
+}
+
+function toggleNivelDetail(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+async function setNivelAB2L(id, nivel) {
+  doneAB2L[id] = nivel;
+  await saveCriterio('ab2l_' + id, nivel);
+  renderAB2L();
+}
+
+function triggerUploadAB2L(id, label) {
+  pendingUpload = { id, label, norma: 'ab2l' };
+  document.getElementById('fileInput').click();
+}
+
+// ══════════════════════════════════════════════════════════════
+// ★ HISTÓRICO DE INCLUSÕES (⋯)
+// ══════════════════════════════════════════════════════════════
+function toggleHistPopover(criterioId) {
+  // Close other open popovers
+  document.querySelectorAll('.hist-popover').forEach(p => { if (p.id !== 'hist_' + criterioId) p.style.display = 'none'; });
+  const pop = document.getElementById('hist_' + criterioId);
+  if (!pop) return;
+  if (pop.style.display !== 'none') { pop.style.display = 'none'; return; }
+
+  const hist = docHistorico[criterioId] || [];
+  if (!hist.length) {
+    pop.innerHTML = `<div class="hist-popover-title"><span>Histórico de inclusões</span><span onclick="document.getElementById('hist_${criterioId}').style.display='none'" style="cursor:pointer;color:#607080">✕</span></div><div style="font-size:12px;color:#607080;text-align:center;padding:8px 0">Nenhuma inclusão registrada</div>`;
+  } else {
+    const rows = hist.slice().reverse().map(h => `
+      <div class="hist-entry">
+        <div style="display:flex;justify-content:space-between">
+          <span class="hist-user">👤 ${h.usuario || h.email}</span>
+          <span class="hist-date">${h.data ? new Date(h.data).toLocaleString('pt-BR') : '—'}</span>
+        </div>
+        <div style="margin-top:2px">📄 ${h.filename} <span class="hist-result" style="color:${h.resultado==='aprovado'?'#00e676':h.resultado==='insuficiente'?'ff5252':'#ffea00'}">${h.resultado||'—'}</span></div>
+        <div style="color:#607080;font-size:11px">Norma: ${h.norma||'—'}</div>
+      </div>`).join('');
+    pop.innerHTML = `<div class="hist-popover-title"><span>Histórico de inclusões (${hist.length})</span><span onclick="document.getElementById('hist_${criterioId}').style.display='none'" style="cursor:pointer;color:#607080">✕</span></div>${rows}`;
+  }
+  pop.style.display = 'block';
+  // Close on outside click
+  setTimeout(() => {
+    const handler = (e) => { if (!pop.contains(e.target)) { pop.style.display = 'none'; document.removeEventListener('click', handler); } };
+    document.addEventListener('click', handler);
+  }, 50);
+}
+
+function registrarHistorico(criterioId, filename, resultado, norma) {
+  if (!docHistorico[criterioId]) docHistorico[criterioId] = [];
+  docHistorico[criterioId].push({
+    usuario: loggedUser?.nome || loggedUser?.email || 'Desconhecido',
+    email: loggedUser?.email || '',
+    filename,
+    resultado,
+    norma: norma || normaAtiva || '9001',
+    data: new Date().toISOString()
+  });
+  // Persist to Supabase (best effort)
+  try {
+    sb('/rest/v1/resultados_ia', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({
+        ano: anoAtual,
+        criterio_id: 'hist_' + (norma||'9001') + '_' + criterioId,
+        recomendacao: JSON.stringify(docHistorico[criterioId]),
+        usuario_id: loggedUser?.id,
+        criado_em: new Date().toISOString()
+      })
+    });
+  } catch(e) {}
+}
+
+// Patch the main fileInput listener to record history
+const _origFileChange = null; // handled by adding to the end of existing listener logic
+
+// ══════════════════════════════════════════════════════════════
+// ★ CONTROLE DE ACESSO
+// ══════════════════════════════════════════════════════════════
+const ALL_NORMAS = ['9001','27001','42001','ab2l'];
+const NORMA_LABELS = { '9001':'ISO 9001','27001':'ISO 27001','42001':'ISO 42001','ab2l':'AB2L' };
+const NORMA_REQS = {
+  '9001': [4,5,6,7,8,9,10],
+  '27001': [4,5,6,7,8,9,10],
+  '42001': [4,5,6,7,8,9,10],
+  'ab2l': ['inovacao','pessoas','eficiencia','parceiro']
+};
+
+function getAcesso(userId) {
+  if (!userId) return null;
+  return acessosUsuarios[userId] || { normas: [...ALL_NORMAS], requisitos: { '9001':[4,5,6,7,8,9,10],'27001':[4,5,6,7,8,9,10],'42001':[4,5,6,7,8,9,10],'ab2l':['inovacao','pessoas','eficiencia','parceiro'] } };
+}
+
+function temAcesso(norma, req) {
+  if (!loggedUser) return false;
+  if (loggedUser.perfil === 'Administrador') return true;
+  const ac = getAcesso(loggedUser.id);
+  if (!ac) return true;
+  if (!ac.normas.includes(norma)) return false;
+  if (req !== undefined && ac.requisitos[norma] && !ac.requisitos[norma].includes(req)) return false;
+  return true;
+}
+
+async function renderAcessos() {
+  const content = document.getElementById('acessosContent');
+  if (!content) return;
+  content.innerHTML = '<div style="color:#607080;font-size:13px;padding:20px">Carregando usuários...</div>';
+
+  // Load users
+  let users = [];
+  try { users = await sb('/rest/v1/perfis?select=*&order=criado_em.asc') || []; } catch(e) {}
+
+  content.innerHTML = '';
+  const intro = document.createElement('div');
+  intro.style.cssText = 'margin-bottom:16px;padding:12px 16px;background:rgba(255,234,0,.04);border:1px solid rgba(255,234,0,.12);border-radius:9px;font-size:12px;color:#607080';
+  intro.innerHTML = `🔑 <strong style="color:#ffea00">Controle de Acesso</strong> — Defina por usuário quais normas e requisitos cada um pode acessar. Administradores sempre têm acesso total.`;
+  content.appendChild(intro);
+
+  const nonAdmins = users.filter(u => u.perfil !== 'Administrador');
+  if (!nonAdmins.length) {
+    content.innerHTML += '<div style="text-align:center;color:#607080;padding:40px">Nenhum usuário não-administrador encontrado.</div>';
+    return;
+  }
+
+  nonAdmins.forEach(user => {
+    const ac = getAcesso(user.id);
+    const card = document.createElement('div');
+    card.style.cssText = 'background:#111820;border:1px solid #1e2d3d;border-radius:12px;margin-bottom:14px;overflow:hidden';
+
+    // Header
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'padding:14px 18px;border-bottom:1px solid #1e2d3d;display:flex;align-items:center;gap:12px';
+    hdr.innerHTML = `
+      <div style="width:36px;height:36px;border-radius:9px;background:#18222e;border:1px solid #1e2d3d;display:flex;align-items:center;justify-content:center;font-size:15px">👤</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:14px">${user.nome || user.email}</div>
+        <div style="font-size:11px;color:#607080">${user.email} · <span style="color:#00c8ff">${user.perfil}</span></div>
+      </div>
+      <button onclick="salvarAcesso('${user.id}')" style="padding:6px 16px;border-radius:7px;border:none;background:#00c8ff;color:#0a0e14;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">💾 Salvar</button>`;
+    card.appendChild(hdr);
+
+    // Permissions grid
+    const body = document.createElement('div');
+    body.style.cssText = 'padding:16px 18px';
+
+    ALL_NORMAS.forEach(norma => {
+      const hasNorma = ac.normas.includes(norma);
+      const normaDiv = document.createElement('div');
+      normaDiv.style.cssText = 'margin-bottom:14px';
+      normaDiv.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
+            <input type="checkbox" id="ac_${user.id}_${norma}" ${hasNorma?'checked':''} onchange="toggleNormaAcesso('${user.id}','${norma}',this.checked)" style="width:15px;height:15px;cursor:pointer">
+            <span style="font-size:13px;font-weight:600">${NORMA_LABELS[norma]}</span>
+          </label>
+          <span class="perm-badge ${hasNorma?'perm-full':'perm-none'}" id="badge_${user.id}_${norma}">${hasNorma?'✅ Acesso':'🚫 Bloqueado'}</span>
+        </div>`;
+
+      if (hasNorma) {
+        const reqs = NORMA_REQS[norma];
+        const reqsDiv = document.createElement('div');
+        reqsDiv.id = `reqsDiv_${user.id}_${norma}`;
+        reqsDiv.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:#18222e;border-radius:8px;margin-left:22px';
+        reqs.forEach(req => {
+          const hasReq = ac.requisitos[norma] ? ac.requisitos[norma].includes(req) : true;
+          const label = norma === 'ab2l'
+            ? CHECKLIST_AB2L[req]?.titulo || req
+            : `Req. ${req}`;
+          reqsDiv.innerHTML += `
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid ${hasReq?'rgba(0,200,255,.2)':'#1e2d3d'};background:${hasReq?'rgba(0,200,255,.05)':'transparent'};font-size:11px">
+              <input type="checkbox" id="ac_${user.id}_${norma}_${req}" ${hasReq?'checked':''} style="cursor:pointer">
+              ${label}
+            </label>`;
+        });
+        normaDiv.appendChild(reqsDiv);
+      } else {
+        const blockedDiv = document.createElement('div');
+        blockedDiv.id = `reqsDiv_${user.id}_${norma}`;
+        blockedDiv.style.display = 'none';
+        normaDiv.appendChild(blockedDiv);
+      }
+      body.appendChild(normaDiv);
+    });
+    card.appendChild(body);
+    content.appendChild(card);
+  });
+}
+
+function toggleNormaAcesso(userId, norma, checked) {
+  if (!acessosUsuarios[userId]) {
+    acessosUsuarios[userId] = { normas: [...ALL_NORMAS], requisitos: JSON.parse(JSON.stringify(NORMA_REQS)) };
+  }
+  const ac = acessosUsuarios[userId];
+  if (checked) { if (!ac.normas.includes(norma)) ac.normas.push(norma); }
+  else { ac.normas = ac.normas.filter(n => n !== norma); }
+
+  const badge = document.getElementById(`badge_${userId}_${norma}`);
+  if (badge) { badge.textContent = checked ? '✅ Acesso' : '🚫 Bloqueado'; badge.className = 'perm-badge ' + (checked ? 'perm-full' : 'perm-none'); }
+
+  const reqsDiv = document.getElementById(`reqsDiv_${userId}_${norma}`);
+  if (reqsDiv) reqsDiv.style.display = checked ? 'flex' : 'none';
+}
+
+async function salvarAcesso(userId) {
+  if (!acessosUsuarios[userId]) {
+    acessosUsuarios[userId] = { normas: [...ALL_NORMAS], requisitos: JSON.parse(JSON.stringify(NORMA_REQS)) };
+  }
+  const ac = acessosUsuarios[userId];
+
+  // Read current checkbox state
+  ALL_NORMAS.forEach(norma => {
+    const normaCheck = document.getElementById(`ac_${userId}_${norma}`);
+    if (normaCheck) {
+      if (normaCheck.checked) { if (!ac.normas.includes(norma)) ac.normas.push(norma); }
+      else { ac.normas = ac.normas.filter(n => n !== norma); }
+
+      ac.requisitos[norma] = [];
+      NORMA_REQS[norma].forEach(req => {
+        const reqCheck = document.getElementById(`ac_${userId}_${norma}_${req}`);
+        if (reqCheck && reqCheck.checked) ac.requisitos[norma].push(req);
+      });
+    }
+  });
+
+  // Save to Supabase
+  try {
+    await sb('/rest/v1/perfis?id=eq.' + userId, {
+      method: 'PATCH',
+      body: JSON.stringify({ acessos: JSON.stringify(ac), atualizado_em: new Date().toISOString() })
+    });
+    // Visual feedback
+    const btns = document.querySelectorAll(`button[onclick="salvarAcesso('${userId}')"]`);
+    btns.forEach(b => { b.textContent = '✅ Salvo!'; b.style.background = '#00e676'; setTimeout(() => { b.textContent = '💾 Salvar'; b.style.background = '#00c8ff'; }, 2000); });
+  } catch(e) { alert('Erro ao salvar: ' + e.message); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// ★ USER TEMPLATES (Upload PDF/DOCX)
+// ══════════════════════════════════════════════════════════════
+async function handleTplUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result.split(',')[1];
+    const tpl = {
+      id: 'tpl_' + Date.now(),
+      nome: file.name.replace(/\.[^.]+$/, ''),
+      tipo: file.name.split('.').pop().toUpperCase(),
+      norma: 'geral',
+      filename: file.name,
+      conteudo_base64: base64,
+      mime: file.type,
+      criado_em: new Date().toISOString(),
+      usuario: loggedUser?.nome || loggedUser?.email
+    };
+    userTemplates.push(tpl);
+    // Save to Supabase (best effort)
+    try {
+      await sb('/rest/v1/resultados_ia', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({
+          ano: anoAtual,
+          criterio_id: 'usertpl_' + tpl.id,
+          recomendacao: JSON.stringify({ nome: tpl.nome, filename: tpl.filename, mime: tpl.mime, usuario: tpl.usuario, criado_em: tpl.criado_em }),
+          usuario_id: loggedUser?.id,
+          criado_em: tpl.criado_em
+        })
+      });
+    } catch(eErr) {}
+    renderUserTemplates();
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderUserTemplates() {
+  const content = document.getElementById('userTemplatesContent');
+  if (!content) return;
+  content.innerHTML = '';
+
+  // Upload area
+  const uploadArea = document.createElement('div');
+  uploadArea.className = 'tpl-upload-card';
+  uploadArea.onclick = () => document.getElementById('tplFileInput').click();
+  uploadArea.innerHTML = `<div style="font-size:32px;margin-bottom:8px">📁</div><div style="font-size:14px;font-weight:600;color:#e8edf3;margin-bottom:4px">Clique para fazer upload de um template</div><div style="font-size:12px;color:#607080">PDF, DOC ou DOCX · A IA usará como base nas emissões</div>`;
+  content.appendChild(uploadArea);
+
+  // How it works
+  const info = document.createElement('div');
+  info.style.cssText = 'margin-bottom:16px;padding:12px 14px;background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.12);border-radius:9px;font-size:12px;color:#607080;line-height:1.6';
+  info.innerHTML = `💡 <strong style="color:#00c8ff">Como funciona:</strong> Faça upload do seu modelo padrão (ex: POP, Política, IT). Quando pedir à IA para gerar um documento no chat, ela usará seus templates como referência de formato e estrutura, completando com o conteúdo específico solicitado.`;
+  content.appendChild(info);
+
+  if (!userTemplates.length) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'text-align:center;color:#607080;padding:40px;font-size:13px';
+    empty.textContent = 'Nenhum template carregado ainda. Faça upload do seu primeiro modelo!';
+    content.appendChild(empty);
+    return;
+  }
+
+  const title = document.createElement('div');
+  title.style.cssText = "font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px;color:#e8edf3";
+  title.textContent = `Seus Templates (${userTemplates.length})`;
+  content.appendChild(title);
+
+  userTemplates.forEach((tpl, i) => {
+    const item = document.createElement('div');
+    item.className = 'tpl-item';
+    item.innerHTML = `
+      <div style="font-size:22px">${tpl.tipo === 'PDF' ? '📕' : '📘'}</div>
+      <div style="flex:1">
+        <div class="tpl-item-name">${tpl.nome}</div>
+        <div class="tpl-item-meta">${tpl.tipo} · Upload por ${tpl.usuario} · ${new Date(tpl.criado_em).toLocaleDateString('pt-BR')}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button onclick="usarTemplateNoChat(${i})" style="padding:5px 12px;border-radius:6px;border:1px solid rgba(0,200,255,.3);background:transparent;color:#00c8ff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">💬 Usar no Chat</button>
+        <button onclick="removerTemplate(${i})" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">🗑</button>
+      </div>`;
+    content.appendChild(item);
+  });
+
+  // Gerar com template
+  const genSection = document.createElement('div');
+  genSection.style.cssText = 'margin-top:16px;background:#111820;border:1px solid #1e2d3d;border-radius:12px;padding:16px';
+  genSection.innerHTML = `
+    <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px">🤖 Gerar Documento Usando Meu Template</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <select id="tplSelectGen" style="background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+        ${userTemplates.map((t,i) => `<option value="${i}">${t.nome}</option>`).join('')}
+      </select>
+      <input id="tplGenPrompt" placeholder='Descreva o que preencher (ex: "POP para controle de documentos ISO 9001")' style="flex:1;min-width:200px;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 11px;color:#e8edf3;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+      <button onclick="gerarComTemplate()" style="padding:8px 18px;border-radius:7px;border:none;background:#00c8ff;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Gerar →</button>
+    </div>
+    <div id="tplGenResult" style="margin-top:8px"></div>`;
+  content.appendChild(genSection);
+}
+
+function removerTemplate(i) {
+  if (confirm('Remover o template "' + userTemplates[i].nome + '"?')) {
+    userTemplates.splice(i, 1);
+    renderUserTemplates();
+  }
+}
+
+function usarTemplateNoChat(i) {
+  const tpl = userTemplates[i];
+  showModule('chat');
+  setTimeout(() => {
+    fillChat('Use o template "' + tpl.nome + '" como base e gere um documento completo e personalizado para nossa empresa (CCADV).');
+  }, 200);
+}
+
+async function gerarComTemplate() {
+  const idx = parseInt(document.getElementById('tplSelectGen').value);
+  const prompt = document.getElementById('tplGenPrompt').value.trim();
+  const resultDiv = document.getElementById('tplGenResult');
+  if (!prompt) { alert('Descreva o que deve ser preenchido.'); return; }
+
+  const tpl = userTemplates[idx];
+  resultDiv.innerHTML = '<div style="color:#607080;font-size:12px">⏳ Gerando documento com base no seu template...</div>';
+
+  try {
+    const system = `Você é especialista em documentação ISO. O usuário forneceu um template de documento da empresa. Use a estrutura, formatação e estilo do template como referência OBRIGATÓRIA. Adapte e complete o conteúdo conforme solicitado, mantendo o padrão da empresa.`;
+    const userText = `Template de referência: "${tpl.nome}" (${tpl.tipo}).\nSolicitação: ${prompt}\n\nGere o documento completo seguindo a estrutura do template.`;
+    const fileMime = (tpl.mime === 'application/pdf' || tpl.mime?.startsWith('image/')) ? tpl.mime : null;
+    const reply = await callGemini(userText, system, fileMime ? tpl.conteudo_base64 : null, fileMime);
+    const docId = 'tplgen_' + Date.now();
+    window._genDocs = window._genDocs || {};
+    window._genDocs[docId] = { titulo: prompt.slice(0, 60), conteudo: reply };
+    resultDiv.innerHTML = `
+      <div style="background:#18222e;border:1px solid rgba(0,230,118,.2);border-radius:9px;padding:12px">
+        <div style="font-size:11px;font-weight:700;color:#00e676;margin-bottom:8px">✅ Documento gerado com base no template "${tpl.nome}"!</div>
+        <div style="font-size:12px;color:#e8edf3;line-height:1.7;max-height:300px;overflow-y:auto;white-space:pre-wrap">${reply.replace(/</g,'&lt;')}</div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="print-btn" onclick="imprimirGenDoc('${docId}')">🖨️ Imprimir</button>
+          <button onclick="copiarGenDoc('${docId}')" style="padding:7px 14px;border-radius:7px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">📋 Copiar</button>
+        </div>
+      </div>`;
+  } catch(err) {
+    resultDiv.innerHTML = `<div style="font-size:12px;color:#ff5252">❌ Erro: ${err.message}</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// ★ PATCHES — showModule, trocarNorma, fileInput
+// ══════════════════════════════════════════════════════════════
+const _origShowModuleV3 = showModule;
+showModule = function(id) {
+  ['mainAB2L','mainUserTemplates','mainAcessos'].forEach(m => {
+    const el = document.getElementById(m); if (el) el.style.display = 'none';
+  });
+  if (id === 'acessos') {
+    activeModule = 'acessos';
+    Object.values(MAIN_IDS).forEach(mid => { const el = document.getElementById(mid); if (el) el.style.display = 'none'; });
+    document.getElementById('main27001').style.display = 'none';
+    document.getElementById('main42001').style.display = 'none';
+    document.getElementById('mainAnexo27').style.display = 'none';
+    document.getElementById('mainAnexo42').style.display = 'none';
+    document.getElementById('mainAuditLive').style.display = 'none';
+    document.getElementById('mainTemplates').style.display = 'none';
+    document.getElementById('mainAcessos').style.display = 'flex';
+    updateExtraNav(); renderAcessos(); return;
+  }
+  if (id === 'userTemplates') {
+    activeModule = 'userTemplates';
+    Object.values(MAIN_IDS).forEach(mid => { const el = document.getElementById(mid); if (el) el.style.display = 'none'; });
+    ['main27001','main42001','mainAnexo27','mainAnexo42','mainAuditLive','mainTemplates','mainAB2L'].forEach(m => { const el = document.getElementById(m); if(el) el.style.display='none'; });
+    document.getElementById('mainUserTemplates').style.display = 'flex';
+    updateExtraNav(); renderUserTemplates(); return;
+  }
+  _origShowModuleV3(id);
+};
+
+const _origTrocarNormaV3 = trocarNorma;
+trocarNorma = function(norma) {
+  // Update AB2L tab styling
+  const tabAB2L = document.getElementById('isoTabAB2L');
+  if (tabAB2L) tabAB2L.className = 'iso-tab' + (norma === 'ab2l' ? ' active-ab2l' : '');
+
+  if (norma === 'ab2l') {
+    normaAtiva = 'ab2l';
+    // Update label
+    const labelEl = document.getElementById('navSectionLabel');
+    if (labelEl) labelEl.textContent = 'Pilares AB2L';
+    // Update tab states
+    ['9001','27001','42001'].forEach(n => {
+      const tab = document.getElementById('isoTab' + n);
+      if (tab) tab.className = 'iso-tab';
+    });
+    // Show AB2L module
+    Object.values(MAIN_IDS).forEach(mid => { const el = document.getElementById(mid); if (el) el.style.display = 'none'; });
+    ['main27001','main42001','mainAnexo27','mainAnexo42','mainAuditLive','mainTemplates'].forEach(m => { const el = document.getElementById(m); if(el) el.style.display='none'; });
+    document.getElementById('mainAB2L').style.display = 'flex';
+    activeModule = 'ab2l';
+    // Hide Anexo A button (not applicable for AB2L)
+    const anexoNav = document.getElementById('anexoNavArea');
+    if (anexoNav) anexoNav.style.display = 'none';
+    updateExtraNav();
+    renderAB2L();
+    return;
+  }
+  _origTrocarNormaV3(norma);
+};
+
+// ── Patch fileInput to record history for all normas ──
+document.getElementById('fileInput').addEventListener('change', function(eHist) {
+  // Only record history — actual processing done by earlier listeners
+  const file = eHist.target.files[0];
+  if (!file || !pendingUpload) return;
+  const { id, norma } = pendingUpload;
+  // Register in history after a short delay (after processing completes)
+  setTimeout(() => {
+    const resultsMap = norma === '27001' ? results27 : norma === '42001' ? results42 : norma === 'ab2l' ? resultsAB2L : results;
+    const res = resultsMap[id];
+    if (res) {
+      registrarHistorico(id, file.name, res.aprovado ? 'aprovado' : 'insuficiente', norma);
+    }
+  }, 3000);
+}, false);
+
+// ── Patch AB2L fileInput handling ──
+document.getElementById('fileInput').addEventListener('change', async function(eAB2L) {
+  const file = eAB2L.target.files[0];
+  if (!file || !pendingUpload) return;
+  if (pendingUpload.norma !== 'ab2l') return;
+  eAB2L.target.value = '';
+  const { id, label } = pendingUpload;
+  pendingUpload = null;
+  const systemAB2L = `Você é avaliador da Certificação AB2L de Inovação Jurídica. Analise o documento enviado e avalie se ele atende ao critério informado. Classifique como EXCELENTE, BOM ou INSUFICIENTE conforme os critérios do regulamento AB2L 2026. Responda APENAS com JSON válido: {"aprovado":true,"nivel":"excelente","conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}`;
+  try {
+    const base64 = await new Promise((res,rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(file); });
+    const isPdf = file.type === 'application/pdf'; const isImg = file.type.startsWith('image/');
+    const fileMime = (isPdf||isImg) ? file.type : null;
+    const raw = await callGemini('Critério AB2L: "' + label + '"\nArquivo: ' + file.name, systemAB2L, fileMime ? base64 : null, fileMime);
+    const json = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    resultsAB2L[id] = { ...json, filename: file.name };
+    if (json.nivel === 'excelente' || json.nivel === 'bom') {
+      doneAB2L[id] = json.nivel;
+      await saveCriterio('ab2l_' + id, json.nivel);
+    }
+    await saveResultadoIA('ab2l_' + id, resultsAB2L[id]);
+    registrarHistorico(id, file.name, json.nivel || (json.aprovado?'aprovado':'insuficiente'), 'ab2l');
+  } catch(err) {
+    resultsAB2L[id] = { erro: true, filename: file.name };
+  }
+  renderAB2L();
 }, false);
 
 </script>
