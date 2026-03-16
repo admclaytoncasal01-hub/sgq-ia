@@ -1322,6 +1322,7 @@ document.getElementById('fileInput').addEventListener('change',async function(e)
   e.target.value='';
   const {id,label,norma}=pendingUpload;pendingUpload=null;
   uploading=id;
+  mostrarLoadingIA(id);
   if(!norma||norma==='9001') render();else renderISO(norma);
   const systemISO=norma==='27001'
     ?'Você é auditor ISO 27001 especialista. Analise o documento e avalie se atende ao critério informado. Responda APENAS com JSON válido, sem markdown: {"aprovado":true,"conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}'
@@ -1342,6 +1343,7 @@ document.getElementById('fileInput').addEventListener('change',async function(e)
     else{const rm=norma==='27001'?results27:results42;rm[id]={erro:true,erroMsg:err.message,filename:file?.name};}
   }
   uploading=null;
+  esconderLoadingIA(id);
   if(!norma||norma==='9001') render();else renderISO(norma);
 });
 
@@ -3176,6 +3178,11 @@ function renderAB2L() {
             <div class="nivel-detail" id="exc_${c.id}">
               <div style="font-size:11px;font-weight:700;color:#00c8ff;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Evidências esperadas — Nível EXCELENTE:</div>
               ${c.nivel_excelente.map(e => `<div style="display:flex;gap:7px;margin-bottom:4px"><div style="width:5px;height:5px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:6px"></div><span>${e}</span></div>`).join('')}
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,200,255,.15);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <button id="ab2lbtn_exc_inner_${c.id}" onclick="triggerUploadAB2L('${c.id}','${c.label.replace(/'/g,"\\'")}','excelente')" style="padding:5px 14px;border-radius:7px;border:1px solid rgba(0,200,255,.4);background:rgba(0,200,255,.06);color:#00c8ff;font-size:12px;font-weight:700;cursor:pointer">⭐ Enviar evidência EXCELENTE</button>
+                <div id="ab2l_loading_exc_${c.id}" style="display:none"><div class="typing" style="display:inline-flex"><div class="typing-dot" style="background:#00c8ff"></div><div class="typing-dot" style="background:#00c8ff"></div><div class="typing-dot" style="background:#00c8ff"></div></div><span style="font-size:11px;color:#00c8ff;margin-left:6px">Analisando...</span></div>
+                ${resultsAB2L[c.id+'_excelente'] ? `<span style="font-size:11px;font-weight:700;color:${resultsAB2L[c.id+'_excelente'].nivel==='excelente'?'#00c8ff':resultsAB2L[c.id+'_excelente'].nivel==='bom'?'#00e676':'#ffea00'}">→ ${resultsAB2L[c.id+'_excelente'].nivel?.toUpperCase()||''} (${resultsAB2L[c.id+'_excelente'].conformidade||''})</span>` : ''}
+              </div>
             </div>
           </div>
 
@@ -3185,6 +3192,11 @@ function renderAB2L() {
             <div class="nivel-detail" id="bom_${c.id}">
               <div style="font-size:11px;font-weight:700;color:#00e676;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Evidências esperadas — Nível BOM:</div>
               ${c.nivel_bom.map(e => `<div style="display:flex;gap:7px;margin-bottom:4px"><div style="width:5px;height:5px;border-radius:50%;background:#00e676;flex-shrink:0;margin-top:6px"></div><span>${e}</span></div>`).join('')}
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,230,118,.15);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <button id="ab2lbtn_bom_inner_${c.id}" onclick="triggerUploadAB2L('${c.id}','${c.label.replace(/'/g,"\\'")}','bom')" style="padding:5px 14px;border-radius:7px;border:1px solid rgba(0,230,118,.4);background:rgba(0,230,118,.06);color:#00e676;font-size:12px;font-weight:700;cursor:pointer">📎 Enviar evidência BOM</button>
+                <div id="ab2l_loading_bom_${c.id}" style="display:none"><div class="typing" style="display:inline-flex"><div class="typing-dot" style="background:#00e676"></div><div class="typing-dot" style="background:#00e676"></div><div class="typing-dot" style="background:#00e676"></div></div><span style="font-size:11px;color:#00e676;margin-left:6px">Analisando...</span></div>
+                ${resultsAB2L[c.id+'_bom'] ? `<span style="font-size:11px;font-weight:700;color:${resultsAB2L[c.id+'_bom'].nivel==='excelente'?'#00c8ff':resultsAB2L[c.id+'_bom'].nivel==='bom'?'#00e676':'#ffea00'}">→ ${resultsAB2L[c.id+'_bom'].nivel?.toUpperCase()||''} (${resultsAB2L[c.id+'_bom'].conformidade||''})</span>` : ''}
+              </div>
             </div>
           </div>
 
@@ -3741,10 +3753,17 @@ document.getElementById('fileInputAB2L').addEventListener('change', async functi
   const { id, label, nivel } = pendingUpload;
   pendingUpload = null;
 
-  // Show uploading state
-  const btnId = nivel ? 'ab2lbtn_' + nivel + '_' + id : 'ab2lbtn_' + id;
-  const uploadingBtn = document.getElementById(btnId);
-  if (uploadingBtn) { uploadingBtn.disabled = true; uploadingBtn.textContent = '⏳ Analisando...'; }
+  // Show loading animation on both the button AND the inline loading div
+  const btnIds = nivel
+    ? ['ab2lbtn_' + nivel + '_' + id, 'ab2lbtn_' + nivel + '_inner_' + id]
+    : ['ab2lbtn_bom_' + id, 'ab2lbtn_exc_' + id];
+  btnIds.forEach(bid => {
+    const b = document.getElementById(bid);
+    if (b) { b.disabled = true; b.style.opacity = '0.5'; }
+  });
+  const loadDivId = nivel ? 'ab2l_loading_' + nivel + '_' + id : null;
+  const loadDiv = loadDivId ? document.getElementById(loadDivId) : null;
+  if (loadDiv) loadDiv.style.display = 'flex';
 
   const nivelHint = nivel ? (' Avalie especificamente se atende ao nível ' + nivel.toUpperCase() + '.') : '';
   const systemAB2L = 'Você é avaliador da Certificação AB2L de Inovação Jurídica 2026. Analise a evidência enviada.' + nivelHint + ' Responda APENAS com JSON válido, sem markdown: {"aprovado":true,"nivel":"excelente","conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}';
@@ -3785,6 +3804,12 @@ document.getElementById('fileInputAB2L').addEventListener('change', async functi
     console.error('AB2L upload error:', err);
     resultsAB2L[id] = { erro: true, erroMsg: err.message, filename: file?.name };
   }
+  // Hide loading
+  btnIds.forEach(bid => {
+    const b = document.getElementById(bid);
+    if (b) { b.disabled = false; b.style.opacity = '1'; }
+  });
+  if (loadDiv) loadDiv.style.display = 'none';
   renderAB2L();
 }, false);
 
@@ -4362,6 +4387,37 @@ carregarAno = async function(ano) {
     await carregarNormasCustom();
   }
 };
+
+
+// ══════════════════════════════════════════════════════════════
+// ★ LOADING IA — ANIMAÇÃO DURANTE ANÁLISE
+// ══════════════════════════════════════════════════════════════
+function mostrarLoadingIA(criterioId) {
+  // Show a subtle overlay on the criterio card
+  var cDiv = document.getElementById('crit-' + criterioId);
+  if (!cDiv) cDiv = document.getElementById('crit-9001-' + criterioId) || document.getElementById('crit-27001-' + criterioId) || document.getElementById('crit-42001-' + criterioId);
+  if (cDiv) {
+    var existing = cDiv.querySelector('.ia-analyzing-overlay');
+    if (!existing) {
+      var overlay = document.createElement('div');
+      overlay.className = 'ia-analyzing-overlay';
+      overlay.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.2);border-radius:8px;margin-top:8px">' +
+        '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>' +
+        '<span style="font-size:12px;color:#00c8ff;font-weight:600">🤖 Analisando documento com IA...</span>' +
+        '</div>';
+      cDiv.appendChild(overlay);
+    }
+  }
+  // Also disable the upload button
+  var btn = document.querySelector('[onclick*="triggerUpload('' + criterioId + ''"]') ||
+            document.querySelector('[onclick*="triggerUploadISO"][onclick*="' + criterioId + '"]');
+  if (btn) btn.disabled = true;
+}
+
+function esconderLoadingIA(criterioId) {
+  var overlays = document.querySelectorAll('.ia-analyzing-overlay');
+  overlays.forEach(function(o){ o.remove(); });
+}
 
 </script>
 </body>
