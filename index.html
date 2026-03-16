@@ -924,12 +924,35 @@ async function carregarAno(ano){
       else if(r.criterio_id.startsWith('42001_')) done42[r.criterio_id.replace('42001_','')]=r.feito;
       else anoData[ano].done[r.criterio_id]=r.feito;
     });
-    const ri=await sb('/rest/v1/resultados_ia?ano=eq.'+ano+'&select=*');
+    const ri=await sb('/rest/v1/resultados_ia?ano=eq.'+ano+'&select=*&order=criado_em.asc');
     if(ri) ri.forEach(r=>{
+      // Rebuild document history from hist_ rows
+      if(r.criterio_id && r.criterio_id.startsWith('hist_')){
+        // Format: hist_NORMA_criterioId_timestamp
+        var parts = r.criterio_id.split('_');
+        if(parts.length >= 3){
+          var normaH = parts[1];
+          // criterioId is everything between norma and last timestamp segment
+          var critId = parts.slice(2, parts.length-1).join('_');
+          if(!critId) critId = parts[2] || '';
+          if(critId){
+            if(!docHistorico[critId]) docHistorico[critId] = [];
+            docHistorico[critId].push({
+              usuario: (r.pontos_atendidos && r.pontos_atendidos[0]) ? r.pontos_atendidos[0] : (r.conformidade || 'Usuário'),
+              email: '',
+              filename: r.filename || '',
+              resultado: r.recomendacao || (r.aprovado ? 'aprovado' : 'insuficiente'),
+              norma: normaH,
+              data: r.criado_em || ''
+            });
+          }
+        }
+        return;
+      }
       const obj={aprovado:r.aprovado,conformidade:r.conformidade,pontos_atendidos:r.pontos_atendidos||[],pontos_faltando:r.pontos_faltando||[],recomendacao:r.recomendacao,filename:r.filename,erro:r.erro};
       if(r.criterio_id.startsWith('27001_')) results27[r.criterio_id.replace('27001_','')]=obj;
       else if(r.criterio_id.startsWith('42001_')) results42[r.criterio_id.replace('42001_','')]=obj;
-      else anoData[ano].results[r.criterio_id]=obj;
+      else if(!r.criterio_id.startsWith('arg_') && !r.criterio_id.startsWith('usertpl_')) anoData[ano].results[r.criterio_id]=obj;
     });
     const docs=await sb('/rest/v1/documentos?ano=eq.'+ano+'&select=*&order=criado_em.asc');
     if(docs&&docs.length) anoData[ano].docList=docs.map(d=>({cod:d.codigo,titulo:d.titulo,tipo:d.tipo,req:d.requisito_iso,versao:d.versao,resp:d.responsavel,aprv:d.data_aprovacao,val:d.data_validade,status:d.status,desc:d.descricao,arquivo:d.arquivo||'',_id:d.id}));
@@ -1029,7 +1052,7 @@ function renderContent(){
         const cDiv=document.createElement('div');cDiv.className='criterio'+(isDone?' done':'');cDiv.id='crit-'+c.id;
         let resultHTML='';
         if(result&&!result.erro){const rClass=result.aprovado?'ok':'warn';const rColor=result.aprovado?'#00e676':'#ffea00';const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');const falt=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span></div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falt?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falt}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
-        }else if(result&&result.erro){resultHTML=`<div class="ia-result err"><span style="color:#ff5252">❌ Erro ao analisar. Tente novamente.</span></div>`;}
+        }else if(result&&result.erro){resultHTML="";}
         cDiv.innerHTML=`<div class="criterio-row"><div class="checkbox${isDone?' checked':''}" onclick="toggleDone('${c.id}')">${isDone?'<span class="checkbox-tick">✓</span>':''}</div><div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id}</span>${c.label}</div>${resultHTML}</div><button class="upload-btn ${isDone?'done':'pending'}" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button><div style="position:relative;display:inline-block;margin-left:4px"><button onclick=\"toggleHistPopover('${c.id}',event)\" title="Histórico de inclusões" style="width:26px;height:26px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center">⋯</button><div class="hist-popover" id="hist_${c.id}" style="display:none"></div></div></div>`;
         criteriosDiv.appendChild(cDiv);
       });
@@ -1161,7 +1184,7 @@ function renderISO(norma){
         const cDiv=document.createElement('div');cDiv.className='criterio'+(isDone?' done':'');
         let resultHTML='';
         if(result&&!result.erro){const rClass=result.aprovado?'ok':'warn';const rColor=result.aprovado?'#00e676':'#ffea00';const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');const falt=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span></div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falt?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falt}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
-        }else if(result&&result.erro){resultHTML=`<div class="ia-result err"><span style="color:#ff5252">❌ Erro ao analisar. Tente novamente.</span></div>`;}
+        }else if(result&&result.erro){resultHTML="";}
         const lbl=c.label.replace(/'/g,"\\'");const cid=c.id;
         const toggleFn=`toggleDoneISO('${norma}','${cid}')`;const uploadFn=`triggerUploadISO('${norma}','${cid}','${lbl}')`;
         cDiv.innerHTML=`<div class="criterio-row"><div class="checkbox${isDone?' checked':''}" onclick="${toggleFn}">${isDone?'<span class="checkbox-tick">✓</span>':''}</div><div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id.replace('27_','').replace('42_','')}</span>${c.label}</div>${resultHTML}</div><button class="upload-btn ${isDone?'done':'pending'}" onclick="${uploadFn}" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button><div style="position:relative;display:inline-block;margin-left:4px"><button onclick=\"toggleHistPopover('${c.id}',event)\" title="Histórico de inclusões" style="width:26px;height:26px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center">⋯</button><div class="hist-popover" id="hist_${c.id}" style="display:none"></div></div></div>`;
@@ -1219,12 +1242,12 @@ document.getElementById('fileInput').addEventListener('change',async function(e)
     const userText='Critério '+(norma||'ISO 9001')+' a validar: "'+label+'"\nArquivo: '+file.name+'\nAnalise e responda APENAS com JSON válido.';
     const raw=await callGemini(userText,systemISO,fileMime?base64:null,fileMime);
     const clean=raw.replace(/```json|```/g,'').trim();const json=JSON.parse(clean);
-    if(!norma||norma==='9001'){results[id]={...json,filename:file.name};if(json.aprovado){done[id]=true;await saveCriterio(id,true);}await saveResultadoIA(id,results[id]);}
-    else{const rm=norma==='27001'?results27:results42;const dm=norma==='27001'?done27:done42;rm[id]={...json,filename:file.name};if(json.aprovado){dm[id]=true;await saveCriterio(norma+'_'+id,true);}await saveResultadoIA(norma+'_'+id,rm[id]);}
+    if(!norma||norma==='9001'){results[id]={...json,filename:file.name};if(json.aprovado){done[id]=true;await saveCriterio(id,true);}await saveResultadoIA(id,results[id]);registrarHistorico(id,file.name,json.aprovado?'aprovado':'insuficiente',norma||'9001');}
+    else{const rm=norma==='27001'?results27:results42;const dm=norma==='27001'?done27:done42;rm[id]={...json,filename:file.name};if(json.aprovado){dm[id]=true;await saveCriterio(norma+'_'+id,true);}await saveResultadoIA(norma+'_'+id,rm[id]);registrarHistorico(id,file.name,json.aprovado?'aprovado':'insuficiente',norma);}
   }catch(err){
     console.error('IA erro:',err);
-    if(!norma||norma==='9001'){results[id]={erro:true,erroMsg:err.message,filename:file?.name};await saveResultadoIA(id,results[id]);}
-    else{const rm=norma==='27001'?results27:results42;rm[id]={erro:true,erroMsg:err.message,filename:file?.name};await saveResultadoIA(norma+'_'+id,rm[id]);}
+    if(!norma||norma==='9001'){results[id]={erro:true,erroMsg:err.message,filename:file?.name};}
+    else{const rm=norma==='27001'?results27:results42;rm[id]={erro:true,erroMsg:err.message,filename:file?.name};}
   }
   uploading=null;
   if(!norma||norma==='9001') render();else renderISO(norma);
@@ -3175,29 +3198,33 @@ function toggleHistPopover(criterioId, evt) {
 }
 
 function registrarHistorico(criterioId, filename, resultado, norma) {
-  if (!docHistorico[criterioId]) docHistorico[criterioId] = [];
-  docHistorico[criterioId].push({
+  var nrm = norma || normaAtiva || '9001';
+  var entry = {
     usuario: loggedUser?.nome || loggedUser?.email || 'Desconhecido',
     email: loggedUser?.email || '',
-    filename,
-    resultado,
-    norma: norma || normaAtiva || '9001',
+    filename: filename || '',
+    resultado: resultado || '-',
+    norma: nrm,
     data: new Date().toISOString()
-  });
-  // Persist to Supabase (best effort)
-  try {
-    sb('/rest/v1/resultados_ia', {
-      method: 'POST',
-      headers: { 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({
-        ano: anoAtual,
-        criterio_id: 'hist_' + (norma||'9001') + '_' + criterioId,
-        recomendacao: JSON.stringify(docHistorico[criterioId]),
-        usuario_id: loggedUser?.id,
-        criado_em: new Date().toISOString()
-      })
-    });
-  } catch(e) {}
+  };
+  if (!docHistorico[criterioId]) docHistorico[criterioId] = [];
+  docHistorico[criterioId].push(entry);
+  // Save as individual row with unique ID (timestamp) so multiple uploads are preserved
+  var uniqueId = 'hist_' + nrm + '_' + criterioId + '_' + Date.now();
+  sb('/rest/v1/resultados_ia', {
+    method: 'POST',
+    body: JSON.stringify({
+      ano: anoAtual,
+      criterio_id: uniqueId,
+      filename: filename || '',
+      recomendacao: resultado || '',
+      conformidade: nrm,
+      aprovado: resultado === 'aprovado',
+      pontos_atendidos: [entry.usuario || ''],
+      usuario_id: loggedUser?.id,
+      criado_em: entry.data
+    })
+  }).catch(function(e){ console.warn('hist save:', e); });
 }
 
 // Patch the main fileInput listener to record history
@@ -3581,14 +3608,6 @@ document.getElementById('fileInput').addEventListener('change', function(eHist) 
   const file = eHist.target.files[0];
   if (!file || !pendingUpload) return;
   const { id, norma } = pendingUpload;
-  // Register in history after a short delay (after processing completes)
-  setTimeout(() => {
-    const resultsMap = norma === '27001' ? results27 : norma === '42001' ? results42 : norma === 'ab2l' ? resultsAB2L : results;
-    const res = resultsMap[id];
-    if (res) {
-      registrarHistorico(id, file.name, res.aprovado ? 'aprovado' : 'insuficiente', norma);
-    }
-  }, 3000);
 }, false);
 
 // ── Patch AB2L fileInput handling ──
