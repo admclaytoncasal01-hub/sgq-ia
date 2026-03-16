@@ -820,6 +820,7 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
 </div><!-- /app -->
 
 <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx" style="display:none">
+<input type="file" id="fileInputAB2L" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.heic,.heif" style="display:none">
 
 <script>
 // ══════════════════════════════════════════════════════════════
@@ -1316,6 +1317,8 @@ function triggerUpload(criterioId,criterioLabel,subNum){
 
 document.getElementById('fileInput').addEventListener('change',async function(e){
   const file=e.target.files[0];if(!file||!pendingUpload) return;
+  // Let AB2L handler process its own uploads
+  if(pendingUpload.norma==='ab2l') return;
   e.target.value='';
   const {id,label,norma}=pendingUpload;pendingUpload=null;
   uploading=id;
@@ -3194,17 +3197,25 @@ function renderAB2L() {
             <span style="font-size:11px;font-weight:700;color:${nivelColor};margin-left:4px">${nivelLabel}</span>
           </div>
 
-          <!-- UPLOAD EVIDÊNCIA + HISTÓRICO -->
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <button class="upload-btn pending" onclick="triggerUploadAB2L('${c.id}','${c.label.replace(/'/g,"\\'")}')">📎 Enviar evidência</button>
-            ${result ? `<span style="font-size:11px;color:#607080">📄 ${result.filename} · <span style="color:${result.aprovado?'#00e676':'#ffea00'}">${result.aprovado?'Aprovado':'Insuficiente'}</span></span>` : ''}
+                    <!-- UPLOAD EVIDÊNCIA POR NÍVEL + RESULTADO IA -->
+          ${result && !result.erro ? `<div class="ia-result ${result.nivel==='excelente'||result.nivel==='bom'?'ok':'warn'}" style="margin-bottom:10px">
+            <div class="ia-result-header" style="color:${result.nivel==='excelente'?'#00c8ff':result.nivel==='bom'?'#00e676':'#ffea00'}">
+              <span>${result.nivel==='excelente'?'⭐ EXCELENTE':result.nivel==='bom'?'✅ BOM':'⚠️ INSUFICIENTE'} · ${result.conformidade||''}</span>
+              <span class="ia-result-filename">📄 ${result.filename||''}</span>
+            </div>
+            ${(result.pontos_atendidos||[]).length?'<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>'+(result.pontos_atendidos||[]).map(p=>'<div class="ia-item">• '+p+'</div>').join(''):''}
+            ${(result.pontos_faltando||[]).length?'<div class="ia-section-title" style="color:#ff5252;margin-top:4px">✗ O que falta:</div>'+(result.pontos_faltando||[]).map(p=>'<div class="ia-item">• '+p+'</div>').join(''):''}
+            ${result.recomendacao?'<div class="ia-rec">💡 '+result.recomendacao+'</div>':''}
+          </div>` : ''}
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px">
+            <button id="ab2lbtn_bom_${c.id}" class="upload-btn pending" onclick="triggerUploadAB2L('${c.id}','${c.label.replace(/'/g,"\\'")}','bom')" style="border-color:#00e676;color:#00e676">📎 Evidência BOM</button>
+            <button id="ab2lbtn_exc_${c.id}" class="upload-btn pending" onclick="triggerUploadAB2L('${c.id}','${c.label.replace(/'/g,"\\'")}','excelente')" style="border-color:#00c8ff;color:#00c8ff">⭐ Evidência EXCELENTE</button>
             <div style="position:relative;margin-left:auto">
-              <button onclick=\"toggleHistPopover('${c.id}',event)\" title="Histórico de inclusões" style="width:28px;height:28px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">⋯</button>
+              <button onclick="toggleHistPopover('${c.id}',event)" title="Histórico de inclusões" style="width:28px;height:28px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">⋯</button>
               <div class="hist-popover" id="hist_${c.id}" style="display:none"></div>
             </div>
           </div>
-
-          ${buildArgWidget(c.id, !!result)}
+                    ${buildArgWidget(c.id, !!result)}
         </div>
       </div>`;
     content.appendChild(cDiv);
@@ -3222,9 +3233,10 @@ async function setNivelAB2L(id, nivel) {
   renderAB2L();
 }
 
-function triggerUploadAB2L(id, label) {
-  pendingUpload = { id, label, norma: 'ab2l' };
-  document.getElementById('fileInput').click();
+function triggerUploadAB2L(id, label, nivel) {
+  pendingUpload = { id, label, norma: 'ab2l', nivel: nivel || null };
+  // AB2L accepts images too
+  document.getElementById('fileInputAB2L').click();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -3721,29 +3733,57 @@ document.getElementById('fileInput').addEventListener('change', function(eHist) 
 }, false);
 
 // ── Patch AB2L fileInput handling ──
-document.getElementById('fileInput').addEventListener('change', async function(eAB2L) {
+// AB2L dedicated file input - handles both image and PDF, supports nivel
+document.getElementById('fileInputAB2L').addEventListener('change', async function(eAB2L) {
   const file = eAB2L.target.files[0];
-  if (!file || !pendingUpload) return;
-  if (pendingUpload.norma !== 'ab2l') return;
+  if (!file || !pendingUpload || pendingUpload.norma !== 'ab2l') return;
   eAB2L.target.value = '';
-  const { id, label } = pendingUpload;
+  const { id, label, nivel } = pendingUpload;
   pendingUpload = null;
-  const systemAB2L = `Você é avaliador da Certificação AB2L de Inovação Jurídica. Analise o documento enviado e avalie se ele atende ao critério informado. Classifique como EXCELENTE, BOM ou INSUFICIENTE conforme os critérios do regulamento AB2L 2026. Responda APENAS com JSON válido: {"aprovado":true,"nivel":"excelente","conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}`;
+
+  // Show uploading state
+  const btnId = nivel ? 'ab2lbtn_' + nivel + '_' + id : 'ab2lbtn_' + id;
+  const uploadingBtn = document.getElementById(btnId);
+  if (uploadingBtn) { uploadingBtn.disabled = true; uploadingBtn.textContent = '⏳ Analisando...'; }
+
+  const nivelHint = nivel ? (' Avalie especificamente se atende ao nível ' + nivel.toUpperCase() + '.') : '';
+  const systemAB2L = 'Você é avaliador da Certificação AB2L de Inovação Jurídica 2026. Analise a evidência enviada.' + nivelHint + ' Responda APENAS com JSON válido, sem markdown: {"aprovado":true,"nivel":"excelente","conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}';
+
   try {
-    const base64 = await new Promise((res,rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(file); });
-    const isPdf = file.type === 'application/pdf'; const isImg = file.type.startsWith('image/');
-    const fileMime = (isPdf||isImg) ? file.type : null;
-    const raw = await callGemini('Critério AB2L: "' + label + '"\nArquivo: ' + file.name, systemAB2L, fileMime ? base64 : null, fileMime);
-    const json = JSON.parse(raw.replace(/```json|```/g,'').trim());
-    resultsAB2L[id] = { ...json, filename: file.name };
+    const base64 = await new Promise((res,rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result.split(',')[1]);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+    // AB2L accepts PDF and ALL image types
+    const fileMime = file.type || 'application/octet-stream';
+    const canSend = fileMime === 'application/pdf' || fileMime.startsWith('image/');
+    const userText = 'Critério AB2L: "' + label + '"' + (nivel ? '\nNível avaliado: ' + nivel.toUpperCase() : '') + '\nArquivo: ' + file.name + '\nAvalie se esta evidência comprova o critério e classifique.';
+    const raw = await callGemini(userText, systemAB2L, canSend ? base64 : null, canSend ? fileMime : null);
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const json = JSON.parse(clean);
+
+    // Store result with nivel info
+    if (!resultsAB2L[id]) resultsAB2L[id] = {};
+    const resultKey = nivel ? (id + '_' + nivel) : id;
+    resultsAB2L[resultKey] = { ...json, filename: file.name, nivel_enviado: nivel };
+
+    // Also update main id result
+    resultsAB2L[id] = { ...json, filename: file.name, nivel_enviado: nivel };
+
+    // Set classification based on IA result
     if (json.nivel === 'excelente' || json.nivel === 'bom') {
       doneAB2L[id] = json.nivel;
       await saveCriterio('ab2l_' + id, json.nivel);
+    } else if (!doneAB2L[id]) {
+      doneAB2L[id] = 'insuficiente';
     }
     await saveResultadoIA('ab2l_' + id, resultsAB2L[id]);
-    registrarHistorico(id, file.name, json.nivel || (json.aprovado?'aprovado':'insuficiente'), 'ab2l');
+    registrarHistorico(id, file.name, json.nivel || 'insuficiente', 'ab2l');
   } catch(err) {
-    resultsAB2L[id] = { erro: true, filename: file.name };
+    console.error('AB2L upload error:', err);
+    resultsAB2L[id] = { erro: true, erroMsg: err.message, filename: file?.name };
   }
   renderAB2L();
 }, false);
