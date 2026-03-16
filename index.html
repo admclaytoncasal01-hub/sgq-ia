@@ -737,9 +737,84 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
 <div class="main" id="mainAcessos" style="display:none">
   <div class="mod-topbar">
     <div class="mod-icon-badge">🔑</div>
-    <div style="flex:1"><div class="mod-title">Controle de Acesso</div><div class="mod-sub">Defina por usuário quais normas e requisitos cada um pode acessar</div></div>
+    <div style="flex:1"><div class="mod-title">Controle de Acesso</div><div class="mod-sub">Gerencie normas, requisitos e módulos por usuário e perfil</div></div>
+    <div style="display:flex;gap:6px">
+      <button id="tabAcessoUsuario" onclick="mostrarAbaAcesso('usuario')" style="padding:7px 16px;border-radius:8px;border:none;background:#00c8ff;color:#0a0e14;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">👤 Por Usuário</button>
+      <button id="tabAcessoPerfil" onclick="mostrarAbaAcesso('perfil')" style="padding:7px 16px;border-radius:8px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🏷️ Por Perfil</button>
+    </div>
   </div>
   <div class="mod-content" id="acessosContent"></div>
+  <div class="mod-content" id="acessosPerfilContent" style="display:none"></div>
+</div>
+
+
+<!-- MÓDULO: NOVA NORMA VIA IA -->
+<div class="main" id="mainNovaNorma" style="display:none">
+  <div class="mod-topbar">
+    <div class="mod-icon-badge" style="background:rgba(255,180,0,.1);border-color:rgba(255,180,0,.3)">➕</div>
+    <div style="flex:1"><div class="mod-title" style="color:#ffb400">Nova Norma via IA</div><div class="mod-sub">Envie o PDF de qualquer norma — a IA lê e cria os requisitos automaticamente</div></div>
+  </div>
+  <div class="mod-content" id="novaNormaContent">
+    <div style="max-width:700px;margin:0 auto">
+      <!-- INTRO -->
+      <div style="margin-bottom:20px;padding:16px;background:rgba(255,180,0,.06);border:1px solid rgba(255,180,0,.2);border-radius:12px">
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#ffb400;margin-bottom:8px">🤖 Como funciona</div>
+        <div style="font-size:13px;color:#a0b4c8;line-height:1.7">
+          1. Defina o nome e código da norma (ex: <strong>ISO 14001</strong>)<br>
+          2. Faça upload do PDF da norma<br>
+          3. A IA lê o documento e gera automaticamente todos os requisitos com seus critérios<br>
+          4. A norma aparece como nova aba no seletor e fica disponível para o checklist
+        </div>
+      </div>
+
+      <!-- FORMULÁRIO -->
+      <div style="background:#111820;border:1px solid #1e2d3d;border-radius:12px;padding:20px;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;color:#607080;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nome da Norma *</div>
+            <input id="nn_nome" placeholder="ex: ISO 14001" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:9px 12px;color:#e8edf3;font-size:13px;outline:none">
+          </div>
+          <div>
+            <div style="font-size:11px;color:#607080;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Código/ID *</div>
+            <input id="nn_codigo" placeholder="ex: 14001 (sem espaços)" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:9px 12px;color:#e8edf3;font-size:13px;outline:none">
+          </div>
+          <div>
+            <div style="font-size:11px;color:#607080;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Descrição</div>
+            <input id="nn_desc" placeholder="ex: Gestão Ambiental" style="width:100%;background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:9px 12px;color:#e8edf3;font-size:13px;outline:none">
+          </div>
+          <div>
+            <div style="font-size:11px;color:#607080;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Cor da Aba</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+              <input type="color" id="nn_cor" value="#ff8c00" style="width:40px;height:36px;border:1px solid #1e2d3d;border-radius:7px;background:#18222e;cursor:pointer">
+              <span style="font-size:12px;color:#607080">Cor da norma no seletor</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload PDF -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:11px;color:#607080;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">PDF da Norma *</div>
+          <div id="nn_dropzone" onclick="document.getElementById('nn_fileInput').click()" style="border:2px dashed rgba(255,180,0,.3);border-radius:10px;padding:24px;text-align:center;cursor:pointer;background:rgba(255,180,0,.03);transition:all .15s" onmouseover="this.style.borderColor='rgba(255,180,0,.6)'" onmouseout="this.style.borderColor='rgba(255,180,0,.3)'">
+            <div style="font-size:28px;margin-bottom:8px">📕</div>
+            <div style="font-size:13px;color:#e8edf3;font-weight:600">Clique para selecionar o PDF da norma</div>
+            <div style="font-size:11px;color:#607080;margin-top:4px">Apenas arquivos PDF</div>
+          </div>
+          <input type="file" id="nn_fileInput" accept=".pdf" style="display:none" onchange="nn_fileSelected(this)">
+          <div id="nn_fileLabel" style="font-size:12px;color:#607080;margin-top:8px">Nenhum arquivo selecionado</div>
+        </div>
+
+        <button onclick="gerarNormaPDF()" id="nn_btnGerar" style="width:100%;padding:12px;border-radius:9px;border:none;background:linear-gradient(135deg,#ffb400,#ff8c00);color:#0a0e14;font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:1px">
+          🤖 GERAR NORMA COM IA
+        </button>
+      </div>
+
+      <!-- PROGRESSO / RESULTADO -->
+      <div id="nn_resultado" style="display:none"></div>
+
+      <!-- NORMAS CRIADAS -->
+      <div id="nn_listaCustom"></div>
+    </div>
+  </div>
 </div>
 
 </div><!-- /app -->
@@ -807,6 +882,7 @@ const EXTRA_MODULES = [
   {id:'usuarios',   icon:'👥',label:'Usuários',             badge:'',    roles:['Administrador']},
   {id:'acessos',    icon:'🔑',label:'Controle de Acesso',   badge:'',    roles:['Administrador']},
   {id:'userTemplates',icon:'📁',label:'Meus Templates',    badge:'',    roles:['Administrador','Gestor da Qualidade']},
+  {id:'novaNorma',   icon:'➕',label:'Nova Norma via IA',  badge:'',    roles:['Administrador']},
 ];
 
 const MAIN_IDS = {
@@ -815,7 +891,8 @@ const MAIN_IDS = {
   usuarios:'mainUsuarios',auditLive:'mainAuditLive',
   templates:'mainTemplates',
   acessos:'mainAcessos',
-  userTemplates:'mainUserTemplates'
+  userTemplates:'mainUserTemplates',
+  novaNorma:'mainNovaNorma'
 };
 
 const docListDefault = [
@@ -3746,6 +3823,505 @@ function _aplicarFiltroNavItens() {
     div.style.display = blocked ? 'none' : '';
   });
 }
+
+
+// ══════════════════════════════════════════════════════════════
+// ★ PERMISSÕES DE MÓDULOS POR PERFIL
+// ══════════════════════════════════════════════════════════════
+
+// Default module permissions (can be overridden by admin)
+const PERFIS_SISTEMA = ['Administrador','Gestor da Qualidade','Auditor Interno','Colaborador','Somente Leitura'];
+
+// Loaded from Supabase - admin can edit
+var modPermissoes = {
+  'Administrador':       {chat:true, auditLive:true, auditInt:true, auditExt:true, docs:true, templates:true, alertas:true, usuarios:true, acessos:true, userTemplates:true},
+  'Gestor da Qualidade': {chat:true, auditLive:true, auditInt:true, auditExt:true, docs:true, templates:true, alertas:true, usuarios:false, acessos:false, userTemplates:true},
+  'Auditor Interno':     {chat:true, auditLive:true, auditInt:true, auditExt:true, docs:true, templates:false, alertas:true, usuarios:false, acessos:false, userTemplates:false},
+  'Colaborador':         {chat:true, auditLive:false, auditInt:false, auditExt:false, docs:true, templates:false, alertas:false, usuarios:false, acessos:false, userTemplates:false},
+  'Somente Leitura':     {chat:false, auditLive:false, auditInt:false, auditExt:false, docs:false, templates:false, alertas:false, usuarios:false, acessos:false, userTemplates:false},
+};
+
+const MOD_LABELS = {
+  chat:'🤖 Assistente IA', auditLive:'🎯 Auditoria IA Live', auditInt:'🔍 Auditoria Interna',
+  auditExt:'🏅 Pré-Auditoria Externa', docs:'📄 Documentos', templates:'📋 Modelos de Docs',
+  alertas:'🔔 Alertas', usuarios:'👥 Usuários', acessos:'🔑 Controle de Acesso',
+  userTemplates:'📁 Meus Templates'
+};
+
+async function carregarModPermissoes() {
+  try {
+    const rows = await sb('/rest/v1/resultados_ia?criterio_id=eq.mod_permissoes&ano=eq.0&select=recomendacao');
+    if (rows && rows.length && rows[0].recomendacao) {
+      var saved = JSON.parse(rows[0].recomendacao);
+      Object.keys(saved).forEach(function(perfil) {
+        if (modPermissoes[perfil]) {
+          Object.assign(modPermissoes[perfil], saved[perfil]);
+        }
+      });
+    }
+  } catch(e) {}
+}
+
+async function salvarModPermissoes() {
+  // Read checkboxes and update modPermissoes
+  PERFIS_SISTEMA.forEach(function(perfil) {
+    if (!modPermissoes[perfil]) modPermissoes[perfil] = {};
+    Object.keys(MOD_LABELS).forEach(function(modId) {
+      var cb = document.getElementById('mp_' + perfil.replace(/\s/g,'_') + '_' + modId);
+      if (cb) modPermissoes[perfil][modId] = cb.checked;
+    });
+  });
+
+  // Admins always have full access (safety lock)
+  Object.keys(MOD_LABELS).forEach(function(m) { modPermissoes['Administrador'][m] = true; });
+
+  try {
+    await sb('/rest/v1/resultados_ia', {
+      method: 'POST',
+      headers: {'Prefer':'resolution=merge-duplicates'},
+      body: JSON.stringify({
+        ano: 0,
+        criterio_id: 'mod_permissoes',
+        recomendacao: JSON.stringify(modPermissoes),
+        usuario_id: loggedUser?.id,
+        criado_em: new Date().toISOString()
+      })
+    });
+    // Visual feedback
+    var btn = document.getElementById('btnSalvarModPerm');
+    if (btn) { btn.textContent = '✅ Salvo!'; btn.style.background = '#00e676';
+      setTimeout(function(){ btn.textContent = '💾 Salvar Permissões'; btn.style.background = '#00c8ff'; }, 2000); }
+  } catch(e) { alert('Erro ao salvar: ' + e.message); }
+}
+
+function mostrarAbaAcesso(aba) {
+  var tabU = document.getElementById('tabAcessoUsuario');
+  var tabP = document.getElementById('tabAcessoPerfil');
+  var contU = document.getElementById('acessosContent');
+  var contP = document.getElementById('acessosPerfilContent');
+  if (!tabU || !tabP || !contU || !contP) return;
+
+  if (aba === 'usuario') {
+    tabU.style.background = '#00c8ff'; tabU.style.color = '#0a0e14'; tabU.style.border = 'none';
+    tabP.style.background = 'transparent'; tabP.style.color = '#607080'; tabP.style.border = '1px solid #1e2d3d';
+    contU.style.display = 'block';
+    contP.style.display = 'none';
+    renderAcessos();
+  } else {
+    tabP.style.background = '#00c8ff'; tabP.style.color = '#0a0e14'; tabP.style.border = 'none';
+    tabU.style.background = 'transparent'; tabU.style.color = '#607080'; tabU.style.border = '1px solid #1e2d3d';
+    contU.style.display = 'none';
+    contP.style.display = 'block';
+    renderAbaPerfilModulos();
+  }
+}
+
+function renderAbaPerfilModulos() {
+  var content = document.getElementById('acessosPerfilContent');
+  if (!content) return;
+  content.innerHTML = '';
+
+  // Info box
+  var info = document.createElement('div');
+  info.style.cssText = 'margin-bottom:16px;padding:12px 14px;background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.12);border-radius:9px;font-size:12px;color:#607080';
+  info.innerHTML = '🏷️ <strong style="color:#00c8ff">Permissões por Perfil</strong> — Defina quais módulos do menu cada perfil pode acessar. Administrador sempre tem acesso total.';
+  content.appendChild(info);
+
+  // Save button
+  var saveRow = document.createElement('div');
+  saveRow.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:16px';
+  var btnPerm = document.createElement('button');
+  btnPerm.id = 'btnSalvarModPerm';
+  btnPerm.onclick = salvarModPermissoes;
+  btnPerm.textContent = '💾 Salvar Permissões';
+  btnPerm.style.cssText = 'padding:8px 20px;border-radius:8px;border:none;background:#00c8ff;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer';
+  saveRow.appendChild(btnPerm);
+  content.appendChild(saveRow);
+
+  // Table header
+  var tableWrap = document.createElement('div');
+  tableWrap.style.cssText = 'background:#111820;border:1px solid #1e2d3d;border-radius:12px;overflow:hidden';
+
+  var table = document.createElement('table');
+  table.style.cssText = 'width:100%;border-collapse:collapse';
+
+  // Build header row
+  var thead = document.createElement('thead');
+  var headerRow = document.createElement('tr');
+  headerRow.innerHTML = '<th style="padding:12px 16px;text-align:left;font-size:11px;font-weight:700;letter-spacing:2px;color:#607080;text-transform:uppercase;border-bottom:1px solid #1e2d3d;background:#18222e">Módulo</th>';
+  PERFIS_SISTEMA.filter(function(p){ return p !== 'Administrador'; }).forEach(function(perfil) {
+    headerRow.innerHTML += '<th style="padding:12px 10px;text-align:center;font-size:11px;font-weight:700;color:#607080;border-bottom:1px solid #1e2d3d;background:#18222e;white-space:nowrap">' + perfil + '</th>';
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Build body rows - one per module
+  var tbody = document.createElement('tbody');
+  Object.entries(MOD_LABELS).forEach(function(entry, rowIdx) {
+    var modId = entry[0], modLabel = entry[1];
+    var tr = document.createElement('tr');
+    tr.style.background = rowIdx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,.015)';
+
+    // Module name cell
+    var tdName = document.createElement('td');
+    tdName.style.cssText = 'padding:11px 16px;font-size:13px;border-bottom:1px solid rgba(30,45,61,.4)';
+    tdName.textContent = modLabel;
+    tr.appendChild(tdName);
+
+    // Checkbox per perfil (skip Administrador - always true)
+    PERFIS_SISTEMA.filter(function(p){ return p !== 'Administrador'; }).forEach(function(perfil) {
+      var td = document.createElement('td');
+      td.style.cssText = 'padding:11px 10px;text-align:center;border-bottom:1px solid rgba(30,45,61,.4)';
+      var cbId = 'mp_' + perfil.replace(/\s/g,'_') + '_' + modId;
+      var isChecked = modPermissoes[perfil] ? (modPermissoes[perfil][modId] === true) : false;
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = cbId;
+      cb.checked = isChecked;
+      cb.style.cssText = 'width:16px;height:16px;cursor:pointer;accent-color:#00c8ff';
+      td.appendChild(cb);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+
+  // Admin row (always full - locked)
+  var trAdmin = document.createElement('tr');
+  trAdmin.style.cssText = 'background:rgba(0,200,255,.03)';
+  trAdmin.innerHTML = '<td colspan="' + PERFIS_SISTEMA.length + '" style="padding:10px 16px;font-size:11px;color:#607080;text-align:center;font-style:italic">🔒 Administrador — sempre tem acesso total a todos os módulos</td>';
+  tbody.appendChild(trAdmin);
+
+  table.appendChild(tbody);
+  tableWrap.appendChild(table);
+  content.appendChild(tableWrap);
+}
+
+// ── Patch updateExtraNav to use modPermissoes ──
+// Override the roles check to also consider modPermissoes
+const _origUpdateExtraNav = updateExtraNav;
+updateExtraNav = function() {
+  var nav = document.getElementById('extraNav');
+  if (!nav) { _origUpdateExtraNav(); return; }
+  nav.innerHTML = '';
+  var perfilAtual = loggedUser ? loggedUser.perfil : 'Colaborador';
+  EXTRA_MODULES.forEach(function(m) {
+    // Check modPermissoes first (admin-configurable), fallback to roles
+    var allowed = true;
+    if (perfilAtual !== 'Administrador') {
+      if (modPermissoes[perfilAtual] !== undefined) {
+        allowed = modPermissoes[perfilAtual][m.id] === true;
+      } else if (m.roles) {
+        allowed = m.roles.includes(perfilAtual);
+      }
+    }
+    if (!allowed) return;
+
+    var active = activeModule === m.id;
+    var div = document.createElement('div');
+    div.className = 'nav-item' + (active ? ' active' : '');
+    div.style.cssText = 'display:flex;align-items:center;gap:9px;padding:8px 12px;margin:0 6px 3px;border-radius:8px;cursor:pointer;border:1px solid ' + (active?'rgba(0,200,255,.2)':'transparent') + ';background:' + (active?'rgba(0,200,255,.08)':'transparent');
+    div.innerHTML = '<span style="font-size:14px;width:18px;text-align:center">' + m.icon + '</span><span class="nav-item-name" style="flex:1;font-size:12.5px;color:' + (active?'#00c8ff':'#e8edf3') + ';font-weight:' + (active?600:400) + '">' + m.label + '</span>' + (m.badge ? '<span style="background:#ff5252;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px">' + m.badge + '</span>' : '');
+    div.onclick = function(){ showModule(m.id); };
+    nav.appendChild(div);
+  });
+};
+
+// Load modPermissoes on startup (add to carregarAno flow)
+var _origCarregarAcessoUsuario = carregarAcessoUsuario;
+carregarAcessoUsuario = async function(userId) {
+  await _origCarregarAcessoUsuario(userId);
+  await carregarModPermissoes();
+};
+
+
+
+// ══════════════════════════════════════════════════════════════
+// ★ NOVA NORMA VIA IA
+// ══════════════════════════════════════════════════════════════
+var nn_fileData = null;
+var normasCustom = {}; // código -> {nome, codigo, desc, cor, checklist}
+
+function nn_fileSelected(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var label = document.getElementById('nn_fileLabel');
+  var drop = document.getElementById('nn_dropzone');
+  if (label) { label.textContent = '📕 ' + file.name; label.style.color = '#ffb400'; }
+  if (drop) { drop.innerHTML = '<div style="font-size:24px">📕</div><div style="font-size:13px;color:#ffb400;font-weight:600">' + file.name + '</div>'; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    nn_fileData = { base64: e.target.result.split(',')[1], mime: file.type, name: file.name };
+  };
+  reader.readAsDataURL(file);
+}
+
+async function gerarNormaPDF() {
+  var nome = document.getElementById('nn_nome').value.trim();
+  var codigo = document.getElementById('nn_codigo').value.trim().replace(/\s/g,'');
+  var desc = document.getElementById('nn_desc').value.trim();
+  var cor = document.getElementById('nn_cor').value || '#ff8c00';
+
+  if (!nome || !codigo) { alert('Preencha Nome e Código da norma.'); return; }
+  if (!nn_fileData) { alert('Selecione o PDF da norma.'); return; }
+
+  var btn = document.getElementById('nn_btnGerar');
+  var resDiv = document.getElementById('nn_resultado');
+  btn.disabled = true;
+  btn.textContent = '⏳ Lendo PDF e gerando requisitos...';
+  resDiv.style.display = 'block';
+  resDiv.innerHTML = '<div style="background:#111820;border:1px solid rgba(255,180,0,.2);border-radius:12px;padding:20px"><div style="color:#ffb400;font-size:13px;margin-bottom:12px">🤖 IA lendo o PDF da norma <strong>' + nome + '</strong>...</div><div class="typing"><div class="typing-dot" style="background:#ffb400"></div><div class="typing-dot" style="background:#ffb400"></div><div class="typing-dot" style="background:#ffb400"></div></div></div>';
+
+  var system = 'Você é especialista em normas de gestão e sistemas de qualidade. Analise o PDF da norma fornecida e extraia TODOS os requisitos e seus critérios/subcritérios. Responda APENAS com JSON válido neste formato exato, sem markdown:\n{"requisitos":[{"numero":4,"titulo":"Contexto da Organização","sub":"Descrição breve","subitems":[{"num":"4.1","name":"Nome do subitem","criterios":[{"id":"' + codigo + '_4.1.1","label":"Descrição do critério"}]}]}]}';
+  var userText = 'Norma: ' + nome + ' (' + codigo + ')\n' + (desc ? 'Descrição: ' + desc + '\n' : '') + 'Extraia todos os requisitos, subitems e critérios desta norma conforme o PDF. Responda APENAS com JSON válido.';
+
+  try {
+    var raw = await callGemini(userText, system, nn_fileData.base64, nn_fileData.mime);
+    var clean = raw.replace(/```json|```/g,'').trim();
+    // Handle possible leading text
+    var jsonStart = clean.indexOf('{');
+    if (jsonStart > 0) clean = clean.substring(jsonStart);
+    var parsed = JSON.parse(clean);
+
+    if (!parsed.requisitos || !parsed.requisitos.length) throw new Error('IA não retornou requisitos. Tente novamente.');
+
+    // Build checklist object
+    var checklist = {};
+    parsed.requisitos.forEach(function(req) {
+      checklist[req.numero] = {
+        title: req.titulo,
+        sub: req.sub || '',
+        subitems: (req.subitems || []).map(function(sub) {
+          return {
+            num: sub.num,
+            name: sub.name,
+            criterios: (sub.criterios || []).map(function(c) {
+              return { id: codigo + '_' + c.id.replace(codigo+'_',''), label: c.label };
+            })
+          };
+        })
+      };
+    });
+
+    var totalCriterios = Object.values(checklist).reduce(function(s,r){ return s + r.subitems.reduce(function(ss,sub){ return ss + sub.criterios.length; },0); }, 0);
+
+    // Store the custom norma
+    normasCustom[codigo] = { nome: nome, codigo: codigo, desc: desc, cor: cor, checklist: checklist };
+
+    // Save to Supabase
+    await sb('/rest/v1/resultados_ia', {
+      method: 'POST',
+      headers: {'Prefer':'resolution=merge-duplicates'},
+      body: JSON.stringify({
+        ano: 0,
+        criterio_id: 'norma_custom_' + codigo,
+        recomendacao: JSON.stringify(normasCustom[codigo]),
+        usuario_id: loggedUser?.id,
+        criado_em: new Date().toISOString()
+      })
+    });
+
+    // Add tab to ISO selector
+    adicionarTabNormaCustom(codigo, nome, cor);
+
+    // Show result
+    resDiv.innerHTML = '<div style="background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);border-radius:12px;padding:20px">' +
+      '<div style="font-size:14px;font-weight:700;color:#00e676;margin-bottom:10px">✅ Norma gerada com sucesso!</div>' +
+      '<div style="font-size:13px;color:#a0b4c8;margin-bottom:12px">' +
+        '<strong>' + nome + '</strong> — ' + Object.keys(checklist).length + ' requisitos · ' + totalCriterios + ' critérios criados' +
+      '</div>' +
+      '<div style="display:flex;gap:8px">' +
+        '<button onclick="trocarNorma(\'' + codigo + '\')" style="padding:8px 20px;border-radius:8px;border:none;background:#00e676;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer">▶ Abrir ' + nome + '</button>' +
+        '<button onclick="document.getElementById(\'nn_nome\').value=\'\';document.getElementById(\'nn_codigo\').value=\'\';document.getElementById(\'nn_desc\').value=\'\';nn_fileData=null;document.getElementById(\'nn_resultado\').style.display=\'none\';renderListaNormasCustom();" style="padding:8px 16px;border-radius:8px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer">+ Nova Norma</button>' +
+      '</div></div>';
+
+    renderListaNormasCustom();
+
+  } catch(err) {
+    resDiv.innerHTML = '<div style="background:rgba(255,82,82,.07);border:1px solid rgba(255,82,82,.2);border-radius:12px;padding:16px;font-size:13px;color:#ff5252">❌ Erro: ' + err.message + '<br><span style="font-size:11px;color:#607080">Verifique se o PDF é de uma norma e tente novamente.</span></div>';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🤖 GERAR NORMA COM IA';
+}
+
+function adicionarTabNormaCustom(codigo, nome, cor) {
+  var selector = document.querySelector('.iso-selector');
+  if (!selector) return;
+  // Remove existing tab if already there
+  var existing = document.getElementById('isoTab' + codigo);
+  if (existing) existing.remove();
+
+  var btn = document.createElement('button');
+  btn.className = 'iso-tab';
+  btn.id = 'isoTab' + codigo;
+  btn.textContent = nome;
+  btn.style.cssText = '--tab-cor:' + cor;
+  btn.onclick = function() { trocarNorma(codigo); };
+  selector.appendChild(btn);
+}
+
+function renderListaNormasCustom() {
+  var container = document.getElementById('nn_listaCustom');
+  if (!container) return;
+  var keys = Object.keys(normasCustom);
+  if (!keys.length) { container.innerHTML = ''; return; }
+
+  var html = '<div style="font-family:\'Syne\',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:#e8edf3">Normas Criadas (' + keys.length + ')</div>';
+  keys.forEach(function(cod) {
+    var n = normasCustom[cod];
+    var totalReqs = Object.keys(n.checklist || {}).length;
+    var totalCrit = Object.values(n.checklist || {}).reduce(function(s,r){ return s + (r.subitems||[]).reduce(function(ss,sub){ return ss+(sub.criterios||[]).length;},0);},0);
+    html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#111820;border:1px solid #1e2d3d;border-radius:10px;margin-bottom:8px">' +
+      '<div style="width:10px;height:10px;border-radius:50%;background:' + n.cor + ';flex-shrink:0"></div>' +
+      '<div style="flex:1"><div style="font-weight:600;font-size:13px">' + n.nome + '</div><div style="font-size:11px;color:#607080">' + totalReqs + ' requisitos · ' + totalCrit + ' critérios</div></div>' +
+      '<button onclick="trocarNorma(\'' + cod + '\')" style="padding:5px 14px;border-radius:7px;border:1px solid rgba(255,180,0,.3);background:rgba(255,180,0,.06);color:#ffb400;font-size:12px;cursor:pointer">▶ Abrir</button>' +
+      '<button onclick="excluirNormaCustom(\'' + cod + '\')" style="padding:5px 10px;border-radius:7px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:12px;cursor:pointer">🗑</button>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+}
+
+async function excluirNormaCustom(codigo) {
+  if (!confirm('Excluir a norma "' + normasCustom[codigo]?.nome + '"?')) return;
+  delete normasCustom[codigo];
+  try {
+    await sb('/rest/v1/resultados_ia?criterio_id=eq.norma_custom_' + codigo + '&ano=eq.0', { method: 'DELETE' });
+  } catch(e) {}
+  var tab = document.getElementById('isoTab' + codigo);
+  if (tab) tab.remove();
+  renderListaNormasCustom();
+}
+
+async function carregarNormasCustom() {
+  try {
+    var rows = await sb('/rest/v1/resultados_ia?criterio_id=like.norma_custom_%&ano=eq.0&select=criterio_id,recomendacao');
+    if (rows && rows.length) {
+      rows.forEach(function(row) {
+        if (row.recomendacao) {
+          try {
+            var n = JSON.parse(row.recomendacao);
+            if (n.codigo) {
+              normasCustom[n.codigo] = n;
+              adicionarTabNormaCustom(n.codigo, n.nome, n.cor || '#ff8c00');
+            }
+          } catch(e) {}
+        }
+      });
+    }
+  } catch(e) {}
+}
+
+// Patch trocarNorma to handle custom normas
+var _origTrocarNormaFinal = trocarNorma;
+trocarNorma = function(norma) {
+  if (normasCustom[norma]) {
+    // Handle custom norma
+    normaAtiva = norma;
+    var n = normasCustom[norma];
+    var cor = n.cor || '#ff8c00';
+    var labelEl = document.getElementById('navSectionLabel');
+    if (labelEl) labelEl.textContent = 'Requisitos ' + n.nome;
+    // Update all tab states
+    document.querySelectorAll('.iso-tab').forEach(function(t) { t.className = 'iso-tab'; });
+    var tab = document.getElementById('isoTab' + norma);
+    if (tab) { tab.className = 'iso-tab active-custom'; tab.style.background = 'rgba(255,180,0,.12)'; tab.style.borderColor = cor; tab.style.color = cor; }
+    // Show a dynamic checklist view
+    Object.values(MAIN_IDS).forEach(function(mid){ var el=document.getElementById(mid);if(el) el.style.display='none'; });
+    ['main27001','main42001','mainAnexo27','mainAnexo42','mainAuditLive','mainTemplates','mainAB2L','mainNovaNorma'].forEach(function(m){ var el=document.getElementById(m);if(el) el.style.display='none'; });
+    // Reuse mainReq for custom norma
+    document.getElementById('mainReq').style.display = 'flex';
+    activeModule = 'req';
+    // Override CHECKLIST temporarily
+    window._checklistCustom = n.checklist;
+    renderChecklistCustom(n, cor);
+    updateExtraNav();
+    return;
+  }
+  // Reset custom checklist override
+  window._checklistCustom = null;
+  _origTrocarNormaFinal(norma);
+};
+
+function renderChecklistCustom(norma, cor) {
+  var checklist = norma.checklist;
+  var allCrits = Object.values(checklist).flatMap(function(r){ return r.subitems.flatMap(function(s){ return s.criterios; }); });
+  var done_custom = window._doneCustom || {};
+  var dc = allCrits.filter(function(c){ return done_custom[c.id]; }).length;
+  var pct = allCrits.length ? Math.round(dc/allCrits.length*100) : 0;
+  var col = pctColor(pct);
+
+  document.getElementById('topReqNum').textContent = '✦';
+  document.getElementById('topReqNum').style.color = cor;
+  document.getElementById('topReqTitle').textContent = norma.nome;
+  document.getElementById('topReqSub').textContent = norma.desc || 'Norma personalizada gerada por IA';
+  document.getElementById('topReqPct').textContent = pct + '%';
+  document.getElementById('topReqPct').style.color = col;
+  document.getElementById('topReqCriterios').textContent = dc + ' de ' + allCrits.length + ' critérios';
+  document.getElementById('topBarFill').style.width = pct + '%';
+  document.getElementById('topBarFill').style.background = col;
+  document.getElementById('topHint').textContent = pct === 100 ? '✅ 100% conforme!' : 'Faltam ' + (allCrits.length - dc) + ' critérios';
+  document.getElementById('topHint').style.color = pct === 100 ? '#00e676' : '#607080';
+  document.getElementById('totalPctLabel').textContent = pct + '%';
+  document.getElementById('totalPctLabel').style.color = col;
+  document.getElementById('totalBarFill').style.width = pct + '%';
+  document.getElementById('totalBarFill').style.background = col;
+
+  // Nav items
+  var nav = document.getElementById('navItems');
+  nav.innerHTML = '';
+  Object.entries(checklist).forEach(function(entry) {
+    var rn = entry[0], rd = entry[1];
+    var rCrits = rd.subitems.flatMap(function(s){ return s.criterios; });
+    var rDone = rCrits.filter(function(c){ return done_custom[c.id]; }).length;
+    var rPct = rCrits.length ? Math.round(rDone/rCrits.length*100) : 0;
+    var rCol = pctColor(rPct);
+    var div = document.createElement('div');
+    div.className = 'nav-item';
+    div.innerHTML = '<div class="nav-item-row"><span class="nav-item-name">Req. ' + rn + ' · ' + rd.title + '</span><span class="nav-item-pct" style="color:' + (rPct===0?'#607080':rCol) + '">' + rPct + '%</span></div><div class="nav-mini-bar"><div style="width:' + rPct + '%;height:100%;background:' + (rPct===0?'#1e2d3d':rCol) + ';border-radius:2px"></div></div>';
+    nav.appendChild(div);
+  });
+
+  // Content
+  var content = document.getElementById('content');
+  content.innerHTML = '';
+  Object.entries(checklist).forEach(function(entry) {
+    var rn = entry[0], rd = entry[1];
+    rd.subitems.forEach(function(sub) {
+      var sp = sub.criterios.length ? Math.round(sub.criterios.filter(function(c){ return done_custom[c.id]; }).length/sub.criterios.length*100) : 0;
+      var scol = pctColor(sp);
+      var card = document.createElement('div');
+      card.className = 'sub-card';
+      card.innerHTML = '<div class="sub-header"><div class="sub-num" style="background:' + cor + '18;border-color:' + cor + '40;color:' + cor + '">' + sub.num + '</div><div style="flex:1"><div class="sub-name">' + sub.name + '</div><div class="sub-meta">' + sub.criterios.length + ' critérios</div></div><div class="sub-pct" style="color:' + (sp===0?'#607080':scol) + '">' + sp + '%</div></div>';
+      var criteriosDiv = document.createElement('div');
+      criteriosDiv.className = 'criterios';
+      sub.criterios.forEach(function(c) {
+        var isDone = !!done_custom[c.id];
+        var cDiv = document.createElement('div');
+        cDiv.className = 'criterio' + (isDone?' done':'');
+        cDiv.innerHTML = '<div class="criterio-row"><div class="checkbox' + (isDone?' checked':'') + '" onclick="toggleDoneCustom(\'' + normaAtiva + '\',\'' + c.id + '\')">' + (isDone?'<span class="checkbox-tick">✓</span>':'') + '</div><div style="flex:1"><div class="criterio-label"><span class="criterio-id">' + c.id + '</span>' + c.label + '</div></div></div>';
+        criteriosDiv.appendChild(cDiv);
+      });
+      card.appendChild(criteriosDiv);
+      content.appendChild(card);
+    });
+  });
+}
+
+async function toggleDoneCustom(normaId, criterioId) {
+  if (!window._doneCustom) window._doneCustom = {};
+  window._doneCustom[criterioId] = !window._doneCustom[criterioId];
+  await saveCriterio('custom_' + normaId + '_' + criterioId, window._doneCustom[criterioId]);
+  if (normasCustom[normaId]) renderChecklistCustom(normasCustom[normaId], normasCustom[normaId].cor || '#ff8c00');
+}
+
+// Load custom normas and custom done state on startup
+var _origCarregarAnoFinal = carregarAno;
+carregarAno = async function(ano) {
+  await _origCarregarAnoFinal(ano);
+  if (loggedUser && loggedUser.perfil === 'Administrador') {
+    await carregarNormasCustom();
+  }
+};
 
 </script>
 </body>
