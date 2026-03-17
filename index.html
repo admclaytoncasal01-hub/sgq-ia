@@ -3249,44 +3249,21 @@ function renderAB2L() {
                 var itemColor = itemResult ? (itemResult.nivel === 'excelente' ? '#00c8ff' : itemResult.nivel === 'bom' ? '#00e676' : '#ffea00') : 'transparent';
                 var itemDocKey = 'ab2l_' + itemKey;
                 var hasDoc = !!docArquivos[itemDocKey];
-                return `
-<div style="display:flex;gap:7px;margin-bottom:6px;align-items:flex-start;padding:5px 8px;border-radius:6px;background:rgba(0,200,255,.03);border:1px solid rgba(0,200,255,.08)">
-  <div style="width:5px;height:5px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:6px"></div>
-  <span style="flex:1;font-size:12px">${e}</span>
-
-  ${itemStatus ? `<span style="font-size:11px;font-weight:700;color:${itemColor};flex-shrink:0;margin-right:4px">${itemStatus}</span>` : ''}
-
-  ${hasDoc ? `<button onclick="viewDocumento('ab2l_${itemKey}')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">👁</button>` : ''}
-
-  <button class="ab2l-item-upload-btn" data-critid="${c.id}" data-nivel="excelente" data-idx="${ei}" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(0,200,255,.3);background:transparent;color:#00c8ff;font-size:10px;cursor:pointer;flex-shrink:0">📎</button>
-</div>
-
-<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,200,255,.15);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-  <button id="ab2lbtn_exc_inner_${c.id}" onclick="triggerUploadAB2L('${c.id}','${c.label.replace(/'/g,"\\'")}','excelente')" style="padding:5px 14px;border-radius:7px;border:1px solid rgba(0,200,255,.4);background:rgba(0,200,255,.06);color:#00c8ff;font-size:12px;font-weight:700;cursor:pointer">
-    ⭐ Enviar evidência EXCELENTE
-  </button>
-
-  <div id="ab2l_loading_exc_${c.id}" style="display:none">
-    <div class="typing" style="display:inline-flex">
-      <div class="typing-dot" style="background:#00c8ff"></div>
-      <div class="typing-dot" style="background:#00c8ff"></div>
-      <div class="typing-dot" style="background:#00c8ff"></div>
-    </div>
-    <span style="font-size:11px;color:#00c8ff;margin-left:6px">Analisando...</span>
-  </div>
-
-  ${
-    resultsAB2L[c.id+'_excelente'] 
-    ? `<span style="font-size:11px;font-weight:700;color:${
-        resultsAB2L[c.id+'_excelente'].nivel==='excelente' ? '#00c8ff' :
-        resultsAB2L[c.id+'_excelente'].nivel==='bom' ? '#00e676' : '#ffea00'
-      }">
-        → ${resultsAB2L[c.id+'_excelente'].nivel?.toUpperCase() || ''} 
-        (${resultsAB2L[c.id+'_excelente'].conformidade || ''})
-      </span>` 
-    : ''
-  }
-</div>
+                return '<div style="display:flex;gap:7px;margin-bottom:6px;align-items:flex-start;padding:5px 8px;border-radius:6px;background:rgba(0,200,255,.03);border:1px solid rgba(0,200,255,.08)">' +
+                  '<div style="width:5px;height:5px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:6px"></div>' +
+                  '<span style="flex:1;font-size:12px">' + e + '</span>' +
+                  (itemStatus ? '<span style="font-size:11px;font-weight:700;color:' + itemColor + ';flex-shrink:0;margin-right:4px">' + itemStatus + '</span>' : '') +
+                  (hasDoc ? '<button onclick="viewDocumento('ab2l_' + itemKey + '')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">\u{1F441}</button>' : '') +
+                  '<button class="ab2l-item-upload-btn" data-critid="' + c.id + '" data-nivel="excelente" data-idx="' + ei + '" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(0,200,255,.3);background:transparent;color:#00c8ff;font-size:10px;cursor:pointer;flex-shrink:0">\u{1F4CE}</button>' +
+                  '</div>';
+              }).join('')}
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,200,255,.15);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <button id="ab2lbtn_exc_inner_${c.id}" onclick="triggerUploadAB2L('${c.id}','${c.label.replace(/'/g,"\\'")}','excelente')" style="padding:5px 14px;border-radius:7px;border:1px solid rgba(0,200,255,.4);background:rgba(0,200,255,.06);color:#00c8ff;font-size:12px;font-weight:700;cursor:pointer">⭐ Enviar evidência EXCELENTE</button>
+                <div id="ab2l_loading_exc_${c.id}" style="display:none"><div class="typing" style="display:inline-flex"><div class="typing-dot" style="background:#00c8ff"></div><div class="typing-dot" style="background:#00c8ff"></div><div class="typing-dot" style="background:#00c8ff"></div></div><span style="font-size:11px;color:#00c8ff;margin-left:6px">Analisando...</span></div>
+                ${resultsAB2L[c.id+'_excelente'] ? `<span style="font-size:11px;font-weight:700;color:${resultsAB2L[c.id+'_excelente'].nivel==='excelente'?'#00c8ff':resultsAB2L[c.id+'_excelente'].nivel==='bom'?'#00e676':'#ffea00'}">→ ${resultsAB2L[c.id+'_excelente'].nivel?.toUpperCase()||''} (${resultsAB2L[c.id+'_excelente'].conformidade||''})</span>` : ''}
+              </div>
+            </div>
+          </div>
 
           <!-- NÍVEL BOM -->
           <div style="margin-bottom:12px">
@@ -3304,7 +3281,7 @@ function renderAB2L() {
                   '<div style="width:5px;height:5px;border-radius:50%;background:#00e676;flex-shrink:0;margin-top:6px"></div>' +
                   '<span style="flex:1;font-size:12px">' + e + '</span>' +
                   (itemStatus ? '<span style="font-size:11px;font-weight:700;color:' + itemColor + ';flex-shrink:0;margin-right:4px">' + itemStatus + '</span>' : '') +
-                  (hasDoc ? `<button onclick="viewDocumento('ab2l_${itemKey}')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:#00e676;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">👁</button>` : '') +
+                  (hasDoc ? '<button onclick="viewDocumento('ab2l_' + itemKey + '')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:#00e676;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">\u{1F441}</button>' : '') +
                   '<button class="ab2l-item-upload-btn" data-critid="' + c.id + '" data-nivel="bom" data-idx="' + ei + '" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(0,230,118,.3);background:transparent;color:#00e676;font-size:10px;cursor:pointer;flex-shrink:0">\u{1F4CE}</button>' +
                   '</div>';
               }).join('')}
