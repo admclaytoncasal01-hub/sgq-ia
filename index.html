@@ -358,7 +358,10 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
       </div>
     </div>
     <div class="topbar-bar"><div class="bar-fill" id="topBarFill" style="width:0%;background:#607080"></div></div>
-    <div class="topbar-hint" id="topHint"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:7px">
+      <div class="topbar-hint" id="topHint"></div>
+      <button onclick="imprimirRequisito('9001',currentReq)" title="Imprimir critérios aprovados" style="padding:5px 14px;border-radius:7px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0">🖨️ Imprimir Requisito</button>
+    </div>
   </div>
   <div class="content" id="content"></div>
 </div>
@@ -378,7 +381,10 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
       </div>
     </div>
     <div class="topbar-bar"><div class="bar-fill" id="topBarFill27" style="width:0%;background:#607080"></div></div>
-    <div class="topbar-hint" id="topHint27"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:7px">
+      <div class="topbar-hint" id="topHint27"></div>
+      <button onclick="imprimirRequisito('27001',currentReq27)" style="padding:5px 14px;border-radius:7px;border:1px solid rgba(160,80,255,.3);background:rgba(160,80,255,.06);color:#a050ff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0">🖨️ Imprimir Requisito</button>
+    </div>
   </div>
   <div class="content" id="content27"></div>
 </div>
@@ -398,7 +404,10 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
       </div>
     </div>
     <div class="topbar-bar"><div class="bar-fill" id="topBarFill42" style="width:0%;background:#607080"></div></div>
-    <div class="topbar-hint" id="topHint42"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:7px">
+      <div class="topbar-hint" id="topHint42"></div>
+      <button onclick="imprimirRequisito('42001',currentReq42)" style="padding:5px 14px;border-radius:7px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:#00e676;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0">🖨️ Imprimir Requisito</button>
+    </div>
   </div>
   <div class="content" id="content42"></div>
 </div>
@@ -718,7 +727,10 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
       </div>
     </div>
     <div class="topbar-bar"><div class="bar-fill" id="topBarFillAB2L" style="width:0%;background:#607080"></div></div>
-    <div class="topbar-hint" id="topHintAB2L">Meta: 85% (17/20 critérios com BOM ou EXCELENTE)</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:7px">
+      <div class="topbar-hint" id="topHintAB2L">Meta: 85% (17/20 critérios com BOM ou EXCELENTE)</div>
+      <button onclick="imprimirRequisito('ab2l',currentPilarAB2L)" style="padding:5px 14px;border-radius:7px;border:1px solid rgba(255,180,0,.3);background:rgba(255,180,0,.06);color:#ffb400;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0">🖨️ Imprimir Pilar</button>
+    </div>
   </div>
   <div class="content" id="contentAB2L"></div>
 </div>
@@ -1039,7 +1051,7 @@ async function carregarAno(ano){
         }
         return;
       }
-      const obj={aprovado:r.aprovado,conformidade:r.conformidade,pontos_atendidos:r.pontos_atendidos||[],pontos_faltando:r.pontos_faltando||[],recomendacao:r.recomendacao,filename:r.filename,erro:r.erro};
+      const obj={aprovado:r.aprovado,conformidade:r.conformidade,pontos_atendidos:r.pontos_atendidos||[],pontos_faltando:r.pontos_faltando||[],recomendacao:r.recomendacao,filename:r.filename,erro:r.erro,storagePath:r.storage_path||null};
       if(r.criterio_id.startsWith('27001_')) results27[r.criterio_id.replace('27001_','')]=obj;
       else if(r.criterio_id.startsWith('42001_')) results42[r.criterio_id.replace('42001_','')]=obj;
       else if(!r.criterio_id.startsWith('arg_') && !r.criterio_id.startsWith('usertpl_')) anoData[ano].results[r.criterio_id]=obj;
@@ -1078,7 +1090,7 @@ async function saveCriterio(id,feito){
 }
 
 async function saveResultadoIA(id,resultado){
-  try{await sb('/rest/v1/resultados_ia',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({ano:anoAtual,criterio_id:id,aprovado:resultado.aprovado,conformidade:resultado.conformidade,pontos_atendidos:resultado.pontos_atendidos,pontos_faltando:resultado.pontos_faltando,recomendacao:resultado.recomendacao,filename:resultado.filename,erro:resultado.erro||false,usuario_id:loggedUser?.id,criado_em:new Date().toISOString()})});}catch(e){console.warn('saveResultadoIA:',e);}
+  try{await sb('/rest/v1/resultados_ia',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({ano:anoAtual,criterio_id:id,aprovado:resultado.aprovado,conformidade:resultado.conformidade,pontos_atendidos:resultado.pontos_atendidos,pontos_faltando:resultado.pontos_faltando,recomendacao:resultado.recomendacao,filename:resultado.filename,erro:resultado.erro||false,storage_path:resultado.storagePath||null,usuario_id:loggedUser?.id,criado_em:new Date().toISOString()})});}catch(e){console.warn('saveResultadoIA:',e);}
 }
 
 async function salvarDocumentoSb(doc){
@@ -1141,7 +1153,7 @@ function renderContent(){
         const isDone=!!done[c.id];const result=results[c.id];const isUp=uploading===c.id;
         const cDiv=document.createElement('div');cDiv.className='criterio'+(isDone?' done':'');cDiv.id='crit-'+c.id;
         let resultHTML='';
-        if(result&&!result.erro){const rClass=result.aprovado?'ok':'warn';const rColor=result.aprovado?'#00e676':'#ffea00';const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');const falt=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span>${docArquivos[c.id]?'<button onclick="viewDocumento(\''+c.id+'\')" style="padding:1px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;margin-left:6px">👁 Ver</button>':''}</div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falt?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falt}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
+        if(result&&!result.erro){const rClass=result.aprovado?'ok':'warn';const rColor=result.aprovado?'#00e676':'#ffea00';const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');const falt=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span>${(results[c.id]&&results[c.id].storagePath)?'<button onclick="viewDocFromStorage(\''+results[c.id].storagePath+'\',\''+( results[c.id].filename||'doc')+'\'); event.stopPropagation();" style="padding:1px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;margin-left:6px">👁 Ver</button>':docArquivos[c.id]?'<button onclick="viewDocumento(\''+c.id+'\')" style="padding:1px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;margin-left:6px">👁 Ver</button>':''}</div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falt?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falt}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
         }else if(result&&result.erro){resultHTML="";}
         var critOpen9001 = openCriterios[c.id] !== false;
         cDiv.innerHTML=`<div class="criterio-row">` +
@@ -1359,8 +1371,11 @@ document.getElementById('fileInput').addEventListener('change',async function(e)
     const userText='Critério '+(norma||'ISO 9001')+' a validar: "'+label+'"\nArquivo: '+file.name+'\nAnalise e responda APENAS com JSON válido.';
     const raw=await callGemini(userText,systemISO,fileMime?base64:null,fileMime);
     const clean=raw.replace(/```json|```/g,'').trim();const json=JSON.parse(clean);
-    if(!norma||norma==='9001'){results[id]={...json,filename:file.name};if(json.aprovado){done[id]=true;await saveCriterio(id,true);}await saveResultadoIA(id,results[id]);registrarHistorico(id,file.name,json.aprovado?'aprovado':'insuficiente',norma||'9001');}
-    else{const rm=norma==='27001'?results27:results42;const dm=norma==='27001'?done27:done42;rm[id]={...json,filename:file.name};if(json.aprovado){dm[id]=true;await saveCriterio(norma+'_'+id,true);}await saveResultadoIA(norma+'_'+id,rm[id]);registrarHistorico(id,file.name,json.aprovado?'aprovado':'insuficiente',norma);}
+    // Upload to Supabase Storage for permanent access
+    var docKey2=(norma&&norma!=='9001')?(norma+'_'+id):id;
+    var storagePath = await uploadDocToStorage(base64, file.type||'application/pdf', file.name, docKey2);
+    if(!norma||norma==='9001'){results[id]={...json,filename:file.name,storagePath:storagePath};if(json.aprovado){done[id]=true;await saveCriterio(id,true);}await saveResultadoIA(id,results[id]);registrarHistorico(id,file.name,json.aprovado?'aprovado':'insuficiente',norma||'9001');}
+    else{const rm=norma==='27001'?results27:results42;const dm=norma==='27001'?done27:done42;rm[id]={...json,filename:file.name,storagePath:storagePath};if(json.aprovado){dm[id]=true;await saveCriterio(norma+'_'+id,true);}await saveResultadoIA(norma+'_'+id,rm[id]);registrarHistorico(id,file.name,json.aprovado?'aprovado':'insuficiente',norma);}
   }catch(err){
     console.error('IA erro:',err);
     if(!norma||norma==='9001'){results[id]={erro:true,erroMsg:err.message,filename:file?.name};}
@@ -3212,9 +3227,15 @@ function renderAB2L() {
     cDiv.innerHTML = `
       <div style="padding:14px 18px;display:flex;align-items:flex-start;gap:12px">
         <div style="width:38px;height:38px;border-radius:9px;background:rgba(255,180,0,.1);border:1px solid rgba(255,180,0,.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#ffb400;flex-shrink:0">${c.codigo}</div>
-        `+`<span id="chev_${c.id}" onclick="event.stopPropagation();toggleCriterio('${c.id}')" title="Recolher" style="color:#607080;font-size:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:1px solid #1e2d3d;transform:${critOpenAB2L?'rotate(180deg)':'rotate(0)'};transition:transform .2s;flex-shrink:0;margin-left:auto;align-self:flex-start">▼</span>`+`<div id="critbody_${c.id}" style="flex:1;display:${critOpenAB2L?'block':'none'}">
-          <div style="font-size:14px;font-weight:600;margin-bottom:3px">${c.label}</div>
-          <div style="font-size:12px;color:#607080;margin-bottom:10px">${c.descricao}</div>
+        `+`<div style="flex:1">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:600;margin-bottom:2px">${c.label}</div>
+              <div style="font-size:12px;color:#607080">${c.descricao}</div>
+            </div>
+            <span id="chev_${c.id}" onclick="event.stopPropagation();toggleCriterio('${c.id}')" title="Recolher" style="color:#607080;font-size:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:1px solid #1e2d3d;transform:${critOpenAB2L?'rotate(180deg)':'rotate(0)'};transition:transform .2s;flex-shrink:0">▼</span>
+          </div>
+          <div id="critbody_${c.id}" style="margin-top:8px;display:${critOpenAB2L?'block':'none'}">
 
           <!-- NÍVEL EXCELENTE -->
           <div style="margin-bottom:8px">
@@ -4668,6 +4689,142 @@ function toggleCriterio(criterioId) {
   var chev = document.getElementById('chev_' + criterioId);
   if (body) body.style.display = openCriterios[criterioId] === false ? 'none' : 'block';
   if (chev) chev.style.transform = openCriterios[criterioId] === false ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// ★ SUPABASE STORAGE — SALVAR DOCUMENTOS PERMANENTEMENTE
+// ══════════════════════════════════════════════════════════════
+// IMPORTANTE: Crie o bucket 'sgq-documentos' no painel Supabase
+// Storage > New bucket > sgq-documentos > Public: OFF
+
+async function uploadDocToStorage(base64, mime, filename, criterioKey) {
+  try {
+    // Convert base64 to blob
+    var byteChars = atob(base64);
+    var byteArr = new Uint8Array(byteChars.length);
+    for (var i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
+    var blob = new Blob([byteArr], { type: mime });
+    var ext = filename.split('.').pop() || 'pdf';
+    var path = anoAtual + '/' + criterioKey.replace(/[^a-zA-Z0-9_-]/g,'_') + '_' + Date.now() + '.' + ext;
+    var session = JSON.parse(localStorage.getItem('sgq_session') || 'null');
+    var token = session ? session.access_token : SUPABASE_KEY;
+    var res = await fetch(SUPABASE_URL + '/storage/v1/object/sgq-documentos/' + path, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': mime },
+      body: blob
+    });
+    if (!res.ok) { var e = await res.json(); console.warn('Storage upload failed:', e.message||e.error); return null; }
+    // Store path in resultados_ia for later retrieval
+    return path;
+  } catch(e) { console.warn('Storage upload error:', e); return null; }
+}
+
+async function getStorageUrl(path) {
+  try {
+    var session = JSON.parse(localStorage.getItem('sgq_session') || 'null');
+    var token = session ? session.access_token : SUPABASE_KEY;
+    var res = await fetch(SUPABASE_URL + '/storage/v1/object/sgq-documentos/' + path, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) return null;
+    var blob = await res.blob();
+    return URL.createObjectURL(blob);
+  } catch(e) { return null; }
+}
+
+async function viewDocFromStorage(path, filename) {
+  var loadingMsg = '⏳ Carregando documento...';
+  var btn = event ? event.target : null;
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+  try {
+    var url = await getStorageUrl(path);
+    if (!url) { alert('Documento não disponível. Verifique se o bucket sgq-documentos existe no Supabase.'); return; }
+    var win = window.open('', '_blank');
+    if (!win) { alert('Permita pop-ups para visualizar.'); return; }
+    var mime = filename.split('.').pop().toLowerCase();
+    if (mime === 'pdf') {
+      win.document.write('<html><body style="margin:0"><iframe src="' + url + '" style="width:100%;height:100vh;border:none"></iframe></body></html>');
+    } else {
+      win.document.write('<html><body style="margin:0;background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh"><img src="' + url + '" style="max-width:100%;max-height:100vh"></body></html>');
+    }
+    win.document.close();
+  } catch(e) { alert('Erro: ' + e.message); }
+  if (btn) { btn.textContent = '👁 Ver'; btn.disabled = false; }
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// ★ IMPRIMIR REQUISITO — SÓ CRITÉRIOS APROVADOS + EVIDÊNCIAS
+// ══════════════════════════════════════════════════════════════
+async function imprimirRequisito(norma, reqId) {
+  var cl = norma==='9001' ? CHECKLIST : norma==='27001' ? CHECKLIST_27001 : norma==='42001' ? CHECKLIST_42001 : null;
+  var doneMap = norma==='9001' ? done : norma==='27001' ? done27 : norma==='42001' ? done42 : doneAB2L;
+  var resultsMap = norma==='9001' ? results : norma==='27001' ? results27 : norma==='42001' ? results42 : resultsAB2L;
+
+  var req, titulo, subitems;
+  if (norma === 'ab2l') {
+    var pilar = CHECKLIST_AB2L[reqId];
+    if (!pilar) return;
+    titulo = 'AB2L · ' + pilar.titulo;
+    subitems = [{ name: pilar.titulo, criterios: pilar.criterios }];
+  } else {
+    req = cl[reqId];
+    if (!req) return;
+    titulo = 'ISO ' + norma + ' · Req. ' + reqId + ' — ' + req.title;
+    subitems = req.subitems || [];
+  }
+
+  var rows = '';
+  var totalAprov = 0;
+  subitems.forEach(function(sub) {
+    var criterios = sub.criterios || [];
+    criterios.forEach(function(c) {
+      var isDone = norma === 'ab2l'
+        ? (doneMap[c.id] === 'excelente' || doneMap[c.id] === 'bom')
+        : !!doneMap[c.id];
+      if (!isDone) return;
+      var result = resultsMap[c.id] || {};
+      totalAprov++;
+      var nivelLabel = norma === 'ab2l'
+        ? (doneMap[c.id] === 'excelente' ? '⭐ EXCELENTE' : '✅ BOM')
+        : (result.conformidade ? '✅ ' + result.conformidade : '✅ Aprovado');
+      var pontos = (result.pontos_atendidos||[]).map(function(p){ return '<li>'+p+'</li>'; }).join('');
+      var verBtn = result.storagePath
+        ? '<a href="#" style="color:#0066cc;font-size:11px" onclick="window.open(''+SUPABASE_URL+'/storage/v1/object/public/sgq-documentos/'+result.storagePath+'')">📎 '+( result.filename||'Ver documento')+'</a>'
+        : result.filename ? '<span style="color:#666;font-size:11px">📄 '+result.filename+'</span>' : '';
+      rows += '<tr style="border-bottom:1px solid #ddd">' +
+        '<td style="padding:8px;font-size:11px;color:#666;width:80px">' + (norma==='ab2l'?c.id.replace('ab2l_',''):c.id) + '</td>' +
+        '<td style="padding:8px;font-size:12px">' + c.label + '</td>' +
+        '<td style="padding:8px;font-size:11px;color:' + (doneMap[c.id]==='excelente'?'#0066cc':doneMap[c.id]==='bom'?'#006600':'#006600') + '">' + nivelLabel + '</td>' +
+        '<td style="padding:8px;font-size:11px">' + (pontos?'<ul style="margin:0;padding-left:16px">'+pontos+'</ul>':'—') + '</td>' +
+        '<td style="padding:8px">' + verBtn + '</td>' +
+        '</tr>';
+    });
+  });
+
+  if (!totalAprov) { alert('Nenhum critério aprovado neste requisito ainda.'); return; }
+
+  var win = window.open('', '_blank');
+  if (!win) { alert('Permita pop-ups para imprimir.'); return; }
+  win.document.write('<!DOCTYPE html><html><head><title>' + titulo + '</title><style>' +
+    'body{font-family:Arial,sans-serif;font-size:12pt;padding:2cm;color:#000;max-width:21cm;margin:0 auto}' +
+    'h1{font-size:15pt;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:4px}' +
+    'h2{font-size:11pt;color:#666;font-weight:normal;margin-top:0;margin-bottom:20px}' +
+    'table{width:100%;border-collapse:collapse;margin-top:16px}' +
+    'th{background:#f0f0f0;padding:8px;font-size:11pt;text-align:left;border-bottom:2px solid #000}' +
+    'td{vertical-align:top}' +
+    '.footer{margin-top:30px;font-size:10pt;color:#666;border-top:1px solid #ccc;padding-top:10px}' +
+    '@media print{@page{margin:2cm}a{color:#000}button{display:none}}' +
+    '</style></head><body>' +
+    '<h1>' + titulo + '</h1>' +
+    '<h2>Critérios aprovados: ' + totalAprov + ' · Gerado em: ' + new Date().toLocaleString('pt-BR') + ' · Usuário: ' + ((loggedUser&&loggedUser.nome)||'') + '</h2>' +
+    '<table><thead><tr><th>ID</th><th>Critério</th><th>Classificação</th><th>Pontos Atendidos</th><th>Evidência</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody></table>' +
+    '<div class="footer">CCADV · Clayton Casal Sociedade de Advogados · SGQ-IA</div>' +
+    '</body></html>');
+  win.document.close();
+  setTimeout(function(){ win.print(); }, 500);
 }
 
 </script>
