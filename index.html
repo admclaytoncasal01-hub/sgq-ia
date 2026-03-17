@@ -4790,9 +4790,10 @@ async function imprimirRequisito(norma, reqId) {
         ? (doneMap[c.id] === 'excelente' ? '⭐ EXCELENTE' : '✅ BOM')
         : (result.conformidade ? '✅ ' + result.conformidade : '✅ Aprovado');
       var pontos = (result.pontos_atendidos||[]).map(function(p){ return '<li>'+p+'</li>'; }).join('');
-      var verBtn = result.storagePath
-        ? '<a href="#" style="color:#0066cc;font-size:11px" onclick="window.open(''+SUPABASE_URL+'/storage/v1/object/public/sgq-documentos/'+result.storagePath+'')">📎 '+( result.filename||'Ver documento')+'</a>'
-        : result.filename ? '<span style="color:#666;font-size:11px">📄 '+result.filename+'</span>' : '';
+      var storageUrl = result.storagePath ? (SUPABASE_URL+'/storage/v1/object/public/sgq-documentos/'+result.storagePath) : null;
+      var verBtn = storageUrl
+        ? '<a href="' + storageUrl + '" target="_blank" style="color:#0066cc;font-size:11px">&#x1F4CE; '+(result.filename||'Ver documento')+'</a>'
+        : (result.filename ? '<span style="color:#666;font-size:11px">&#x1F4C4; '+result.filename+'</span>' : '');
       rows += '<tr style="border-bottom:1px solid #ddd">' +
         '<td style="padding:8px;font-size:11px;color:#666;width:80px">' + (norma==='ab2l'?c.id.replace('ab2l_',''):c.id) + '</td>' +
         '<td style="padding:8px;font-size:12px">' + c.label + '</td>' +
