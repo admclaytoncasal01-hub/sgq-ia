@@ -1148,7 +1148,7 @@ function renderContent(){
           `<div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id}</span>${c.label}</div></div>` +
           `<button class="upload-btn ${isDone?'done':'pending'}" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button>` +
           `<div style="position:relative;display:inline-block;margin-left:4px"><button onclick="toggleHistPopover('${c.id}',event)" title="Histórico de inclusões" style="width:26px;height:26px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center">⋯</button><div class="hist-popover" id="hist_${c.id}" style="display:none"></div></div>` +
-          `<span onclick="toggleCriterio('${c.id}')" id="chev_${c.id}" title="Recolher" style="margin-left:6px;color:#607080;font-size:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:1px solid #1e2d3d;transform:${critOpen9001?'rotate(180deg)':'rotate(0)'};transition:transform .2s">▼</span>` +
+          `<span onclick="event.stopPropagation();toggleCriterio('${c.id}')" id="chev_${c.id}" title="Recolher" style="margin-left:6px;color:#607080;font-size:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:1px solid #1e2d3d;transform:${critOpen9001?'rotate(180deg)':'rotate(0)'};transition:transform .2s">▼</span>` +
           `</div>` +
           `<div id="critbody_${c.id}" style="display:${critOpen9001?'block':'none'}">${resultHTML}</div>`;
         criteriosDiv.appendChild(cDiv);
@@ -1294,7 +1294,7 @@ function renderISO(norma){
           `<div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id.replace('27_','').replace('42_','')}</span>${c.label}</div></div>` +
           `<button class="upload-btn ${isDone?'done':'pending'}" onclick="${uploadFn}" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button>` +
           `<div style="position:relative;display:inline-block;margin-left:4px"><button onclick="toggleHistPopover('${c.id}',event)" title="Histórico" style="width:26px;height:26px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center">⋯</button><div class="hist-popover" id="hist_${c.id}" style="display:none"></div></div>` +
-          `<span onclick="toggleCriterio('${c.id}')" id="chev_${c.id}" title="Recolher" style="margin-left:6px;color:#607080;font-size:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:1px solid #1e2d3d;transform:${critOpenISO?'rotate(180deg)':'rotate(0)'};transition:transform .2s">▼</span>` +
+          `<span onclick="event.stopPropagation();toggleCriterio('${c.id}')" id="chev_${c.id}" title="Recolher" style="margin-left:6px;color:#607080;font-size:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:1px solid #1e2d3d;transform:${critOpenISO?'rotate(180deg)':'rotate(0)'};transition:transform .2s">▼</span>` +
           `</div>` +
           `<div id="critbody_${c.id}" style="display:${critOpenISO?'block':'none'}">${resultHTML}</div>`;
         criteriosDiv.appendChild(cDiv);
@@ -3211,7 +3211,7 @@ function renderAB2L() {
     cDiv.innerHTML = `
       <div style="padding:14px 18px;display:flex;align-items:flex-start;gap:12px">
         <div style="width:38px;height:38px;border-radius:9px;background:rgba(255,180,0,.1);border:1px solid rgba(255,180,0,.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#ffb400;flex-shrink:0">${c.codigo}</div>
-        `+`<span id="chev_${c.id}" onclick="toggleCriterio('${c.id}')" title="Recolher" style="color:#607080;font-size:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:1px solid #1e2d3d;transform:${critOpenAB2L?'rotate(180deg)':'rotate(0)'};transition:transform .2s;flex-shrink:0;margin-left:auto;align-self:flex-start">▼</span>`+`<div id="critbody_${c.id}" style="flex:1;display:${critOpenAB2L?'block':'none'}">
+        `+`<span id="chev_${c.id}" onclick="event.stopPropagation();toggleCriterio('${c.id}')" title="Recolher" style="color:#607080;font-size:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:1px solid #1e2d3d;transform:${critOpenAB2L?'rotate(180deg)':'rotate(0)'};transition:transform .2s;flex-shrink:0;margin-left:auto;align-self:flex-start">▼</span>`+`<div id="critbody_${c.id}" style="flex:1;display:${critOpenAB2L?'block':'none'}">
           <div style="font-size:14px;font-weight:600;margin-bottom:3px">${c.label}</div>
           <div style="font-size:12px;color:#607080;margin-bottom:10px">${c.descricao}</div>
 
@@ -4655,6 +4655,18 @@ function imprimirDocTemplate(docId) {
   win.document.write(content);
   win.document.close();
   setTimeout(function(){ win.print(); }, 400);
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// ★ RECOLHER/EXPANDIR CRITÉRIO INDIVIDUAL
+// ══════════════════════════════════════════════════════════════
+function toggleCriterio(criterioId) {
+  openCriterios[criterioId] = openCriterios[criterioId] === false ? true : false;
+  var body = document.getElementById('critbody_' + criterioId);
+  var chev = document.getElementById('chev_' + criterioId);
+  if (body) body.style.display = openCriterios[criterioId] === false ? 'none' : 'block';
+  if (chev) chev.style.transform = openCriterios[criterioId] === false ? 'rotate(0deg)' : 'rotate(180deg)';
 }
 
 </script>
