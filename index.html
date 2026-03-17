@@ -970,7 +970,7 @@ async function doLogin(){
     sbSession=data;localStorage.setItem('sgq_session',JSON.stringify(data));
     const perfis=await sb('/rest/v1/perfis?id=eq.'+data.user.id+'&select=*');
     const perfil=perfis&&perfis[0]?perfis[0]:{nome:email,perfil:'Colaborador',email};
-    if(perfil.ativo===false){ errEl.textContent='Conta desativada. Contate o administrador.'; btn.textContent='ENTRAR NO SISTEMA'; btn.disabled=false; return; }
+    if(perfil.ativo===false){errEl.textContent='Conta desativada. Contate o administrador.';localStorage.removeItem('sgq_session');btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;return;}
     loggedUser={...perfil,id:data.user.id};
     await registrarLog('login','Acesso ao sistema SGQ');
     abrirSistema();
