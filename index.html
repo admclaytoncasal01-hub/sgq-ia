@@ -3247,10 +3247,13 @@ function renderAB2L() {
                 var itemResult = resultsAB2L[itemKey];
                 var itemStatus = itemResult ? (itemResult.nivel === 'excelente' ? '\u2B50' : itemResult.nivel === 'bom' ? '\u2705' : '\u26A0\uFE0F') : '';
                 var itemColor = itemResult ? (itemResult.nivel === 'excelente' ? '#00c8ff' : itemResult.nivel === 'bom' ? '#00e676' : '#ffea00') : 'transparent';
+                var itemDocKey = 'ab2l_' + itemKey;
+                var hasDoc = !!docArquivos[itemDocKey];
                 return '<div style="display:flex;gap:7px;margin-bottom:6px;align-items:flex-start;padding:5px 8px;border-radius:6px;background:rgba(0,200,255,.03);border:1px solid rgba(0,200,255,.08)">' +
                   '<div style="width:5px;height:5px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:6px"></div>' +
                   '<span style="flex:1;font-size:12px">' + e + '</span>' +
                   (itemStatus ? '<span style="font-size:11px;font-weight:700;color:' + itemColor + ';flex-shrink:0;margin-right:4px">' + itemStatus + '</span>' : '') +
+                  (hasDoc ? '<button onclick="viewDocumento('ab2l_' + itemKey + '')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">\u{1F441}</button>' : '') +
                   '<button class="ab2l-item-upload-btn" data-critid="' + c.id + '" data-nivel="excelente" data-idx="' + ei + '" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(0,200,255,.3);background:transparent;color:#00c8ff;font-size:10px;cursor:pointer;flex-shrink:0">\u{1F4CE}</button>' +
                   '</div>';
               }).join('')}
@@ -3272,10 +3275,13 @@ function renderAB2L() {
                 var itemResult = resultsAB2L[itemKey];
                 var itemStatus = itemResult ? (itemResult.nivel === 'excelente' ? '\u2B50' : itemResult.nivel === 'bom' ? '\u2705' : '\u26A0\uFE0F') : '';
                 var itemColor = itemResult ? (itemResult.nivel === 'excelente' ? '#00c8ff' : itemResult.nivel === 'bom' ? '#00e676' : '#ffea00') : 'transparent';
+                var itemDocKey = 'ab2l_' + itemKey;
+                var hasDoc = !!docArquivos[itemDocKey];
                 return '<div style="display:flex;gap:7px;margin-bottom:6px;align-items:flex-start;padding:5px 8px;border-radius:6px;background:rgba(0,230,118,.03);border:1px solid rgba(0,230,118,.08)">' +
                   '<div style="width:5px;height:5px;border-radius:50%;background:#00e676;flex-shrink:0;margin-top:6px"></div>' +
                   '<span style="flex:1;font-size:12px">' + e + '</span>' +
                   (itemStatus ? '<span style="font-size:11px;font-weight:700;color:' + itemColor + ';flex-shrink:0;margin-right:4px">' + itemStatus + '</span>' : '') +
+                  (hasDoc ? '<button onclick="viewDocumento('ab2l_' + itemKey + '')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:#00e676;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">\u{1F441}</button>' : '') +
                   '<button class="ab2l-item-upload-btn" data-critid="' + c.id + '" data-nivel="bom" data-idx="' + ei + '" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(0,230,118,.3);background:transparent;color:#00e676;font-size:10px;cursor:pointer;flex-shrink:0">\u{1F4CE}</button>' +
                   '</div>';
               }).join('')}
@@ -3852,6 +3858,7 @@ document.getElementById('fileInputAB2L').addEventListener('change', async functi
   if (!file || !pendingUpload || pendingUpload.norma !== 'ab2l') return;
   eAB2L.target.value = '';
   const { id, label, nivel } = pendingUpload;
+  const itemKeyPending = pendingUpload.itemKey || null;
   pendingUpload = null;
 
   // Show loading animation on both the button AND the inline loading div
@@ -3878,7 +3885,7 @@ document.getElementById('fileInputAB2L').addEventListener('change', async functi
     });
     const base64 = fileDataUrl.split(',')[1];
     // Store for viewing this session
-    var ab2lDocKey = (pendingUpload && pendingUpload.itemKey) ? 'ab2l_'+pendingUpload.itemKey : 'ab2l_'+id;
+    var ab2lDocKey = itemKeyPending ? 'ab2l_'+itemKeyPending : 'ab2l_'+id;
     docArquivos[ab2lDocKey] = {dataUrl:fileDataUrl, mime:file.type, filename:file.name};
     docArquivos['ab2l_'+id] = {dataUrl:fileDataUrl, mime:file.type, filename:file.name};
     // AB2L accepts PDF and ALL image types
@@ -3890,12 +3897,9 @@ document.getElementById('fileInputAB2L').addEventListener('change', async functi
     const json = JSON.parse(clean);
 
     // Store result - if item upload, store by itemKey; else store by id
-    const resultKey = (pendingUpload && pendingUpload.itemKey) ? pendingUpload.itemKey
-                    : nivel ? (id + '_' + nivel) : id;
-    const itemKey = resultKey;
+    const resultKey = itemKeyPending || (nivel ? (id + '_' + nivel) : id);
     if (!resultsAB2L[id]) resultsAB2L[id] = {};
-    resultsAB2L[itemKey] = { ...json, filename: file.name, nivel_enviado: nivel };
-    // Also update main id result
+    resultsAB2L[resultKey] = { ...json, filename: file.name, nivel_enviado: nivel, storagePath: null };
     resultsAB2L[id] = { ...json, filename: file.name, nivel_enviado: nivel };
 
     // Set classification based on IA result
@@ -4611,14 +4615,16 @@ async function gerarComTemplateVisual() {
   resultDiv.innerHTML = '<div style="color:#607080;font-size:12px">⏳ Gerando documento com base no template...</div>';
 
   var system = 'Você é especialista em documentação ISO para escritório de advocacia CCADV Clayton Casal.' +
-    '\nO usuário forneceu um template com layout específico (cabeçalho com logo, tabela Número/Versão/Data/Página, rodapé com Elaborador/Revisor/Aprovador).' +
+    '\nO usuário forneceu um template PDF com layout gráfico específico. Analise o template e reproduza FIELMENTE seu layout.' +
     '\nINSTRUÇÕES OBRIGATÓRIAS:' +
-    '\n1. Gere o documento em HTML simples, pronto para imprimir, respeitando EXATAMENTE o layout do template' +
-    '\n2. Inclua cabeçalho com "CLAYTON CASAL | Sociedade de Advogados" à esquerda e tabela Número/Versão/Data/Página à direita' +
-    '\n3. Use as mesmas seções numeradas do template (1. Objetivo, 2. Alcance, 3. Ferramentas, 4. Atividades, etc.)' +
-    '\n4. Inclua rodapé com linhas de assinatura: (*) Elaborador | (*) Revisor | (*) Aprovador' +
-    '\n5. NÃO use markdown. Gere APENAS HTML válido com CSS inline' +
-    '\n6. Fonte: Arial 11pt, margens 2cm, página A4';
+    '\n1. Analise o template e identifique: logo, cabeçalho, estrutura de seções, rodapé e formatação' +
+    '\n2. Gere o documento em HTML COMPLETO com CSS inline, pronto para impressão em A4' +
+    '\n3. Cabeçalho: logo CLAYTON CASAL à esquerda (use texto estilizado se não conseguir extrair imagem) + tabela Número/Versão/Data/Página à direita com bordas' +
+    '\n4. Corpo: mesmas seções numeradas do template, fonte Arial 11pt, espaçamento igual ao original' +
+    '\n5. Rodapé fixo na base: 3 colunas com linhas tracejadas — (*) Elaborador | (*) Revisor | (*) Aprovador — e nota sobre assinatura' +
+    '\n6. NÃO use markdown, NÃO use asteriscos. Gere APENAS HTML válido começando com <!DOCTYPE html>' +
+    '\n7. CSS: body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.5} — use page-break e @media print' +
+    '\n8. O resultado deve parecer IDÊNTICO ao template original quando impresso';
 
   var userText = 'Template de referência: "' + tpl.nome + '" (' + tpl.tipo + ').' +
     '\nSolicitação: ' + prompt +
@@ -4777,6 +4783,7 @@ async function imprimirRequisito(norma, reqId) {
 
   var rows = '';
   var totalAprov = 0;
+  var annexDocs = []; // collect documents for embedding
   subitems.forEach(function(sub) {
     var criterios = sub.criterios || [];
     criterios.forEach(function(c) {
@@ -4794,6 +4801,12 @@ async function imprimirRequisito(norma, reqId) {
       var verBtn = storageUrl
         ? '<a href="' + storageUrl + '" target="_blank" style="color:#0066cc;font-size:11px">&#x1F4CE; '+(result.filename||'Ver documento')+'</a>'
         : (result.filename ? '<span style="color:#666;font-size:11px">&#x1F4C4; '+result.filename+'</span>' : '');
+      // Collect document for annex if available in session
+      var annexDocKey = norma === 'ab2l' ? 'ab2l_' + c.id : c.id;
+      var annexFile = docArquivos[annexDocKey];
+      if (isDone && annexFile) {
+        annexDocs.push({ filename: annexFile.filename||result.filename||c.id, dataUrl: annexFile.dataUrl, mime: annexFile.mime });
+      }
       rows += '<tr style="border-bottom:1px solid #ddd">' +
         '<td style="padding:8px;font-size:11px;color:#666;width:80px">' + (norma==='ab2l'?c.id.replace('ab2l_',''):c.id) + '</td>' +
         '<td style="padding:8px;font-size:12px">' + c.label + '</td>' +
@@ -4808,10 +4821,28 @@ async function imprimirRequisito(norma, reqId) {
 
   var win = window.open('', '_blank');
   if (!win) { alert('Permita pop-ups para imprimir.'); return; }
+
+  // Build annexes - embed documents from this session
+  var annexHtml = '';
+  annexDocs.forEach(function(ann, ai) {
+    annexHtml += '<div style="page-break-before:always;margin-top:20px">';
+    annexHtml += '<h3 style="font-size:12pt;border-bottom:1px solid #ccc;padding-bottom:6px">Anexo ' + (ai+1) + ' — ' + ann.filename + '</h3>';
+    if (ann.mime && ann.mime.startsWith('image/')) {
+      annexHtml += '<img src="' + ann.dataUrl + '" style="max-width:100%;max-height:24cm;object-fit:contain;display:block;margin:0 auto">';
+    } else if (ann.mime === 'application/pdf') {
+      annexHtml += '<p style="color:#666;font-size:11pt">📄 PDF: ' + ann.filename + '</p>';
+      annexHtml += '<iframe src="' + ann.dataUrl + '" style="width:100%;height:26cm;border:1px solid #ccc"></iframe>';
+    } else {
+      annexHtml += '<p style="color:#666">📄 ' + ann.filename + ' (visualize no sistema)</p>';
+    }
+    annexHtml += '</div>';
+  });
+
   win.document.write('<!DOCTYPE html><html><head><title>' + titulo + '</title><style>' +
     'body{font-family:Arial,sans-serif;font-size:12pt;padding:2cm;color:#000;max-width:21cm;margin:0 auto}' +
     'h1{font-size:15pt;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:4px}' +
     'h2{font-size:11pt;color:#666;font-weight:normal;margin-top:0;margin-bottom:20px}' +
+    'h3{font-size:12pt;margin-top:0}' +
     'table{width:100%;border-collapse:collapse;margin-top:16px}' +
     'th{background:#f0f0f0;padding:8px;font-size:11pt;text-align:left;border-bottom:2px solid #000}' +
     'td{vertical-align:top}' +
@@ -4823,9 +4854,10 @@ async function imprimirRequisito(norma, reqId) {
     '<table><thead><tr><th>ID</th><th>Critério</th><th>Classificação</th><th>Pontos Atendidos</th><th>Evidência</th></tr></thead>' +
     '<tbody>' + rows + '</tbody></table>' +
     '<div class="footer">CCADV · Clayton Casal Sociedade de Advogados · SGQ-IA</div>' +
+    (annexHtml ? '<h2 style="margin-top:40px;page-break-before:always">ANEXOS — Evidências</h2>' + annexHtml : '') +
     '</body></html>');
   win.document.close();
-  setTimeout(function(){ win.print(); }, 500);
+  setTimeout(function(){ win.print(); }, 600);
 }
 
 </script>
