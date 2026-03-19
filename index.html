@@ -1074,7 +1074,7 @@ async function doLogin(){
     // Check if admin needs 2FA
     if (loggedUser.perfil === 'Administrador') {
       btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
-      await check2FA(data);
+      await iniciar2FA(data);
       return;
     }
     await registrarLog('login','Acesso ao sistema SGQ');
