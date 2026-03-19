@@ -5472,22 +5472,25 @@ async function check2FA(sessionData) {
         'Authorization': 'Bearer ' + sessionData.access_token
       }
     });
-    const data = await res.json();
-    const totpFactor = (data.all || []).find(f => f.factor_type === 'totp' && f.status === 'verified');
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : {};
+    const factors = Array.isArray(data) ? data : (data.all || data.totp || []);
+    const totpFactor = factors.find(f => f.factor_type === 'totp' && f.status === 'verified');
 
     if (totpFactor) {
-      // Already enrolled - just verify
       _twoFAFactorId = totpFactor.id;
       document.getElementById('twoFASetup').style.display = 'none';
       document.getElementById('twoFAVerify').style.display = 'block';
-      // Create challenge
       await criar2FAChallenge(sessionData.access_token);
     } else {
-      // First time - enroll TOTP
+      // First time - show setup and enroll
+      document.getElementById('twoFASetup').style.display = 'block';
       await enrollTOTP(sessionData.access_token);
     }
   } catch(e) {
-    document.getElementById('twoFAErr').textContent = 'Erro ao verificar 2FA: ' + e.message;
+    // On any error, try enrolling directly
+    document.getElementById('twoFASetup').style.display = 'block';
+    await enrollTOTP(sessionData.access_token);
   }
 }
 
@@ -5502,8 +5505,10 @@ async function enrollTOTP(accessToken) {
       },
       body: JSON.stringify({ factor_type: 'totp', friendly_name: 'SGQ-IA Admin', issuer: 'SGQ-IA CCADV' })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || data.error || 'Erro ao configurar 2FA');
+    const rawText = await res.text();
+    if (!rawText) throw new Error('Supabase retornou resposta vazia. Verifique se o MFA TOTP está ativo em Authentication > Settings.');
+    const data = JSON.parse(rawText);
+    if (!res.ok) throw new Error(data.message || data.error || data.msg || 'Erro ' + res.status);
 
     _twoFAFactorId = data.id;
 
