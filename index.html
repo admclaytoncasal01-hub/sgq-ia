@@ -5449,250 +5449,222 @@ function abrirRelExec(doPrint) {
 }
 
 
-// ══════════════════════════════════════════════════════════════
-// ★ 2FA TOTP — SUPABASE (VERSÃO CORRIGIDA)
-// ══════════════════════════════════════════════════════════════
+// ════════════════════════════════════════
+// 🔐 2FA TOTP - SUPABASE (VERSÃO ESTÁVEL)
+// ════════════════════════════════════════
 
-var _twoFAFactorId = null;
-var _twoFAChallengeId = null;
-var _pendingSession = null;
+// ===== HELPER API =====
+async function sb(path, opts = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    ...(opts.headers || {})
+  };
 
-// ─────────────────────────────────────────────
-// INICIAR 2FA
-// ─────────────────────────────────────────────
-async function check2FA(sessionData) {
-  _pendingSession = sessionData;
+  const session = JSON.parse(localStorage.getItem('sgq_session') || 'null');
+  if (session?.access_token) {
+    headers['Authorization'] = 'Bearer ' + session.access_token;
+  }
 
-  const modal = document.getElementById('twoFAModal');
-  modal.style.display = 'flex';
+  const res = await fetch(SUPABASE_URL + path, { ...opts, headers });
 
-  document.getElementById('twoFAInput').value = '';
+  const text = await res.text();
+  let data = null;
+
+  try { data = text ? JSON.parse(text) : null; } catch {}
+
+  if (!res.ok) {
+    const msg =
+      data?.msg ||
+      data?.message ||
+      data?.error_description ||
+      data?.error ||
+      text ||
+      res.status;
+
+    throw new Error(msg);
+  }
+
+  return data;
+}
+
+// ===== VARIÁVEIS =====
+let _factorId = null;
+let _challengeId = null;
+let _session = null;
+
+// ===== INICIAR 2FA =====
+async function iniciar2FA(sessionData) {
+  _session = sessionData;
+
+  document.getElementById('twoFAModal').style.display = 'flex';
   document.getElementById('twoFAErr').textContent = '';
+  document.getElementById('twoFAInput').value = '';
 
-  try {
-    const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + sessionData.access_token
-      }
-    });
+  const data = await sb('/auth/v1/factors');
+  const factors = data.all || [];
 
-    const data = await res.json();
-    const factors = data.all || [];
+  const totp = factors.find(f => f.factor_type === 'totp');
 
-    const totpFactor = factors.find(f => f.factor_type === 'totp' && f.status === 'verified');
-    const pendingFactor = factors.find(f => f.factor_type === 'totp' && f.status !== 'verified');
+  if (totp && totp.status === 'verified') {
+    // Já configurado
+    _factorId = totp.id;
+    esconderQR();
+    await criarChallenge();
 
-    if (totpFactor) {
-      // ✅ Já configurado → só validar
-      _twoFAFactorId = totpFactor.id;
+  } else if (totp) {
+    // Existe mas não confirmado
+    _factorId = totp.id;
 
-      document.getElementById('twoFASetup').style.display = 'none';
-      document.getElementById('twoFAVerify').style.display = 'block';
+    mostrarMensagem('Finalize o cadastro no app autenticador.');
+    await criarChallenge();
 
-      await criar2FAChallenge(sessionData.access_token);
-
-    } else if (pendingFactor) {
-      // ⚠️ Já existe mas não validou
-      _twoFAFactorId = pendingFactor.id;
-
-      document.getElementById('twoFASetup').style.display = 'none';
-      document.getElementById('twoFAVerify').style.display = 'block';
-
-      document.getElementById('twoFAErr').textContent =
-        'Finalize a configuração usando o código do app autenticador.';
-
-      await criar2FAChallenge(sessionData.access_token);
-
-    } else {
-      // 🆕 Primeira vez → gerar QR
-      await enrollTOTP(sessionData.access_token);
-    }
-
-  } catch (e) {
-    console.error('[2FA] erro:', e);
-    document.getElementById('twoFAErr').textContent = 'Erro: ' + e.message;
+  } else {
+    // Primeira vez
+    await criarNovoTOTP();
   }
 }
 
-// ─────────────────────────────────────────────
-// ENROLL (GERAR QR)
-// ─────────────────────────────────────────────
-async function enrollTOTP(accessToken) {
-  try {
-    const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + accessToken
-      },
-      body: JSON.stringify({
-        factor_type: 'totp',
-        friendly_name: 'SGQ-IA',
-        issuer: 'SGQ-IA'
-      })
-    });
+// ===== CRIAR NOVO TOTP =====
+async function criarNovoTOTP() {
+  const data = await sb('/auth/v1/factors', {
+    method: 'POST',
+    body: JSON.stringify({
+      factor_type: 'totp',
+      friendly_name: 'SGQ-IA',
+      issuer: 'SGQ-IA'
+    })
+  });
 
-    const data = await res.json();
+  _factorId = data.id;
 
-    if (!res.ok) {
-      throw new Error(data.error || data.message);
-    }
+  mostrarQR(data.totp.uri, data.totp.secret);
 
-    _twoFAFactorId = data.id;
-
-    document.getElementById('twoFASetup').style.display = 'block';
-    document.getElementById('twoFAVerify').style.display = 'block';
-
-    const qrDiv = document.getElementById('twoFAQR');
-    qrDiv.innerHTML = '';
-
-    // 🔥 SEMPRE usar URI (mais confiável)
-    if (data.totp && data.totp.uri) {
-      const qrUrl =
-        'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +
-        encodeURIComponent(data.totp.uri);
-
-      qrDiv.innerHTML =
-        '<img src="' + qrUrl + '" style="width:200px;height:200px">';
-    }
-
-    // Mostrar chave manual
-    if (data.totp && data.totp.secret) {
-      document.getElementById('twoFASecretText').textContent =
-        'Chave manual: ' + data.totp.secret;
-    }
-
-    await criar2FAChallenge(accessToken);
-
-  } catch (e) {
-    document.getElementById('twoFAErr').textContent =
-      'Erro ao configurar 2FA: ' + e.message;
-  }
+  await criarChallenge();
 }
 
-// ─────────────────────────────────────────────
-// CRIAR CHALLENGE
-// ─────────────────────────────────────────────
-async function criar2FAChallenge(accessToken) {
-  try {
-    const res = await fetch(
-      SUPABASE_URL + '/auth/v1/factors/' + _twoFAFactorId + '/challenge',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + accessToken
-        }
-      }
-    );
+// ===== CRIAR CHALLENGE =====
+async function criarChallenge() {
+  const data = await sb(`/auth/v1/factors/${_factorId}/challenge`, {
+    method: 'POST'
+  });
 
-    const data = await res.json();
+  _challengeId = data.id;
 
-    if (!res.ok) {
-      throw new Error(data.error || 'Erro ao criar desafio');
-    }
-
-    _twoFAChallengeId = data.id;
-
-    setTimeout(() => {
-      document.getElementById('twoFAInput').focus();
-    }, 200);
-
-  } catch (e) {
-    document.getElementById('twoFAErr').textContent = 'Erro: ' + e.message;
-  }
+  setTimeout(() => {
+    document.getElementById('twoFAInput').focus();
+  }, 200);
 }
 
-// ─────────────────────────────────────────────
-// VERIFICAR CÓDIGO
-// ─────────────────────────────────────────────
+// ===== VERIFICAR CÓDIGO =====
 async function verificar2FA() {
   const code = document.getElementById('twoFAInput').value.trim();
+  const err = document.getElementById('twoFAErr');
   const btn = document.getElementById('twoFABtn');
-  const errEl = document.getElementById('twoFAErr');
 
-  if (!code || code.length !== 6) {
-    errEl.textContent = 'Digite o código de 6 dígitos.';
+  if (code.length !== 6) {
+    err.textContent = 'Digite 6 dígitos';
     return;
   }
 
   btn.disabled = true;
-  btn.textContent = '⏳ Verificando...';
-  errEl.textContent = '';
+  btn.textContent = 'Verificando...';
 
   try {
-    const res = await fetch(
-      SUPABASE_URL + '/auth/v1/factors/' +
-      _twoFAFactorId +
-      '/verify',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + _pendingSession.access_token
-        },
-        body: JSON.stringify({
-          challenge_id: _twoFAChallengeId,
-          code: code
-        })
-      }
-    );
+    const data = await sb(`/auth/v1/factors/${_factorId}/verify`, {
+      method: 'POST',
+      body: JSON.stringify({
+        challenge_id: _challengeId,
+        code: code
+      })
+    });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      let msg = data.error || data.message || 'Erro';
-
-      if (msg.includes('expired')) {
-        errEl.textContent = 'Código expirado. Aguarde o próximo.';
-        await criar2FAChallenge(_pendingSession.access_token);
-      } else {
-        errEl.textContent = 'Código inválido.';
-      }
-
-      btn.disabled = false;
-      btn.textContent = 'VERIFICAR CÓDIGO';
-      return;
-    }
-
-    // ✅ SUCESSO
+    // 🔥 MUITO IMPORTANTE (atualiza sessão MFA)
     if (data.access_token) {
-      _pendingSession.access_token = data.access_token;
-      localStorage.setItem('sgq_session', JSON.stringify(_pendingSession));
+      _session.access_token = data.access_token;
+      localStorage.setItem('sgq_session', JSON.stringify(_session));
     }
 
-    fechar2FAModal();
+    fechar2FA();
     abrirSistema();
 
   } catch (e) {
-    errEl.textContent = 'Erro: ' + e.message;
+    if (e.message.toLowerCase().includes('expired')) {
+      err.textContent = 'Código expirado. Aguarde o próximo.';
+      await criarChallenge();
+    } else {
+      err.textContent = 'Código inválido';
+    }
+
     btn.disabled = false;
     btn.textContent = 'VERIFICAR CÓDIGO';
+
+    document.getElementById('twoFAInput').value = '';
+    document.getElementById('twoFAInput').focus();
   }
 }
 
-// ─────────────────────────────────────────────
-// CANCELAR
-// ─────────────────────────────────────────────
-function cancelar2FA() {
-  fechar2FAModal();
-  localStorage.removeItem('sgq_session');
+// ===== RESETAR 2FA (BOTÃO ADMIN) =====
+async function resetar2FA() {
+  if (!confirm('Deseja resetar o 2FA deste usuário?')) return;
+
+  try {
+    const data = await sb('/auth/v1/factors');
+    const factors = data.all || [];
+
+    for (const f of factors) {
+      if (f.factor_type === 'totp') {
+        await sb(`/auth/v1/factors/${f.id}`, {
+          method: 'DELETE'
+        });
+      }
+    }
+
+    alert('2FA resetado. Faça login novamente.');
+
+  } catch (e) {
+    alert('Erro ao resetar: ' + e.message);
+  }
 }
 
-// ─────────────────────────────────────────────
-// FECHAR MODAL
-// ─────────────────────────────────────────────
-function fechar2FAModal() {
-  const modal = document.getElementById('twoFAModal');
-  if (modal) modal.style.display = 'none';
+// ===== UI HELPERS =====
+function mostrarQR(uri, secret) {
+  const qrDiv = document.getElementById('twoFAQR');
 
-  _twoFAFactorId = null;
-  _twoFAChallengeId = null;
-  _pendingSession = null;
+  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(uri);
+
+  qrDiv.innerHTML = `<img src="${qrUrl}" style="width:200px;height:200px">`;
+
+  if (secret) {
+    document.getElementById('twoFASecretText').textContent =
+      'Chave manual: ' + secret;
+  }
+}
+
+function esconderQR() {
+  document.getElementById('twoFAQR').innerHTML = '';
+  document.getElementById('twoFASecretText').textContent = '';
+}
+
+function mostrarMensagem(msg) {
+  document.getElementById('twoFAErr').textContent = msg;
+}
+
+// ===== FECHAR MODAL =====
+function fechar2FA() {
+  document.getElementById('twoFAModal').style.display = 'none';
+
+  _factorId = null;
+  _challengeId = null;
+  _session = null;
+}
+
+// ===== CANCELAR =====
+function cancelar2FA() {
+  fechar2FA();
+
+  localStorage.removeItem('sgq_session');
+  document.getElementById('loginPass').value = '';
 }
 
 </script>
