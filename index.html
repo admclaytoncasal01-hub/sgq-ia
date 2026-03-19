@@ -5466,15 +5466,15 @@ async function check2FA(sessionData) {
 
   // Check if admin already has TOTP enrolled
   try {
-    const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/user/factors', {
       headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': 'Bearer ' + sessionData.access_token
       }
     });
     const text = await res.text();
-    console.log('[2FA] GET /factors status:', res.status, 'body:', text.slice(0,200));
-    const data = text ? JSON.parse(text) : {};
+    console.log('[2FA] GET /user/factors status:', res.status, 'body:', text.slice(0,200));
+    const data = (text && res.ok) ? JSON.parse(text) : [];
     const factors = Array.isArray(data) ? data : (data.all || data.totp || []);
     const totpFactor = factors.find(f => f.factor_type === 'totp' && f.status === 'verified');
 
@@ -5519,11 +5519,21 @@ async function enrollTOTP(accessToken) {
     document.getElementById('twoFAVerify').style.display = 'block';
 
     const qrDiv = document.getElementById('twoFAQR');
+    qrDiv.innerHTML = '';
     if (data.totp && data.totp.qr_code) {
-      qrDiv.innerHTML = '<img src="' + data.totp.qr_code + '" style="width:180px;height:180px">';
+      var qrCode = data.totp.qr_code;
+      qrDiv.style.cssText = 'width:200px;height:200px;margin:0 auto 14px;background:#fff;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box';
+      if (qrCode.includes('<svg') || qrCode.includes('<?xml')) {
+        // SVG inline - render directly
+        qrDiv.innerHTML = qrCode;
+        var svgEl = qrDiv.querySelector('svg');
+        if (svgEl) { svgEl.setAttribute('width','184'); svgEl.setAttribute('height','184'); }
+      } else {
+        qrDiv.innerHTML = '<img src="' + qrCode + '" style="width:184px;height:184px">';
+      }
     } else if (data.totp && data.totp.uri) {
-      // Generate QR as text fallback
-      qrDiv.innerHTML = '<div style="font-size:9px;color:#333;word-break:break-all;padding:8px">' + data.totp.uri + '</div>';
+      var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=184x184&data=' + encodeURIComponent(data.totp.uri);
+      qrDiv.innerHTML = '<img src="' + qrUrl + '" style="width:184px;height:184px">';
     }
     if (data.totp && data.totp.secret) {
       document.getElementById('twoFASecretText').textContent = 'Chave manual: ' + data.totp.secret;
@@ -5546,8 +5556,11 @@ async function criar2FAChallenge(accessToken) {
         'Authorization': 'Bearer ' + accessToken
       }
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Erro ao criar desafio 2FA');
+    const chalText = await res.text();
+    console.log('[2FA] challenge status:', res.status, 'body:', chalText.slice(0,200));
+    if (!chalText) throw new Error('Sem resposta ao criar desafio');
+    const data = JSON.parse(chalText);
+    if (!res.ok) throw new Error(data.message || data.error || 'Erro ao criar desafio 2FA');
     _twoFAChallengeId = data.id;
     setTimeout(function() { document.getElementById('twoFAInput').focus(); }, 200);
   } catch(e) {
@@ -5575,7 +5588,9 @@ async function verificar2FA() {
       },
       body: JSON.stringify({ challenge_id: _twoFAChallengeId, code: code })
     });
-    const data = await res.json();
+    const verText = await res.text();
+    console.log('[2FA] verify status:', res.status, 'body:', verText.slice(0,200));
+    const data = verText ? JSON.parse(verText) : {};
     if (!res.ok) {
       var msg = data.message || data.error || 'Código inválido';
       if (msg.includes('expired') || msg.includes('expirou')) {
