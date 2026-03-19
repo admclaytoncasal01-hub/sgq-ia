@@ -5450,21 +5450,25 @@ function abrirRelExec(doPrint) {
 
 
 // ══════════════════════════════════════════════════════════════
-// ★ 2FA TOTP — GOOGLE AUTHENTICATOR
-// Uses Supabase MFA API (built-in TOTP support)
+// ★ 2FA TOTP — SUPABASE (VERSÃO CORRIGIDA)
 // ══════════════════════════════════════════════════════════════
+
 var _twoFAFactorId = null;
 var _twoFAChallengeId = null;
 var _pendingSession = null;
 
+// ─────────────────────────────────────────────
+// INICIAR 2FA
+// ─────────────────────────────────────────────
 async function check2FA(sessionData) {
   _pendingSession = sessionData;
+
   const modal = document.getElementById('twoFAModal');
   modal.style.display = 'flex';
+
   document.getElementById('twoFAInput').value = '';
   document.getElementById('twoFAErr').textContent = '';
 
-  // Check if admin already has TOTP enrolled
   try {
     const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
       headers: {
@@ -5472,56 +5476,48 @@ async function check2FA(sessionData) {
         'Authorization': 'Bearer ' + sessionData.access_token
       }
     });
-    const text = await res.text();
-    console.log('[2FA] GET /factors status:', res.status, 'body:', text.slice(0,300));
-    const data = (text && res.ok) ? JSON.parse(text) : [];
-    const factors = Array.isArray(data) ? data : (data.all || data.totp || []);
-    // Find verified TOTP factor
+
+    const data = await res.json();
+    const factors = data.all || [];
+
     const totpFactor = factors.find(f => f.factor_type === 'totp' && f.status === 'verified');
-    // Find unverified/pending TOTP factor
     const pendingFactor = factors.find(f => f.factor_type === 'totp' && f.status !== 'verified');
 
     if (totpFactor) {
-      // Already verified - just challenge
+      // ✅ Já configurado → só validar
       _twoFAFactorId = totpFactor.id;
+
       document.getElementById('twoFASetup').style.display = 'none';
       document.getElementById('twoFAVerify').style.display = 'block';
+
       await criar2FAChallenge(sessionData.access_token);
+
     } else if (pendingFactor) {
-      // Pending/unverified factor exists - use it directly (show QR via URI)
+      // ⚠️ Já existe mas não validou
       _twoFAFactorId = pendingFactor.id;
-      document.getElementById('twoFASetup').style.display = 'block';
+
+      document.getElementById('twoFASetup').style.display = 'none';
       document.getElementById('twoFAVerify').style.display = 'block';
-      // Try to delete and re-enroll to get fresh QR
-      await deletarEReenroll(sessionData.access_token, pendingFactor.id);
+
+      document.getElementById('twoFAErr').textContent =
+        'Finalize a configuração usando o código do app autenticador.';
+
+      await criar2FAChallenge(sessionData.access_token);
+
     } else {
-      // No factor - fresh enrollment
-      document.getElementById('twoFASetup').style.display = 'block';
-      document.getElementById('twoFAVerify').style.display = 'block';
+      // 🆕 Primeira vez → gerar QR
       await enrollTOTP(sessionData.access_token);
     }
-  } catch(e) {
-    console.error('[2FA] check2FA error:', e);
-    document.getElementById('twoFASetup').style.display = 'block';
+
+  } catch (e) {
+    console.error('[2FA] erro:', e);
     document.getElementById('twoFAErr').textContent = 'Erro: ' + e.message;
   }
 }
 
-async function deletarEReenroll(accessToken, factorId) {
-  try {
-    // Delete the pending/unverified factor
-    const delRes = await fetch(SUPABASE_URL + '/auth/v1/factors/' + factorId, {
-      method: 'DELETE',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken }
-    });
-    console.log('[2FA] DELETE factor status:', delRes.status);
-  } catch(e) {
-    console.warn('[2FA] Could not delete factor:', e);
-  }
-  // Re-enroll fresh
-  await enrollTOTP(accessToken);
-}
-
+// ─────────────────────────────────────────────
+// ENROLL (GERAR QR)
+// ─────────────────────────────────────────────
 async function enrollTOTP(accessToken) {
   try {
     const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
@@ -5531,153 +5527,172 @@ async function enrollTOTP(accessToken) {
         'apikey': SUPABASE_KEY,
         'Authorization': 'Bearer ' + accessToken
       },
-      body: JSON.stringify({ factor_type: 'totp', friendly_name: 'SGQ-IA-' + Date.now(), issuer: 'SGQ-IA CCADV' })
+      body: JSON.stringify({
+        factor_type: 'totp',
+        friendly_name: 'SGQ-IA',
+        issuer: 'SGQ-IA'
+      })
     });
-    const rawText = await res.text();
-    console.log('[2FA] POST /factors status:', res.status, 'body:', rawText.slice(0,300));
-    if (!rawText) throw new Error('Resposta vazia (status ' + res.status + '). Tente novamente.');
-    const data = JSON.parse(rawText);
-    if (!res.ok) throw new Error(data.message || data.error || data.msg || 'Erro HTTP ' + res.status + ': ' + rawText.slice(0,100));
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || data.message);
+    }
 
     _twoFAFactorId = data.id;
 
-    // Show QR code
     document.getElementById('twoFASetup').style.display = 'block';
     document.getElementById('twoFAVerify').style.display = 'block';
 
     const qrDiv = document.getElementById('twoFAQR');
     qrDiv.innerHTML = '';
-    if (data.totp && data.totp.qr_code) {
-      var qrCode = data.totp.qr_code;
-      qrDiv.style.cssText = 'width:200px;height:200px;margin:0 auto 14px;background:#fff;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box';
-      if (qrCode.includes('<svg') || qrCode.includes('<?xml')) {
-        // SVG inline - render directly
-        qrDiv.innerHTML = qrCode;
-        var svgEl = qrDiv.querySelector('svg');
-        if (svgEl) { svgEl.setAttribute('width','184'); svgEl.setAttribute('height','184'); }
-      } else {
-        qrDiv.innerHTML = '<img src="' + qrCode + '" style="width:184px;height:184px">';
-      }
-    } else if (data.totp && data.totp.uri) {
-      var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=184x184&data=' + encodeURIComponent(data.totp.uri);
-      qrDiv.innerHTML = '<img src="' + qrUrl + '" style="width:184px;height:184px">';
-    }
-    if (data.totp && data.totp.secret) {
-      document.getElementById('twoFASecretText').textContent = 'Chave manual: ' + data.totp.secret;
+
+    // 🔥 SEMPRE usar URI (mais confiável)
+    if (data.totp && data.totp.uri) {
+      const qrUrl =
+        'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +
+        encodeURIComponent(data.totp.uri);
+
+      qrDiv.innerHTML =
+        '<img src="' + qrUrl + '" style="width:200px;height:200px">';
     }
 
-    // Create challenge for verification
+    // Mostrar chave manual
+    if (data.totp && data.totp.secret) {
+      document.getElementById('twoFASecretText').textContent =
+        'Chave manual: ' + data.totp.secret;
+    }
+
     await criar2FAChallenge(accessToken);
-  } catch(e) {
-    document.getElementById('twoFAErr').textContent = 'Erro ao configurar 2FA: ' + e.message;
+
+  } catch (e) {
+    document.getElementById('twoFAErr').textContent =
+      'Erro ao configurar 2FA: ' + e.message;
   }
 }
 
+// ─────────────────────────────────────────────
+// CRIAR CHALLENGE
+// ─────────────────────────────────────────────
 async function criar2FAChallenge(accessToken) {
   try {
-    const res = await fetch(SUPABASE_URL + '/auth/v1/factors/' + _twoFAFactorId + '/challenge', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + accessToken
+    const res = await fetch(
+      SUPABASE_URL + '/auth/v1/factors/' + _twoFAFactorId + '/challenge',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + accessToken
+        }
       }
-    });
-    const chalText = await res.text();
-    console.log('[2FA] challenge status:', res.status, 'body:', chalText.slice(0,200));
-    if (!chalText) throw new Error('Sem resposta ao criar desafio');
-    const data = JSON.parse(chalText);
-    if (!res.ok) throw new Error(data.message || data.error || 'Erro ao criar desafio 2FA');
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Erro ao criar desafio');
+    }
+
     _twoFAChallengeId = data.id;
-    setTimeout(function() { document.getElementById('twoFAInput').focus(); }, 200);
-  } catch(e) {
+
+    setTimeout(() => {
+      document.getElementById('twoFAInput').focus();
+    }, 200);
+
+  } catch (e) {
     document.getElementById('twoFAErr').textContent = 'Erro: ' + e.message;
   }
 }
 
+// ─────────────────────────────────────────────
+// VERIFICAR CÓDIGO
+// ─────────────────────────────────────────────
 async function verificar2FA() {
   const code = document.getElementById('twoFAInput').value.trim();
   const btn = document.getElementById('twoFABtn');
   const errEl = document.getElementById('twoFAErr');
 
-  if (!code || code.length !== 6) { errEl.textContent = 'Digite o código de 6 dígitos.'; return; }
-  if (!_twoFAChallengeId || !_twoFAFactorId) { errEl.textContent = 'Sessão expirada. Faça login novamente.'; return; }
+  if (!code || code.length !== 6) {
+    errEl.textContent = 'Digite o código de 6 dígitos.';
+    return;
+  }
 
-  btn.disabled = true; btn.textContent = '⏳ Verificando...'; errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = '⏳ Verificando...';
+  errEl.textContent = '';
 
   try {
-    const res = await fetch(SUPABASE_URL + '/auth/v1/factors/' + _twoFAFactorId + '/verify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + _pendingSession.access_token
-      },
-      body: JSON.stringify({ challenge_id: _twoFAChallengeId, code: code })
-    });
-    const verText = await res.text();
-    console.log('[2FA] verify status:', res.status, 'body:', verText.slice(0,200));
-    const data = verText ? JSON.parse(verText) : {};
+    const res = await fetch(
+      SUPABASE_URL + '/auth/v1/factors/' +
+      _twoFAFactorId +
+      '/verify',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + _pendingSession.access_token
+        },
+        body: JSON.stringify({
+          challenge_id: _twoFAChallengeId,
+          code: code
+        })
+      }
+    );
+
+    const data = await res.json();
+
     if (!res.ok) {
-      var msg = data.message || data.error || 'Código inválido';
-      if (msg.includes('expired') || msg.includes('expirou')) {
-        errEl.textContent = '⏰ Código expirado. Aguarde o próximo código no app.';
-        // Recreate challenge
+      let msg = data.error || data.message || 'Erro';
+
+      if (msg.includes('expired')) {
+        errEl.textContent = 'Código expirado. Aguarde o próximo.';
         await criar2FAChallenge(_pendingSession.access_token);
       } else {
-        errEl.textContent = '❌ ' + (msg.includes('Invalid') ? 'Código incorreto. Tente novamente.' : msg);
+        errEl.textContent = 'Código inválido.';
       }
-      btn.disabled = false; btn.textContent = 'VERIFICAR CÓDIGO';
-      document.getElementById('twoFAInput').value = '';
-      document.getElementById('twoFAInput').focus();
+
+      btn.disabled = false;
+      btn.textContent = 'VERIFICAR CÓDIGO';
       return;
     }
 
-    // Success! Update session with MFA token if provided
+    // ✅ SUCESSO
     if (data.access_token) {
       _pendingSession.access_token = data.access_token;
-      sbSession = _pendingSession;
       localStorage.setItem('sgq_session', JSON.stringify(_pendingSession));
     }
 
     fechar2FAModal();
-    await registrarAuditoria('2fa_success', 'Verificação 2FA aprovada', 'info');
-    await registrarLog('login', 'Acesso admin com 2FA verificado');
     abrirSistema();
-  } catch(e) {
+
+  } catch (e) {
     errEl.textContent = 'Erro: ' + e.message;
-    btn.disabled = false; btn.textContent = 'VERIFICAR CÓDIGO';
+    btn.disabled = false;
+    btn.textContent = 'VERIFICAR CÓDIGO';
   }
 }
 
+// ─────────────────────────────────────────────
+// CANCELAR
+// ─────────────────────────────────────────────
 function cancelar2FA() {
   fechar2FAModal();
-  loggedUser = null;
-  sbSession = null;
   localStorage.removeItem('sgq_session');
-  document.getElementById('loginPass').value = '';
 }
 
+// ─────────────────────────────────────────────
+// FECHAR MODAL
+// ─────────────────────────────────────────────
 function fechar2FAModal() {
-  var modal = document.getElementById('twoFAModal');
+  const modal = document.getElementById('twoFAModal');
   if (modal) modal.style.display = 'none';
+
   _twoFAFactorId = null;
   _twoFAChallengeId = null;
   _pendingSession = null;
-}
-
-// ── Add 2FA management to Usuários module ──
-// Admin can see 2FA status and reset for other admins
-async function render2FAStatus() {
-  try {
-    const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + sbSession.access_token }
-    });
-    const data = await res.json();
-    const factors = data.all || [];
-    const totp = factors.find(f => f.factor_type === 'totp' && f.status === 'verified');
-    return totp ? '✅ 2FA Ativo' : '⚠️ 2FA não configurado';
-  } catch(e) { return '—'; }
 }
 
 </script>
