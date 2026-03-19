@@ -5473,6 +5473,7 @@ async function check2FA(sessionData) {
       }
     });
     const text = await res.text();
+    console.log('[2FA] GET /factors status:', res.status, 'body:', text.slice(0,200));
     const data = text ? JSON.parse(text) : {};
     const factors = Array.isArray(data) ? data : (data.all || data.totp || []);
     const totpFactor = factors.find(f => f.factor_type === 'totp' && f.status === 'verified');
@@ -5506,9 +5507,10 @@ async function enrollTOTP(accessToken) {
       body: JSON.stringify({ factor_type: 'totp', friendly_name: 'SGQ-IA Admin', issuer: 'SGQ-IA CCADV' })
     });
     const rawText = await res.text();
-    if (!rawText) throw new Error('Supabase retornou resposta vazia. Verifique se o MFA TOTP está ativo em Authentication > Settings.');
+    console.log('[2FA] POST /factors status:', res.status, 'body:', rawText.slice(0,300));
+    if (!rawText) throw new Error('Resposta vazia (status ' + res.status + '). Tente novamente.');
     const data = JSON.parse(rawText);
-    if (!res.ok) throw new Error(data.message || data.error || data.msg || 'Erro ' + res.status);
+    if (!res.ok) throw new Error(data.message || data.error || data.msg || 'Erro HTTP ' + res.status + ': ' + rawText.slice(0,100));
 
     _twoFAFactorId = data.id;
 
