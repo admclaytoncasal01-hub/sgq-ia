@@ -5329,13 +5329,12 @@ ${barHtml('AB2L',statsAB2L.pct,'#cc6600')}
 <div class="footer">Gerado pelo SGQ-IA · ${empresa} · ${new Date().toLocaleString('pt-BR')} · Usuário: ${loggedUser?.nome||''}</div>
 </body></html>`;
 
-    resultDiv.innerHTML = `<div style="background:rgba(255,180,0,.07);border:1px solid rgba(255,180,0,.2);border-radius:12px;padding:16px">
-      <div style="font-size:12px;font-weight:700;color:#ffb400;margin-bottom:10px">✅ Relatório gerado com sucesso!</div>
-      <div style="display:flex;gap:8px">
-        <button onclick="window._relExecHtml=\`${winHtml.replace(/`/g,"\\`")}\`;var w=window.open('','_blank');w.document.write(window._relExecHtml);w.document.close();setTimeout(function(){w.print();},500)" style="padding:8px 20px;border-radius:7px;border:none;background:#ffb400;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer">🖨️ Imprimir / Salvar PDF</button>
-        <button onclick="var w=window.open('','_blank');w.document.write(window._relExecHtml||'');w.document.close()" style="padding:8px 16px;border-radius:7px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer">👁 Visualizar</button>
-      </div>
-    </div>`;
+    resultDiv.innerHTML = '<div style="background:rgba(255,180,0,.07);border:1px solid rgba(255,180,0,.2);border-radius:12px;padding:16px">' +
+      '<div style="font-size:12px;font-weight:700;color:#ffb400;margin-bottom:10px">&#x2705; Relat&#xF3;rio gerado!</div>' +
+      '<div style="display:flex;gap:8px">' +
+      '<button onclick="abrirRelExec(true)" style="padding:8px 20px;border-radius:7px;border:none;background:#ffb400;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer">&#x1F5A8; Imprimir PDF</button>' +
+      '<button onclick="abrirRelExec(false)" style="padding:8px 16px;border-radius:7px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer">&#x1F441; Visualizar</button>' +
+      '</div></div>';
     window._relExecHtml = winHtml;
   } catch(err) {
     resultDiv.innerHTML = '<div style="color:#ff5252;font-size:13px">❌ Erro: ' + err.message + '</div>';
@@ -5433,6 +5432,23 @@ showModule = function(id) {
 };
 
 
+function abrirRelExec(print) {
+  var w = window.open('', '_blank');
+  if (!w) { alert('Permita pop-ups para visualizar.'); return; }
+  w.document.write(window._relExecHtml || '<p>Gere o relatório primeiro.</p>');
+  w.document.close();
+  if (print) setTimeout(function(){ w.print(); }, 500);
+}
+
+function abrirRelExec(doPrint) {
+  var w = window.open('', '_blank');
+  if (!w) { alert('Permita pop-ups para visualizar.'); return; }
+  w.document.write(window._relExecHtml || '<p>Gere o relatório primeiro.</p>');
+  w.document.close();
+  if (doPrint) setTimeout(function(){ w.print(); }, 500);
+}
+
+
 // ══════════════════════════════════════════════════════════════
 // ★ 2FA TOTP — GOOGLE AUTHENTICATOR
 // Uses Supabase MFA API (built-in TOTP support)
@@ -5447,8 +5463,6 @@ async function check2FA(sessionData) {
   modal.style.display = 'flex';
   document.getElementById('twoFAInput').value = '';
   document.getElementById('twoFAErr').textContent = '';
-  document.getElementById('twoFASetup').style.display = 'none';
-  document.getElementById('twoFAVerify').style.display = 'block';
 
   // Check if admin already has TOTP enrolled
   try {
@@ -5458,24 +5472,22 @@ async function check2FA(sessionData) {
         'Authorization': 'Bearer ' + sessionData.access_token
       }
     });
-    // Handle empty response
-    const text = await res.text();
-    const data = text ? JSON.parse(text) : {};
-    // Supabase returns array or {all:[]} or {totp:[], phone:[]}
-    const factors = Array.isArray(data) ? data : (data.all || data.totp || []);
-    const totpFactor = factors.find(function(f){ return f.factor_type === 'totp' && f.status === 'verified'; });
+    const data = await res.json();
+    const totpFactor = (data.all || []).find(f => f.factor_type === 'totp' && f.status === 'verified');
 
     if (totpFactor) {
       // Already enrolled - just verify
       _twoFAFactorId = totpFactor.id;
+      document.getElementById('twoFASetup').style.display = 'none';
+      document.getElementById('twoFAVerify').style.display = 'block';
+      // Create challenge
       await criar2FAChallenge(sessionData.access_token);
     } else {
-      // First time - enroll TOTP and show QR
+      // First time - enroll TOTP
       await enrollTOTP(sessionData.access_token);
     }
   } catch(e) {
-    // If can't check factors, try enrolling directly
-    await enrollTOTP(sessionData.access_token);
+    document.getElementById('twoFAErr').textContent = 'Erro ao verificar 2FA: ' + e.message;
   }
 }
 
@@ -5490,38 +5502,30 @@ async function enrollTOTP(accessToken) {
       },
       body: JSON.stringify({ factor_type: 'totp', friendly_name: 'SGQ-IA Admin', issuer: 'SGQ-IA CCADV' })
     });
-    // Safe parse
-    const text = await res.text();
-    if (!text) throw new Error('Resposta vazia do servidor. Verifique se MFA está ativo no Supabase.');
-    const data = JSON.parse(text);
-    if (!res.ok) throw new Error(data.message || data.error || data.msg || 'Erro ao configurar 2FA');
-    if (!data.id) throw new Error('Fator não criado. ' + JSON.stringify(data).slice(0,100));
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || data.error || 'Erro ao configurar 2FA');
 
     _twoFAFactorId = data.id;
 
-    // Show QR code and setup area
+    // Show QR code
     document.getElementById('twoFASetup').style.display = 'block';
+    document.getElementById('twoFAVerify').style.display = 'block';
 
     const qrDiv = document.getElementById('twoFAQR');
-    qrDiv.innerHTML = '';
     if (data.totp && data.totp.qr_code) {
-      // Supabase returns SVG or base64 QR
       qrDiv.innerHTML = '<img src="' + data.totp.qr_code + '" style="width:180px;height:180px">';
     } else if (data.totp && data.totp.uri) {
-      // Use Google Charts API to generate QR from URI
-      var qrUrl = 'https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=' + encodeURIComponent(data.totp.uri);
-      qrDiv.innerHTML = '<img src="' + qrUrl + '" style="width:180px;height:180px" onerror="this.style.display='none'">' +
-        '<div style="font-size:8px;color:#333;word-break:break-all;padding:4px;margin-top:4px">' + data.totp.uri.slice(0,80) + '...</div>';
+      // Generate QR as text fallback
+      qrDiv.innerHTML = '<div style="font-size:9px;color:#333;word-break:break-all;padding:8px">' + data.totp.uri + '</div>';
     }
     if (data.totp && data.totp.secret) {
-      document.getElementById('twoFASecretText').textContent = '🔑 Chave manual: ' + data.totp.secret;
+      document.getElementById('twoFASecretText').textContent = 'Chave manual: ' + data.totp.secret;
     }
 
-    // Create challenge
+    // Create challenge for verification
     await criar2FAChallenge(accessToken);
   } catch(e) {
     document.getElementById('twoFAErr').textContent = 'Erro ao configurar 2FA: ' + e.message;
-    console.error('enrollTOTP error:', e);
   }
 }
 
