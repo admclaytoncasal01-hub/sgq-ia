@@ -5178,12 +5178,19 @@ async function gerarPlanoAcao() {
   }
 
   const system = 'Você é consultor especialista em ISO 9001, 27001, 42001 e certificação AB2L. Gere um plano de ação priorizado. Responda APENAS com JSON válido: {"plano":[{"prioridade":"Alta|Media|Baixa","tarefa":"desc","criterios":["id"],"norma":"ISO X","prazo_dias":30,"responsavel_sugerido":"Cargo","evidencia_necessaria":"doc","dica":"texto"}]}';
-  const userText = 'Empresa: CCADV · Clayton Casal Sociedade de Advogados\nCritérios pendentes (' + pendentes.length + '):\n' + pendentes.slice(0,30).map(p => `- [${p.norma}] Req.${p.req} ${p.criterio}`).join('\n') + '\nGere plano priorizado com no máximo 15 ações mais importantes.';
+  const userText = 'Empresa: CCADV · Clayton Casal Sociedade de Advogados\nCritérios pendentes (' + pendentes.length + '):\n' + pendentes.slice(0,20).map(p => '['+p.norma+'] Req.'+p.req+' '+p.criterio.slice(0,60)).join('\n') + '\nGere plano com NO MÁXIMO 8 ações. Seja conciso em cada campo. JSON pequeno.';
 
   try {
     const raw = await callGemini(userText, system);
-    const clean = raw.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(clean.substring(clean.indexOf('{')));
+    var cleanP = raw.replace(/```json|```/g,'').trim();
+    var jsonStartP = cleanP.indexOf('{');
+    if (jsonStartP > 0) cleanP = cleanP.substring(jsonStartP);
+    // Find last complete array item - fix truncated JSON
+    var lastBracket = cleanP.lastIndexOf(']');
+    var lastBrace = cleanP.lastIndexOf('}');
+    if (lastBracket > 0 && lastBrace > lastBracket) cleanP = cleanP.substring(0, lastBrace + 1);
+    else if (lastBracket > 0) cleanP = cleanP.substring(0, lastBracket + 1) + '}}';
+    const parsed = JSON.parse(cleanP);
     const tarefas = parsed.plano || [];
 
     let html = `<div style="margin-bottom:12px;padding:10px 14px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:9px;font-size:13px;color:#a0b4c8">
@@ -5314,7 +5321,7 @@ async function renderAuditoria() {
   content.innerHTML = '<div style="color:#607080;text-align:center;padding:30px">⏳ Carregando logs...</div>';
 
   try {
-    const rows = await sb('/rest/v1/resultados_ia?criterio_id=like.audit_%&order=criado_em.desc&limit=100&select=recomendacao,criado_em') || [];
+    const rows = await sb('/rest/v1/resultados_ia?criterio_id=like.audit_*&order=criado_em.desc&limit=100&select=recomendacao,criado_em') || [];
     if (!rows.length) { content.innerHTML = '<div style="color:#607080;text-align:center;padding:40px">Nenhum log registrado ainda.</div>'; return; }
 
     let html = `<div style="background:#111820;border:1px solid #1e2d3d;border-radius:12px;overflow:hidden">
@@ -5349,7 +5356,7 @@ async function renderAuditoria() {
 
 async function exportarLog() {
   try {
-    const rows = await sb('/rest/v1/resultados_ia?criterio_id=like.audit_%&order=criado_em.desc&limit=500&select=recomendacao,criado_em') || [];
+    const rows = await sb('/rest/v1/resultados_ia?criterio_id=like.audit_*&order=criado_em.desc&limit=500&select=recomendacao,criado_em') || [];
     let csv = 'Data/Hora,Usuário,Email,Perfil,Ação,Detalhe,Nível\n';
     rows.forEach(row => {
       let e = {};
