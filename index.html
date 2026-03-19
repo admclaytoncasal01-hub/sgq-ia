@@ -716,6 +716,18 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
   <div class="mod-topbar">
     <div class="mod-icon-badge">📋</div>
     <div style="flex:1"><div class="mod-title">Modelos de Documentos SGQ</div><div class="mod-sub">Templates padrão ISO — gere, personalize e imprima</div></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div id="logoPreviewTopbar" style="height:36px;max-width:120px;display:none;align-items:center">
+        <img id="logoPreviewTopbarImg" src="" alt="Logo" style="max-height:36px;max-width:120px;object-fit:contain;border-radius:4px">
+      </div>
+      <div>
+        <input type="file" id="logoInputTemplates" accept="image/*" style="display:none" onchange="handleGlobalLogo(this);atualizarLogoTopbar()">
+        <button onclick="document.getElementById('logoInputTemplates').click()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px">
+          🏢 <span id="btnLogoTemplatesLabel">Definir Logo</span>
+        </button>
+        <div style="font-size:10px;color:#607080;margin-top:3px;text-align:center">usada nos documentos gerados</div>
+      </div>
+    </div>
   </div>
   <div class="mod-content" id="templatesContent"></div>
 </div>
@@ -937,13 +949,225 @@ const SUPABASE_KEY = atob(['ZXlKaGJHY2lPaUpJVXpJ','MU5pSXNJblI1Y0NJNklr','cFhWQ0
 
 // ══ ISO 9001 CHECKLIST ══
 const CHECKLIST = {
-  4:{title:"Contexto da Organização",sub:"Partes interessadas · Escopo · Processos do SGQ",subitems:[{num:"4.1",name:"Contexto Externo e Interno",criterios:[{id:"4.1.1",label:"Análise SWOT documentada e aprovada"},{id:"4.1.2",label:"Fatores externos identificados (políticos, econômicos, sociais, tecnológicos)"},{id:"4.1.3",label:"Fatores internos identificados (cultura, valores, desempenho)"},{id:"4.1.4",label:"Análise SWOT revisada nos últimos 6 meses"},{id:"4.1.5",label:"Evidência de uso da SWOT no planejamento estratégico"}]},{num:"4.2",name:"Partes Interessadas",criterios:[{id:"4.2.1",label:"Lista de partes interessadas documentada"},{id:"4.2.2",label:"Necessidades e expectativas de cada parte registradas"},{id:"4.2.3",label:"Requisitos legais e regulamentares identificados"},{id:"4.2.4",label:"Revisão das partes interessadas nos últimos 6 meses"},{id:"4.2.5",label:"Monitoramento periódico das partes interessadas definido"}]},{num:"4.3",name:"Escopo do SGQ",criterios:[{id:"4.3.1",label:"Escopo documentado e aprovado pela direção"},{id:"4.3.2",label:"Limites e aplicabilidade do SGQ definidos"},{id:"4.3.3",label:"Exclusões justificadas (se houver)"},{id:"4.3.4",label:"Escopo disponível e comunicado às partes interessadas"},{id:"4.3.5",label:"Escopo revisado após mudanças organizacionais"}]},{num:"4.4",name:"Processos do SGQ",criterios:[{id:"4.4.1",label:"Mapa de processos elaborado e documentado"},{id:"4.4.2",label:"Entradas e saídas de cada processo definidas"},{id:"4.4.3",label:"Responsáveis por cada processo designados"},{id:"4.4.4",label:"Riscos e oportunidades de cada processo avaliados"},{id:"4.4.5",label:"Indicadores de desempenho definidos para cada processo"},{id:"4.4.6",label:"Interação entre processos documentada"}]}]},
-  5:{title:"Liderança",sub:"Política · Responsabilidades · Comprometimento",subitems:[{num:"5.1",name:"Liderança e Comprometimento",criterios:[{id:"5.1.1",label:"Alta direção preside reuniões do SGQ documentadas em ata"},{id:"5.1.2",label:"Recursos para o SGQ aprovados e disponibilizados"},{id:"5.1.3",label:"Política da Qualidade aprovada pela alta direção"},{id:"5.1.4",label:"Atas de reunião com pauta específica de SGQ nos últimos 2 meses"},{id:"5.1.5",label:"Análise de riscos que afetam satisfação do cliente pela liderança"}]},{num:"5.2",name:"Política da Qualidade",criterios:[{id:"5.2.1",label:"Política da Qualidade documentada e aprovada"},{id:"5.2.2",label:"Política adequada ao propósito e contexto da organização"},{id:"5.2.3",label:"Política comunicada a todos os colaboradores"},{id:"5.2.4",label:"Política disponível às partes interessadas externas"},{id:"5.2.5",label:"Revisão da política no último ciclo de análise crítica"}]},{num:"5.3",name:"Papéis e Responsabilidades",criterios:[{id:"5.3.1",label:"Matriz RACI do SGQ documentada"},{id:"5.3.2",label:"Representante da qualidade formalmente designado"},{id:"5.3.3",label:"Responsabilidades comunicadas a todos os envolvidos"},{id:"5.3.4",label:"Matriz RACI atualizada após última reestruturação"}]}]},
-  6:{title:"Planejamento",sub:"Riscos · Oportunidades · Objetivos · Mudanças",subitems:[{num:"6.1",name:"Riscos e Oportunidades",criterios:[{id:"6.1.1",label:"Metodologia de gestão de riscos definida"},{id:"6.1.2",label:"Matriz de riscos elaborada com probabilidade e impacto"},{id:"6.1.3",label:"Planos de ação para todos os riscos 'alto' definidos"},{id:"6.1.4",label:"Riscos revisados nos últimos 6 meses"},{id:"6.1.5",label:"Oportunidades formalizadas com plano de aproveitamento"},{id:"6.1.6",label:"Responsáveis pelos riscos designados"}]},{num:"6.2",name:"Objetivos da Qualidade",criterios:[{id:"6.2.1",label:"Objetivos da qualidade documentados e aprovados"},{id:"6.2.2",label:"Objetivos mensuráveis com indicadores associados"},{id:"6.2.3",label:"Prazos e responsáveis definidos para cada objetivo"},{id:"6.2.4",label:"Objetivos comunicados aos departamentos"},{id:"6.2.5",label:"Monitoramento periódico dos objetivos registrado"}]},{num:"6.3",name:"Planejamento de Mudanças",criterios:[{id:"6.3.1",label:"Processo formal de planejamento de mudanças definido"},{id:"6.3.2",label:"Mudanças recentes passaram pelo processo formal"},{id:"6.3.3",label:"Impactos das mudanças avaliados antes da implementação"},{id:"6.3.4",label:"Registro de mudanças realizadas mantido"}]}]},
-  7:{title:"Apoio e Recursos",sub:"Recursos · Competências · Comunicação · Documentos",subitems:[{num:"7.1",name:"Recursos e Infraestrutura",criterios:[{id:"7.1.1",label:"Infraestrutura necessária identificada e disponível"},{id:"7.1.2",label:"Ambiente de trabalho adequado documentado"},{id:"7.1.3",label:"Plano de manutenção preventiva documentado"},{id:"7.1.4",label:"Registros de calibração de instrumentos atualizados"},{id:"7.1.5",label:"Rastreabilidade de medições garantida"}]},{num:"7.2",name:"Competência",criterios:[{id:"7.2.1",label:"Competências necessárias para cada função definidas"},{id:"7.2.2",label:"Plano de treinamento anual elaborado"},{id:"7.2.3",label:"Registros de treinamento de todos os colaboradores"},{id:"7.2.4",label:"Avaliação de eficácia dos treinamentos realizada"},{id:"7.2.5",label:"Evidências de competência arquivadas (diplomas, certificados)"}]},{num:"7.3",name:"Conscientização",criterios:[{id:"7.3.1",label:"Colaboradores conscientes da Política da Qualidade"},{id:"7.3.2",label:"Contribuição de cada função para o SGQ comunicada"},{id:"7.3.3",label:"Consequências do não atendimento aos requisitos comunicadas"}]},{num:"7.5",name:"Informação Documentada",criterios:[{id:"7.5.1",label:"Lista mestre de documentos atualizada"},{id:"7.5.2",label:"Todos os documentos com versão, data e aprovação"},{id:"7.5.3",label:"POP-007 revisado e aprovado"},{id:"7.5.4",label:"IT-012 revisada e aprovada"},{id:"7.5.5",label:"Documentos obsoletos retirados de circulação"},{id:"7.5.6",label:"Controle de documentos externos implementado"}]}]},
-  8:{title:"Operação",sub:"Processos · Fornecedores · Clientes · Produto",subitems:[{num:"8.1",name:"Planejamento Operacional",criterios:[{id:"8.1.1",label:"Critérios de aceitação de processos definidos"},{id:"8.1.2",label:"Plano de controle de processos documentado"},{id:"8.1.3",label:"Recursos necessários por processo identificados"},{id:"8.1.4",label:"Rastreabilidade de todas as etapas implementada"}]},{num:"8.2",name:"Requisitos do Cliente",criterios:[{id:"8.2.1",label:"Canais de comunicação com clientes formalizados"},{id:"8.2.2",label:"Requisitos do produto/serviço determinados"},{id:"8.2.3",label:"Análise crítica dos requisitos antes do fornecimento"},{id:"8.2.4",label:"Registro de análise crítica de contratos mantido"}]},{num:"8.4",name:"Controle de Fornecedores",criterios:[{id:"8.4.1",label:"Lista de fornecedores aprovados documentada"},{id:"8.4.2",label:"Critérios de avaliação de fornecedores definidos"},{id:"8.4.3",label:"Avaliação inicial de todos os fornecedores críticos"},{id:"8.4.4",label:"Reavaliação periódica anual realizada e registrada"},{id:"8.4.5",label:"Requisitos comunicados formalmente aos fornecedores"}]},{num:"8.7",name:"Controle de Saídas Não Conformes",criterios:[{id:"8.7.1",label:"Processo de identificação de produtos/serviços NC definido"},{id:"8.7.2",label:"Disposição de NC documentada (rejeitar, retrabalhar, liberar)"},{id:"8.7.3",label:"Registros de NC mantidos com descrição e tratamento"}]}]},
-  9:{title:"Avaliação de Desempenho",sub:"Indicadores · Auditoria · Satisfação · Análise crítica",subitems:[{num:"9.1",name:"Monitoramento e Medição",criterios:[{id:"9.1.1",label:"Indicadores de desempenho definidos para os processos"},{id:"9.1.2",label:"Coleta de dados regular e registrada mensalmente"},{id:"9.1.3",label:"Análise de dados usada para tomada de decisão documentada"},{id:"9.1.4",label:"Pesquisa de satisfação do cliente realizada"},{id:"9.1.5",label:"Plano de ação para satisfação abaixo da meta"}]},{num:"9.2",name:"Auditoria Interna",criterios:[{id:"9.2.1",label:"Programa anual de auditoria interna elaborado"},{id:"9.2.2",label:"Auditores qualificados e independentes designados"},{id:"9.2.3",label:"Auditorias cobrindo todos os processos do SGQ"},{id:"9.2.4",label:"Relatórios de auditoria emitidos e distribuídos"},{id:"9.2.5",label:"Achados de auditoria com plano de ação definido"}]},{num:"9.3",name:"Análise Crítica pela Direção",criterios:[{id:"9.3.1",label:"Análise crítica realizada com entradas obrigatórias da ISO"},{id:"9.3.2",label:"Saídas da análise crítica documentadas (decisões e recursos)"},{id:"9.3.3",label:"Frequência mínima de 2x ao ano estabelecida"},{id:"9.3.4",label:"Participação da alta direção registrada em ata"}]}]},
-  10:{title:"Melhoria Contínua",sub:"Não conformidades · Ações corretivas · Melhoria",subitems:[{num:"10.1",name:"Melhoria Geral",criterios:[{id:"10.1.1",label:"Oportunidades de melhoria identificadas e registradas"},{id:"10.1.2",label:"Priorização de melhorias com base em dados"},{id:"10.1.3",label:"Resultados das melhorias mensurados e documentados"}]},{num:"10.2",name:"NC e Ação Corretiva",criterios:[{id:"10.2.1",label:"Processo de abertura de NC documentado e utilizado"},{id:"10.2.2",label:"Análise de causa raiz realizada para todas as NCs"},{id:"10.2.3",label:"Metodologia estruturada (5 Porquês / Ishikawa) adotada"},{id:"10.2.4",label:"Prazos de ações corretivas definidos e monitorados"},{id:"10.2.5",label:"Verificação de eficácia 30/60 dias após encerramento"},{id:"10.2.6",label:"Registros de todas as NCs e ações mantidos"}]},{num:"10.3",name:"Melhoria Contínua",criterios:[{id:"10.3.1",label:"Canal formal para sugestões de melhoria implantado"},{id:"10.3.2",label:"Melhorias proativas registradas no último trimestre"},{id:"10.3.3",label:"Ciclo PDCA aplicado nas melhorias implementadas"},{id:"10.3.4",label:"Resultados comparados antes e depois das melhorias"}]}]}
+  4:{title:"Contexto da Organização",sub:"4.1 Contexto · 4.2 Partes Interessadas · 4.3 Escopo · 4.4 Processos",subitems:[
+    {num:"4.1",name:"Entendendo a organização e seu contexto",criterios:[
+      {id:"4.1.a",label:"Questões externas pertinentes ao propósito e direcionamento estratégico identificadas e documentadas"},
+      {id:"4.1.b",label:"Questões internas pertinentes ao propósito e direcionamento estratégico identificadas e documentadas"},
+      {id:"4.1.c",label:"Informação sobre essas questões é monitorada e analisada criticamente"}
+    ]},
+    {num:"4.2",name:"Entendendo as necessidades e expectativas de partes interessadas",criterios:[
+      {id:"4.2.a",label:"Partes interessadas pertinentes ao SGQ determinadas"},
+      {id:"4.2.b",label:"Requisitos das partes interessadas pertinentes ao SGQ determinados"},
+      {id:"4.2.c",label:"Informação sobre partes interessadas e seus requisitos monitorada e analisada criticamente"}
+    ]},
+    {num:"4.3",name:"Determinando o escopo do sistema de gestão da qualidade",criterios:[
+      {id:"4.3.a",label:"Escopo do SGQ determinado considerando questões externas/internas (4.1) e requisitos de partes interessadas (4.2)"},
+      {id:"4.3.b",label:"Produtos e serviços cobertos pelo SGQ definidos no escopo"},
+      {id:"4.3.c",label:"Justificativa para qualquer requisito não aplicável documentada"},
+      {id:"4.3.d",label:"Escopo disponível e mantido como informação documentada"}
+    ]},
+    {num:"4.4",name:"Sistema de gestão da qualidade e seus processos",criterios:[
+      {id:"4.4.1.a",label:"Processos necessários ao SGQ e sua aplicação na organização determinados (entradas, saídas, sequência e interação)"},
+      {id:"4.4.1.b",label:"Critérios, métodos e indicadores de desempenho para operação e controle eficazes dos processos determinados"},
+      {id:"4.4.1.c",label:"Recursos necessários para os processos determinados e assegurada sua disponibilidade"},
+      {id:"4.4.1.d",label:"Responsabilidades e autoridades atribuídas para os processos"},
+      {id:"4.4.1.e",label:"Riscos e oportunidades dos processos abordados conforme 6.1"},
+      {id:"4.4.1.f",label:"Processos avaliados e mudanças necessárias implementadas para assegurar resultados pretendidos"},
+      {id:"4.4.2.a",label:"Informação documentada mantida para apoiar a operação dos processos (4.4.2-a)"},
+      {id:"4.4.2.b",label:"Informação documentada retida para ter confiança de que processos são realizados conforme planejado (4.4.2-b)"}
+    ]}
+  ]},
+  5:{title:"Liderança",sub:"5.1 Comprometimento · 5.2 Política · 5.3 Papéis e Responsabilidades",subitems:[
+    {num:"5.1",name:"Liderança e comprometimento",criterios:[
+      {id:"5.1.1.a",label:"Alta Direção responsabiliza-se pela eficácia do SGQ (5.1.1-a)"},
+      {id:"5.1.1.b",label:"Política e objetivos da qualidade estabelecidos e compatíveis com o contexto e direcionamento estratégico"},
+      {id:"5.1.1.c",label:"Requisitos do SGQ integrados aos processos de negócio"},
+      {id:"5.1.1.d",label:"Uso da abordagem de processo e mentalidade de risco promovidos"},
+      {id:"5.1.1.e",label:"Recursos necessários ao SGQ disponibilizados"},
+      {id:"5.1.1.f",label:"Importância da gestão da qualidade eficaz e da conformidade comunicada"},
+      {id:"5.1.1.g",label:"SGQ alcança seus resultados pretendidos"},
+      {id:"5.1.1.h",label:"Pessoas engajadas e dirigidas a contribuir para a eficácia do SGQ"},
+      {id:"5.1.1.i",label:"Melhoria promovida"},
+      {id:"5.1.1.j",label:"Outros papéis pertinentes da gestão apoiados a demonstrar liderança em suas áreas"},
+      {id:"5.1.2.a",label:"Foco no cliente: requisitos do cliente e estatutários/regulamentares determinados, entendidos e atendidos"},
+      {id:"5.1.2.b",label:"Foco no cliente: riscos e oportunidades que afetam conformidade e satisfação determinados e abordados"},
+      {id:"5.1.2.c",label:"Foco no cliente: foco no aumento da satisfação do cliente mantido"}
+    ]},
+    {num:"5.2",name:"Política",criterios:[
+      {id:"5.2.1.a",label:"Política da qualidade apropriada ao propósito e contexto e apoia o direcionamento estratégico (5.2.1-a)"},
+      {id:"5.2.1.b",label:"Política provê estrutura para estabelecimento dos objetivos da qualidade"},
+      {id:"5.2.1.c",label:"Política inclui comprometimento em satisfazer requisitos aplicáveis"},
+      {id:"5.2.1.d",label:"Política inclui comprometimento com a melhoria contínua do SGQ"},
+      {id:"5.2.2.a",label:"Política disponível e mantida como informação documentada (5.2.2-a)"},
+      {id:"5.2.2.b",label:"Política comunicada, entendida e aplicada na organização"},
+      {id:"5.2.2.c",label:"Política disponível para partes interessadas pertinentes, como apropriado"}
+    ]},
+    {num:"5.3",name:"Papéis, responsabilidades e autoridades organizacionais",criterios:[
+      {id:"5.3.a",label:"Responsabilidades e autoridades para papéis pertinentes atribuídas pela Alta Direção"},
+      {id:"5.3.b",label:"Responsabilidades e autoridades comunicadas e entendidas na organização"},
+      {id:"5.3.c",label:"SGQ está conforme os requisitos desta Norma — responsável designado"},
+      {id:"5.3.d",label:"Processos entregam saídas pretendidas — responsável designado"},
+      {id:"5.3.e",label:"Desempenho do SGQ e oportunidades de melhoria relatados à Alta Direção (ver 10.1)"},
+      {id:"5.3.f",label:"Foco no cliente promovido em toda a organização"},
+      {id:"5.3.g",label:"Integridade do SGQ mantida quando mudanças são planejadas e implementadas"}
+    ]}
+  ]},
+  6:{title:"Planejamento",sub:"6.1 Riscos e Oportunidades · 6.2 Objetivos · 6.3 Mudanças",subitems:[
+    {num:"6.1",name:"Ações para abordar riscos e oportunidades",criterios:[
+      {id:"6.1.1.a",label:"Riscos e oportunidades que afetam o SGQ determinados considerando 4.1 e 4.2"},
+      {id:"6.1.1.b",label:"Riscos e oportunidades abordados para: assegurar resultados, aumentar efeitos desejáveis, prevenir efeitos indesejáveis, alcançar melhoria"},
+      {id:"6.1.2.a",label:"Ações para abordar riscos e oportunidades planejadas"},
+      {id:"6.1.2.b",label:"Como integrar e implementar ações nos processos do SGQ (4.4) definido"},
+      {id:"6.1.2.c",label:"Eficácia das ações avaliada"}
+    ]},
+    {num:"6.2",name:"Objetivos da qualidade e planejamento para alcançá-los",criterios:[
+      {id:"6.2.1.a",label:"Objetivos da qualidade estabelecidos nas funções, níveis e processos pertinentes"},
+      {id:"6.2.1.b",label:"Objetivos coerentes com a Política da Qualidade, mensuráveis e monitorados"},
+      {id:"6.2.1.c",label:"Objetivos levam em conta requisitos aplicáveis e são pertinentes para conformidade e satisfação do cliente"},
+      {id:"6.2.1.d",label:"Objetivos comunicados e atualizados como apropriado"},
+      {id:"6.2.1.e",label:"Objetivos mantidos como informação documentada"},
+      {id:"6.2.2.a",label:"Planejamento para alcançar objetivos: o que será feito, recursos requeridos, responsável, prazo e como resultados serão avaliados"}
+    ]},
+    {num:"6.3",name:"Planejamento de mudanças",criterios:[
+      {id:"6.3.a",label:"Mudanças no SGQ realizadas de maneira planejada e sistemática (ver 4.4)"},
+      {id:"6.3.b",label:"Propósito das mudanças e suas potenciais consequências considerados"},
+      {id:"6.3.c",label:"Integridade do SGQ mantida durante mudanças"},
+      {id:"6.3.d",label:"Disponibilidade de recursos e alocação/realocação de responsabilidades considerados nas mudanças"}
+    ]}
+  ]},
+  7:{title:"Apoio",sub:"7.1 Recursos · 7.2 Competência · 7.3 Conscientização · 7.4 Comunicação · 7.5 Informação Documentada",subitems:[
+    {num:"7.1",name:"Recursos",criterios:[
+      {id:"7.1.1.a",label:"Recursos necessários para SGQ determinados considerando capacidades internas e o que precisa ser obtido externamente (7.1.1)"},
+      {id:"7.1.2",label:"Pessoas necessárias para implementação eficaz do SGQ e operação e controle de seus processos determinadas e providas (7.1.2)"},
+      {id:"7.1.3",label:"Infraestrutura necessária para operação dos processos determinada, provida e mantida (edifícios, equipamentos, TI, transporte) (7.1.3)"},
+      {id:"7.1.4",label:"Ambiente necessário para operação dos processos (fatores humanos e físicos) determinado, provido e mantido (7.1.4)"},
+      {id:"7.1.5.1.a",label:"Recursos de monitoramento e medição adequados ao tipo de atividade providos (7.1.5.1)"},
+      {id:"7.1.5.1.b",label:"Recursos de monitoramento e medição mantidos como continuamente apropriados — informação documentada retida como evidência"},
+      {id:"7.1.5.2.a",label:"Rastreabilidade de medição: equipamentos verificados/calibrados a intervalos especificados contra padrões rastreáveis (7.1.5.2)"},
+      {id:"7.1.5.2.b",label:"Rastreabilidade de medição: equipamentos identificados, salvaguardados contra ajustes e deterioração"},
+      {id:"7.1.6.a",label:"Conhecimento organizacional necessário para operação dos processos e conformidade determinado e mantido (7.1.6)"},
+      {id:"7.1.6.b",label:"Conhecimento organizacional disponível na extensão necessária e atualizado para necessidades e tendências de mudanças"}
+    ]},
+    {num:"7.2",name:"Competência",criterios:[
+      {id:"7.2.a",label:"Competência necessária de pessoa(s) que realiza(m) trabalho que afeta desempenho e eficácia do SGQ determinada"},
+      {id:"7.2.b",label:"Pessoas competentes com base em educação, treinamento ou experiência apropriados"},
+      {id:"7.2.c",label:"Ações tomadas para adquirir competência necessária e eficácia das ações avaliada"},
+      {id:"7.2.d",label:"Informação documentada retida como evidência de competência"}
+    ]},
+    {num:"7.3",name:"Conscientização",criterios:[
+      {id:"7.3.a",label:"Pessoas conscientes da Política da Qualidade"},
+      {id:"7.3.b",label:"Pessoas conscientes dos objetivos da qualidade pertinentes"},
+      {id:"7.3.c",label:"Pessoas conscientes de sua contribuição para a eficácia do SGQ, incluindo benefícios de desempenho melhorado"},
+      {id:"7.3.d",label:"Pessoas conscientes das implicações de não estar conforme com os requisitos do SGQ"}
+    ]},
+    {num:"7.4",name:"Comunicação",criterios:[
+      {id:"7.4.a",label:"Comunicações internas e externas pertinentes ao SGQ determinadas: o que, quando, com quem, como e quem comunica"}
+    ]},
+    {num:"7.5",name:"Informação documentada",criterios:[
+      {id:"7.5.1.a",label:"SGQ inclui informação documentada requerida por esta Norma (7.5.1-a)"},
+      {id:"7.5.1.b",label:"SGQ inclui informação documentada determinada pela organização como necessária para eficácia do SGQ (7.5.1-b)"},
+      {id:"7.5.2.a",label:"Ao criar/atualizar: identificação e descrição adequadas (título, data, autor, número de referência) (7.5.2-a)"},
+      {id:"7.5.2.b",label:"Ao criar/atualizar: formato e meio adequados; análise crítica e aprovação quanto à adequação e suficiência (7.5.2-b/c)"},
+      {id:"7.5.3.1.a",label:"Informação documentada disponível e adequada para uso, onde e quando necessária (7.5.3.1-a)"},
+      {id:"7.5.3.1.b",label:"Informação documentada protegida (contra perda de confidencialidade, uso impróprio, perda de integridade) (7.5.3.1-b)"},
+      {id:"7.5.3.2.a",label:"Controle de informação documentada: distribuição, acesso, recuperação e uso controlados (7.5.3.2-a)"},
+      {id:"7.5.3.2.b",label:"Controle de informação documentada: armazenamento, preservação, controle de alterações, retenção e disposição controlados (7.5.3.2-b/c/d)"},
+      {id:"7.5.3.2.c",label:"Informação documentada de origem externa identificada e controlada conforme aplicável"}
+    ]}
+  ]},
+  8:{title:"Operação",sub:"8.1 Planejamento · 8.2 Requisitos · 8.3 Projeto · 8.4 Provedores · 8.5 Produção · 8.6 Liberação · 8.7 NC",subitems:[
+    {num:"8.1",name:"Planejamento e controle operacionais",criterios:[
+      {id:"8.1.a",label:"Requisitos para produtos e serviços determinados; critérios para processos e aceitação estabelecidos"},
+      {id:"8.1.b",label:"Recursos necessários para conformidade determinados; controles implementados de acordo com critérios"},
+      {id:"8.1.c",label:"Informação documentada conservada para ter confiança em que processos foram conduzidos como planejado"},
+      {id:"8.1.d",label:"Informação documentada retida para demonstrar conformidade de produtos e serviços com requisitos"},
+      {id:"8.1.e",label:"Saídas do planejamento adequadas para as operações; mudanças planejadas controladas e consequências de mudanças não intencionais analisadas"}
+    ]},
+    {num:"8.2",name:"Requisitos para produtos e serviços",criterios:[
+      {id:"8.2.1.a",label:"Comunicação com clientes: informação relativa a produtos/serviços provida (8.2.1-a)"},
+      {id:"8.2.1.b",label:"Comunicação com clientes: consultas, contratos e pedidos tratados; retroalimentação e reclamações obtidas (8.2.1-b/c)"},
+      {id:"8.2.1.c",label:"Comunicação com clientes: propriedade do cliente gerenciada; requisitos de contingência estabelecidos quando pertinente (8.2.1-d/e)"},
+      {id:"8.2.2.a",label:"Requisitos para produtos/serviços determinados, incluindo estatutários/regulamentares e os considerados necessários (8.2.2)"},
+      {id:"8.2.3.1.a",label:"Análise crítica dos requisitos antes do comprometimento: requisitos do cliente (especificados, não declarados e para entrega/pós-entrega) (8.2.3.1-a)"},
+      {id:"8.2.3.1.b",label:"Análise crítica dos requisitos: requisitos estatutários/regulamentares e de contrato/pedido divergentes resolvidos (8.2.3.1-b/c/d)"},
+      {id:"8.2.3.2",label:"Informação documentada retida sobre resultados da análise crítica e quaisquer novos requisitos (8.2.3.2)"},
+      {id:"8.2.4",label:"Informação documentada pertinente emendada e pessoas alertadas quando requisitos para produtos/serviços são mudados (8.2.4)"}
+    ]},
+    {num:"8.3",name:"Projeto e desenvolvimento de produtos e serviços",criterios:[
+      {id:"8.3.1",label:"Processo de projeto e desenvolvimento estabelecido, implementado e mantido (8.3.1)"},
+      {id:"8.3.2",label:"Planejamento do projeto: estágios, controles, atividades de verificação/validação, responsabilidades, recursos e interfaces determinados (8.3.2)"},
+      {id:"8.3.3",label:"Entradas de projeto: requisitos funcionais/de desempenho, informação de projetos anteriores, estatutários/regulamentares determinados (8.3.3)"},
+      {id:"8.3.4",label:"Controles de projeto: resultados definidos, análises críticas, verificação, validação e ações corretivas realizadas; informação documentada retida (8.3.4)"},
+      {id:"8.3.5",label:"Saídas de projeto: atendem entradas, adequadas a processos subsequentes, incluem requisitos de monitoramento/medição e critérios de aceitação (8.3.5)"},
+      {id:"8.3.6",label:"Mudanças de projeto: identificadas, analisadas criticamente, controladas; informação documentada retida (8.3.6)"}
+    ]},
+    {num:"8.4",name:"Controle de processos, produtos e serviços providos externamente",criterios:[
+      {id:"8.4.1.a",label:"Critérios para avaliação, seleção, monitoramento de desempenho e reavaliação de provedores externos determinados e aplicados (8.4.1)"},
+      {id:"8.4.1.b",label:"Informação documentada dessas atividades e quaisquer ações necessárias retida"},
+      {id:"8.4.2.a",label:"Processos providos externamente permanecem sob controle do SGQ; controles definidos para provedor e saídas resultantes (8.4.2)"},
+      {id:"8.4.2.b",label:"Impacto potencial e eficácia dos controles do provedor considerados; verificação/validação para assegurar conformidade (8.4.2-c/d)"},
+      {id:"8.4.3",label:"Requisitos comunicados aos provedores externos: processos/produtos/serviços, aprovação, competência, interações, controle e desempenho (8.4.3)"}
+    ]},
+    {num:"8.5",name:"Produção e provisão de serviço",criterios:[
+      {id:"8.5.1",label:"Produção e provisão de serviço sob condições controladas: informação documentada, recursos de monitoramento/medição, atividades de controle, infraestrutura adequada (8.5.1)"},
+      {id:"8.5.2",label:"Meios adequados para identificar saídas usados; situação das saídas identificada em relação a requisitos de monitoramento/medição (8.5.2)"},
+      {id:"8.5.3",label:"Propriedade de clientes ou provedores externos identificada, verificada, protegida e salvaguardada; perdas/danos relatados (8.5.3)"},
+      {id:"8.5.4",label:"Saídas preservadas durante produção e provisão de serviço para assegurar conformidade (8.5.4)"},
+      {id:"8.5.5",label:"Requisitos para atividades pós-entrega atendidos considerando estatutários/regulamentares, consequências indesejáveis, natureza/uso/vida útil, requisitos e retroalimentação do cliente (8.5.5)"},
+      {id:"8.5.6",label:"Mudanças de produção/provisão de serviço analisadas e controladas; informação documentada retida (8.5.6)"}
+    ]},
+    {num:"8.6",name:"Liberação de produtos e serviços",criterios:[
+      {id:"8.6.a",label:"Arranjos planejados implementados em estágios apropriados para verificar se requisitos foram atendidos"},
+      {id:"8.6.b",label:"Informação documentada retida: evidência de conformidade com critérios de aceitação e rastreabilidade à pessoa que autoriza a liberação"}
+    ]},
+    {num:"8.7",name:"Controle de saídas não conformes",criterios:[
+      {id:"8.7.1.a",label:"Saídas não conformes identificadas e controladas para prevenir uso ou entrega não pretendidos (8.7.1)"},
+      {id:"8.7.1.b",label:"Ações tomadas baseadas na natureza da NC: correção, segregação/contenção/retorno, informação ao cliente, autorização para aceitação sob concessão (8.7.1-a/b/c/d)"},
+      {id:"8.7.2",label:"Informação documentada retida: descreve NC, ações tomadas, concessões obtidas e identifica autoridade que decide a ação (8.7.2)"}
+    ]}
+  ]},
+  9:{title:"Avaliação de desempenho",sub:"9.1 Monitoramento · 9.2 Auditoria Interna · 9.3 Análise Crítica pela Direção",subitems:[
+    {num:"9.1",name:"Monitoramento, medição, análise e avaliação",criterios:[
+      {id:"9.1.1.a",label:"O que precisa ser monitorado e medido determinado (9.1.1)"},
+      {id:"9.1.1.b",label:"Métodos para monitoramento, medição, análise e avaliação para resultados válidos determinados"},
+      {id:"9.1.1.c",label:"Quando o monitoramento/medição devem ser realizados e quando resultados analisados/avaliados definidos"},
+      {id:"9.1.1.d",label:"Desempenho e eficácia do SGQ avaliados; informação documentada retida como evidência"},
+      {id:"9.1.2.a",label:"Percepção de clientes monitorada sobre o grau em que necessidades e expectativas foram atendidas (9.1.2)"},
+      {id:"9.1.2.b",label:"Métodos para obter, monitorar e analisar criticamente informação de satisfação do cliente determinados"},
+      {id:"9.1.3",label:"Dados de monitoramento/medição analisados e avaliados para: conformidade de produtos/serviços, satisfação do cliente, desempenho/eficácia do SGQ, eficácia de ações de risco, desempenho de provedores externos e necessidade de melhorias (9.1.3)"}
+    ]},
+    {num:"9.2",name:"Auditoria interna",criterios:[
+      {id:"9.2.1",label:"Auditorias internas conduzidas a intervalos planejados para prover informação se o SGQ está conforme e implementado/mantido eficazmente (9.2.1)"},
+      {id:"9.2.2.a",label:"Programa de auditoria planejado, estabelecido, implementado e mantido (frequência, métodos, responsabilidades, requisitos, relato) (9.2.2-a)"},
+      {id:"9.2.2.b",label:"Critérios de auditoria e escopo para cada auditoria definidos; auditores selecionados garantindo objetividade e imparcialidade (9.2.2-b/c)"},
+      {id:"9.2.2.c",label:"Resultados das auditorias relatados à gerência pertinente; correções e ações corretivas sem demora indevida (9.2.2-d/e)"},
+      {id:"9.2.2.d",label:"Informação documentada retida como evidência da implementação do programa de auditoria e dos resultados (9.2.2-f)"}
+    ]},
+    {num:"9.3",name:"Análise crítica pela direção",criterios:[
+      {id:"9.3.1",label:"Alta Direção analisa criticamente o SGQ a intervalos planejados para assegurar adequação, suficiência, eficácia e alinhamento estratégico (9.3.1)"},
+      {id:"9.3.2.a",label:"Análise crítica considera: ações de análises anteriores, questões externas/internas, desempenho/eficácia do SGQ (9.3.2-a/b/c)"},
+      {id:"9.3.2.b",label:"Análise crítica considera: satisfação do cliente, objetivos da qualidade, conformidade de produtos/serviços, NCs/ações corretivas, resultados de monitoramento/medição, auditorias, desempenho de provedores externos (9.3.2-c.1 a c.7)"},
+      {id:"9.3.2.c",label:"Análise crítica considera: suficiência de recursos, eficácia de ações de risco/oportunidade e oportunidades para melhoria (9.3.2-d/e/f)"},
+      {id:"9.3.3",label:"Saídas da análise crítica incluem decisões/ações sobre oportunidades de melhoria, necessidade de mudanças no SGQ e necessidade de recursos; informação documentada retida como evidência (9.3.3)"}
+    ]}
+  ]},
+  10:{title:"Melhoria",sub:"10.1 Generalidades · 10.2 Não conformidade e ação corretiva · 10.3 Melhoria contínua",subitems:[
+    {num:"10.1",name:"Generalidades",criterios:[
+      {id:"10.1.a",label:"Oportunidades para melhoria determinadas e selecionadas; ações necessárias implementadas para atender requisitos e aumentar satisfação do cliente (10.1)"},
+      {id:"10.1.b",label:"Melhoria inclui: melhorar produtos/serviços para atender requisitos e abordar necessidades futuras; corrigir, prevenir ou reduzir efeitos indesejados; melhorar desempenho e eficácia do SGQ"}
+    ]},
+    {num:"10.2",name:"Não conformidade e ação corretiva",criterios:[
+      {id:"10.2.1.a",label:"Ao ocorrer NC: reação — tomar ação para controlar/corrigir e lidar com consequências (10.2.1-a)"},
+      {id:"10.2.1.b",label:"Necessidade de ação para eliminar causa(s) da NC avaliada: analisando criticamente a NC, determinando causas, verificando se NCs similares existem ou podem ocorrer (10.2.1-b)"},
+      {id:"10.2.1.c",label:"Qualquer ação necessária implementada; eficácia da ação corretiva analisada criticamente (10.2.1-c/d)"},
+      {id:"10.2.1.d",label:"Riscos e oportunidades atualizados se necessário; mudanças no SGQ realizadas se necessário (10.2.1-e/f)"},
+      {id:"10.2.2",label:"Informação documentada retida como evidência: natureza das NCs e ações subsequentes; resultados de qualquer ação corretiva (10.2.2)"}
+    ]},
+    {num:"10.3",name:"Melhoria contínua",criterios:[
+      {id:"10.3.a",label:"Adequação, suficiência e eficácia do SGQ melhoradas continuamente"},
+      {id:"10.3.b",label:"Resultados de análise e avaliação (9.1.3) e saídas de análise crítica pela direção (9.3) considerados para determinar necessidades/oportunidades de melhoria contínua"}
+    ]}
+  ]}
 };
 
 // ══ ISO 27001 CHECKLIST — NOVO ══
@@ -5752,6 +5976,18 @@ function handleLogoUpload(input) {
   handleGlobalLogo(input);
 }
 
+function atualizarLogoTopbar() {
+  var logo = globalLogoDataUrl || localStorage.getItem('sgq_logo') || '';
+  var box = document.getElementById('logoPreviewTopbar');
+  var img = document.getElementById('logoPreviewTopbarImg');
+  var lbl = document.getElementById('btnLogoTemplatesLabel');
+  if (logo && box && img) {
+    img.src = logo;
+    box.style.display = 'flex';
+    if (lbl) lbl.textContent = 'Alterar Logo';
+  }
+}
+
 function updateLogoDisplay() {
   var logo = globalLogoDataUrl || localStorage.getItem('sgq_logo');
   var img = document.getElementById('sidebarLogo');
@@ -5766,6 +6002,7 @@ function updateLogoDisplay() {
     if (previewIcon) previewIcon.style.display = 'none';
     if (logoAtualBox) logoAtualBox.style.display = 'block';
     globalLogoDataUrl = logo;
+    atualizarLogoTopbar();
   }
 }
 
