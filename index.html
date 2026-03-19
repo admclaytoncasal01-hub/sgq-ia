@@ -5466,33 +5466,60 @@ async function check2FA(sessionData) {
 
   // Check if admin already has TOTP enrolled
   try {
-    const res = await fetch(SUPABASE_URL + '/auth/v1/user/factors', {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
       headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': 'Bearer ' + sessionData.access_token
       }
     });
     const text = await res.text();
-    console.log('[2FA] GET /user/factors status:', res.status, 'body:', text.slice(0,200));
+    console.log('[2FA] GET /factors status:', res.status, 'body:', text.slice(0,300));
     const data = (text && res.ok) ? JSON.parse(text) : [];
     const factors = Array.isArray(data) ? data : (data.all || data.totp || []);
+    // Find verified TOTP factor
     const totpFactor = factors.find(f => f.factor_type === 'totp' && f.status === 'verified');
+    // Find unverified/pending TOTP factor
+    const pendingFactor = factors.find(f => f.factor_type === 'totp' && f.status !== 'verified');
 
     if (totpFactor) {
+      // Already verified - just challenge
       _twoFAFactorId = totpFactor.id;
       document.getElementById('twoFASetup').style.display = 'none';
       document.getElementById('twoFAVerify').style.display = 'block';
       await criar2FAChallenge(sessionData.access_token);
-    } else {
-      // First time - show setup and enroll
+    } else if (pendingFactor) {
+      // Pending/unverified factor exists - use it directly (show QR via URI)
+      _twoFAFactorId = pendingFactor.id;
       document.getElementById('twoFASetup').style.display = 'block';
+      document.getElementById('twoFAVerify').style.display = 'block';
+      // Try to delete and re-enroll to get fresh QR
+      await deletarEReenroll(sessionData.access_token, pendingFactor.id);
+    } else {
+      // No factor - fresh enrollment
+      document.getElementById('twoFASetup').style.display = 'block';
+      document.getElementById('twoFAVerify').style.display = 'block';
       await enrollTOTP(sessionData.access_token);
     }
   } catch(e) {
-    // On any error, try enrolling directly
+    console.error('[2FA] check2FA error:', e);
     document.getElementById('twoFASetup').style.display = 'block';
-    await enrollTOTP(sessionData.access_token);
+    document.getElementById('twoFAErr').textContent = 'Erro: ' + e.message;
   }
+}
+
+async function deletarEReenroll(accessToken, factorId) {
+  try {
+    // Delete the pending/unverified factor
+    const delRes = await fetch(SUPABASE_URL + '/auth/v1/factors/' + factorId, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken }
+    });
+    console.log('[2FA] DELETE factor status:', delRes.status);
+  } catch(e) {
+    console.warn('[2FA] Could not delete factor:', e);
+  }
+  // Re-enroll fresh
+  await enrollTOTP(accessToken);
 }
 
 async function enrollTOTP(accessToken) {
@@ -5504,7 +5531,7 @@ async function enrollTOTP(accessToken) {
         'apikey': SUPABASE_KEY,
         'Authorization': 'Bearer ' + accessToken
       },
-      body: JSON.stringify({ factor_type: 'totp', friendly_name: 'SGQ-IA Admin', issuer: 'SGQ-IA CCADV' })
+      body: JSON.stringify({ factor_type: 'totp', friendly_name: 'SGQ-IA-' + Date.now(), issuer: 'SGQ-IA CCADV' })
     });
     const rawText = await res.text();
     console.log('[2FA] POST /factors status:', res.status, 'body:', rawText.slice(0,300));
