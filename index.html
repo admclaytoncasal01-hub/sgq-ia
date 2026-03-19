@@ -291,9 +291,10 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
     <input class="login-input" id="loginPass" type="password" placeholder="Sua senha" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" id="loginBtn" onclick="doLogin()">ENTRAR NO SISTEMA</button>
     <div class="login-error" id="loginError"></div>
-    <div class="login-footer">🔒 Autenticação segura</div>
+    <div class="login-footer">🔒 Autenticação segura · Supabase Auth</div>
   </div>
 </div>
+
 
 <div class="app">
 <nav class="sidebar" id="sidebar">
@@ -303,6 +304,11 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
         <div class="logo-tag">ISO 9001 · 27001 · 42001</div>
         <div class="logo-name">SGQ · IA</div>
         <div class="logo-sub">Gestão Integrada · CCADV</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+        <img id="sidebarLogo" src="" alt="" style="max-height:28px;max-width:80px;display:none;object-fit:contain;border-radius:4px">
+        <button onclick="document.getElementById('globalLogoInput').click()" title="Alterar Logo" style="background:transparent;border:1px dashed rgba(0,200,255,.25);border-radius:5px;color:#607080;font-size:9px;cursor:pointer;padding:2px 6px;font-family:'DM Sans',sans-serif" id="btnUploadLogoSidebar">🏢 Logo</button>
+        <input type="file" id="globalLogoInput" accept="image/*" style="display:none" onchange="handleGlobalLogo(this)">
       </div>
       <button onclick="doLogout()" title="Sair" style="background:transparent;border:1px solid #1e2d3d;border-radius:7px;color:#607080;font-size:11px;cursor:pointer;padding:4px 9px;font-family:'DM Sans',sans-serif;margin-top:2px">Sair</button>
     </div>
@@ -315,6 +321,10 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
     <button class="iso-tab" id="isoTab27001" onclick="trocarNorma('27001')">ISO 27001</button>
     <button class="iso-tab" id="isoTab42001" onclick="trocarNorma('42001')">ISO 42001</button>
     <button class="iso-tab" id="isoTabAB2L" onclick="trocarNorma('ab2l')">🏅 AB2L</button>
+  </div>
+  <!-- Gerenciar Normas (admin) -->
+  <div id="gerenciarNormasBar" style="display:none;padding:4px 14px 6px;border-bottom:1px solid #1e2d3d">
+    <button onclick="abrirGerenciarNormas()" style="width:100%;padding:5px 10px;border-radius:7px;border:1px dashed rgba(255,82,82,.3);background:transparent;color:#ff5252;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left">🗑 Gerenciar / Excluir Normas</button>
   </div>
 
   <!-- SELETOR DE ANO -->
@@ -803,6 +813,23 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
           </div>
         </div>
 
+        <!-- Logo Upload -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:11px;color:#607080;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Logo da Empresa (opcional)</div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div id="logoPreviewBox" style="width:80px;height:50px;border:1px dashed rgba(0,200,255,.3);border-radius:8px;background:#18222e;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" onclick="document.getElementById('logoUploadInput').click()">
+              <img id="logoPreviewImg" src="" alt="" style="max-width:100%;max-height:100%;display:none;object-fit:contain">
+              <span id="logoPreviewIcon" style="font-size:22px">🏢</span>
+            </div>
+            <div>
+              <button onclick="document.getElementById('logoUploadInput').click()" style="padding:7px 14px;border-radius:7px;border:1px solid rgba(0,200,255,.3);background:transparent;color:#00c8ff;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:5px">📁 Selecionar Logo</button>
+              <div style="font-size:11px;color:#607080">PNG, JPG — usado em relatórios e documentos gerados</div>
+              <input type="file" id="logoUploadInput" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
+            </div>
+            <div id="logoAtualBox" style="display:none;padding:6px 12px;border-radius:7px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);font-size:11px;color:#00e676">✅ Logo carregado</div>
+          </div>
+        </div>
+
         <!-- Upload PDF -->
         <div style="margin-bottom:16px">
           <div style="font-size:11px;color:#607080;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">PDF da Norma *</div>
@@ -1062,6 +1089,9 @@ async function doLogout(){
 
 function abrirSistema(){
   document.getElementById('loginScreen').style.display='none';
+  // Show gerenciar normas button for admins
+  var gerBar = document.getElementById('gerenciarNormasBar');
+  if (gerBar) gerBar.style.display = (loggedUser && loggedUser.perfil === 'Administrador') ? 'block' : 'none';
   document.getElementById('sidebarUser').textContent=loggedUser.nome||loggedUser.email;
   document.getElementById('loginError').textContent='';
   resetSessionTimer(); // Start security timeout
@@ -1230,15 +1260,19 @@ function renderContent(){
         let resultHTML='';
         if(result&&!result.erro){const rClass=result.aprovado?'ok':'warn';const rColor=result.aprovado?'#00e676':'#ffea00';const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');const falt=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span>${(results[c.id]&&results[c.id].storagePath)?'<button onclick="viewDocFromStorage(\''+results[c.id].storagePath+'\',\''+( results[c.id].filename||'doc')+'\'); event.stopPropagation();" style="padding:1px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;margin-left:6px">👁 Ver</button>':docArquivos[c.id]?'<button onclick="viewDocumento(\''+c.id+'\')" style="padding:1px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;margin-left:6px">👁 Ver</button>':''}</div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falt?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falt}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
         }else if(result&&result.erro){resultHTML="";}
+        // Multi-docs list
+        var multiKey9001=getMultiDocsKey('9001',c.id);
+        var multiList9001=multiDocs[multiKey9001]||[];
+        var multiHTML9001=multiList9001.length>0?`<div class="doc-list">${multiList9001.map(function(d,mi){return '<div class="doc-item"><span style="font-size:12px">📄</span><span class="doc-item-name">'+d.filename+'</span><span class="doc-item-status" style="background:'+(d.aprovado?'rgba(0,230,118,.12)':'rgba(255,82,82,.12)')+';color:'+(d.aprovado?'#00e676':'#ff5252')+'">'+(d.aprovado?'✅ Aprovado':'⚠️ Insuf.')+'</span>'+(d.storagePath?'<button onclick="viewDocFromStorage(\''+d.storagePath+'\',\''+d.filename+'\');event.stopPropagation();" style="padding:2px 7px;border-radius:5px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer">👁 Ver</button>':d.dataUrl?'<button onclick="viewDocumentoFromData(\'9001_'+c.id+'\','+mi+');" style="padding:2px 7px;border-radius:5px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer">👁 Ver</button>':'')+'<button onclick="removerDocCriterio(\''+multiKey9001+'\','+mi+')" style="padding:2px 7px;border-radius:5px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:10px;cursor:pointer">✕</button></div>';}).join('')}</div>`:'';
         var critOpen9001 = openCriterios[c.id] !== false;
         cDiv.innerHTML=`<div class="criterio-row">` +
           `<div class="checkbox${isDone?' checked':''}" onclick="toggleDone('${c.id}')">${isDone?'<span class="checkbox-tick">✓</span>':''}</div>` +
           `<div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id}</span>${c.label}</div></div>` +
-          `<button class="upload-btn ${isDone?'done':'pending'}" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button>` +
+          `<button class="upload-btn ${isDone?'done':'pending'}" onclick="triggerUploadMulti('${c.id}','${c.label.replace(/'/g,"\\'")}','9001')" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'📎 + Doc':'📎 Enviar doc'}</button>` +
           `<div style="position:relative;display:inline-block;margin-left:4px"><button onclick="toggleHistPopover('${c.id}',event)" title="Histórico de inclusões" style="width:26px;height:26px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center">⋯</button><div class="hist-popover" id="hist_${c.id}" style="display:none"></div></div>` +
           `<span onclick="event.stopPropagation();toggleCriterio('${c.id}')" id="chev_${c.id}" title="Recolher" style="margin-left:6px;color:#607080;font-size:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:1px solid #1e2d3d;transform:${critOpen9001?'rotate(180deg)':'rotate(0)'};transition:transform .2s">▼</span>` +
           `</div>` +
-          `<div id="critbody_${c.id}" style="display:${critOpen9001?'block':'none'}">${resultHTML}</div>`;
+          `<div id="critbody_${c.id}" style="display:${critOpen9001?'block':'none'}">${resultHTML}${multiHTML9001||''}</div>`;
         criteriosDiv.appendChild(cDiv);
       });
       if(pending.length>0){const faltaDiv=document.createElement('div');faltaDiv.className='falta-box';faltaDiv.innerHTML=`<div class="falta-title">📋 Para chegar a 100% neste subitem, ainda falta:</div>`+pending.map(c=>`<div class="falta-item"><span>• ${c.label}</span><button class="falta-btn" onclick="triggerUpload('${c.id}','${c.label.replace(/'/g,"\\'")}','${sub.num}')">📎 Enviar →</button></div>`).join('');criteriosDiv.appendChild(faltaDiv);}
@@ -1371,23 +1405,23 @@ function renderISO(norma){
         const isDone=!!doneMap[c.id];const result=resultsMap[c.id];const isUp=uploading===c.id;
         const cDiv=document.createElement('div');cDiv.className='criterio'+(isDone?' done':'');
         let resultHTML='';
-        if(result&&!result.erro){const rClass=result.aprovado?'ok':'warn';const rColor=result.aprovado?'#00e676':'#ffea00';const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');const falt=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span>${docArquivos[c.id]?'<button onclick="viewDocumento(\''+c.id+'\')" style="padding:1px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;margin-left:6px">👁 Ver</button>':''}</div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falt?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falt}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
+        if(result&&!result.erro){const rClass=result.aprovado?'ok':'warn';const rColor=result.aprovado?'#00e676':'#ffea00';const atend=(result.pontos_atendidos||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');const falt=(result.pontos_faltando||[]).map(p=>`<div class="ia-item">• ${p}</div>`).join('');resultHTML=`<div class="ia-result ${rClass}"><div class="ia-result-header" style="color:${rColor}"><span>${result.aprovado?'✅ Aprovado pela IA':'⚠️ Documento Insuficiente'} · ${result.conformidade||''}</span><span class="ia-result-filename">📄 ${result.filename||''}</span>${(result&&result.storagePath)?'<button onclick="viewDocFromStorage(\''+result.storagePath+'\',\''+( result.filename||'doc')+'\'); event.stopPropagation();" style="padding:1px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;margin-left:6px">👁 Ver</button>':docArquivos[norma+'_'+c.id]||docArquivos[c.id]?'<button onclick="viewDocumento(\''+(docArquivos[norma+'_'+c.id]?norma+'_':'')+c.id+'\')" style="padding:1px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;margin-left:6px">👁 Ver</button>':''}</div>${atend?`<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>${atend}`:''}</div>${falt?`<div class="ia-section-title" style="color:#ff5252;margin-top:5px">✗ O que ainda falta:</div>${falt}`:''}</div>${result.recomendacao?`<div class="ia-rec">💡 ${result.recomendacao}</div>`:''}`;
         }else if(result&&result.erro){resultHTML="";}
         const lbl=c.label.replace(/'/g,"\\'");const cid=c.id;
-        const toggleFn=`toggleDoneISO('${norma}','${cid}')`;const uploadFn=`triggerUploadISO('${norma}','${cid}','${lbl}')`;
+        const toggleFn=`toggleDoneISO('${norma}','${cid}')`;
         var critOpenISO = openCriterios[c.id] !== false;
         cDiv.innerHTML=
           `<div class="criterio-row">` +
           `<div class="checkbox${isDone?' checked':''}" onclick="${toggleFn}">${isDone?'<span class="checkbox-tick">✓</span>':''}</div>` +
           `<div style="flex:1"><div class="criterio-label"><span class="criterio-id">${c.id.replace('27_','').replace('42_','')}</span>${c.label}</div></div>` +
-          `<button class="upload-btn ${isDone?'done':'pending'}" onclick="${uploadFn}" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'🔄 Atualizar':'📎 Enviar doc'}</button>` +
+          `<button class="upload-btn ${isDone?'done':'pending'}" onclick="triggerUploadMulti('${cid}','${lbl}','${norma}')" ${isUp?'disabled':''}>${isUp?'⏳ Analisando...':isDone?'📎 + Doc':'📎 Enviar doc'}</button>` +
           `<div style="position:relative;display:inline-block;margin-left:4px"><button onclick="toggleHistPopover('${c.id}',event)" title="Histórico" style="width:26px;height:26px;border-radius:6px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center">⋯</button><div class="hist-popover" id="hist_${c.id}" style="display:none"></div></div>` +
           `<span onclick="event.stopPropagation();toggleCriterio('${c.id}')" id="chev_${c.id}" title="Recolher" style="margin-left:6px;color:#607080;font-size:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:1px solid #1e2d3d;transform:${critOpenISO?'rotate(180deg)':'rotate(0)'};transition:transform .2s">▼</span>` +
           `</div>` +
-          `<div id="critbody_${c.id}" style="display:${critOpenISO?'block':'none'}">${resultHTML}</div>`;
+          `<div id="critbody_${c.id}" style="display:${critOpenISO?'block':'none'}">${resultHTML}${(()=>{var mk=getMultiDocsKey(norma,c.id);var ml=multiDocs[mk]||[];return ml.length>0?'<div class=\'doc-list\'>' + ml.map(function(d,mi){return '<div class=\'doc-item\'><span style=\'font-size:12px\'>📄</span><span class=\'doc-item-name\'>' + d.filename + '</span><span class=\'doc-item-status\' style=\'background:' + (d.aprovado?'rgba(0,230,118,.12)':'rgba(255,82,82,.12)') + ';color:' + (d.aprovado?'#00e676':'#ff5252') + '\'>' + (d.aprovado?'✅ Aprovado':'⚠️ Insuf.') + '</span>' + (d.storagePath?'<button onclick=\'viewDocFromStorage(\'\'' + d.storagePath + '\'\',\'\'' + d.filename + '\'\')\'  style=\'padding:2px 7px;border-radius:5px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer\'>👁 Ver</button>':'') + '<button onclick=\'removerDocCriterio(\'\'' + mk + '\'\',' + mi + ')\'  style=\'padding:2px 7px;border-radius:5px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:10px;cursor:pointer\'>✕</button></div>';}).join('') + '</div>':'';})()}</div>`;
         criteriosDiv.appendChild(cDiv);
       });
-      if(pending.length>0){const faltaDiv=document.createElement('div');faltaDiv.className='falta-box';faltaDiv.innerHTML=`<div class="falta-title">📋 Para chegar a 100% neste subitem, ainda falta:</div>`+pending.map(c=>{const lbl=c.label.replace(/'/g,"\\'");const fn=`triggerUploadISO('${norma}','${c.id}','${lbl}')`;return`<div class="falta-item"><span>• ${c.label}</span><button class="falta-btn" onclick="${fn}">📎 Enviar →</button></div>`;}).join('');criteriosDiv.appendChild(faltaDiv);}
+      if(pending.length>0){const faltaDiv=document.createElement('div');faltaDiv.className='falta-box';faltaDiv.innerHTML=`<div class="falta-title">📋 Para chegar a 100% neste subitem, ainda falta:</div>`+pending.map(c=>{const lbl=c.label.replace(/'/g,"\\'");const fn=`triggerUploadMulti('${c.id}','${lbl}','${norma}')`;return`<div class="falta-item"><span>• ${c.label}</span><button class="falta-btn" onclick="${fn}">📎 Enviar →</button></div>`;}).join('');criteriosDiv.appendChild(faltaDiv);}
       if(sp===100){const completeDiv=document.createElement('div');completeDiv.className='complete-box';completeDiv.textContent='✅ Subitem '+sub.num+' 100% conforme com a ISO '+norma+'!';criteriosDiv.appendChild(completeDiv);}
       card.appendChild(criteriosDiv);
     }
@@ -1403,7 +1437,8 @@ async function toggleDoneISO(norma,id){
 }
 
 function triggerUploadISO(norma,id,label){
-  pendingUpload={id,label,norma};document.getElementById('fileInput').click();
+  // Delegate to multi-doc trigger
+  triggerUploadMulti(id,label,norma);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1427,14 +1462,20 @@ document.getElementById('fileInput').addEventListener('change',async function(e)
   // Let AB2L handler process its own uploads
   if(pendingUpload.norma==='ab2l') return;
   e.target.value='';
-  const {id,label,norma}=pendingUpload;pendingUpload=null;
+  const {id,label,norma,multi}=pendingUpload;
+  const isMulti=!!multi;
+  if(!isMulti) pendingUpload=null;
+  else { pendingUpload=null; } // reset for multi too
   uploading=id;
   mostrarLoadingIA(id);
-  if(!norma||norma==='9001') render();else renderISO(norma);
+  const normaDisplay=norma&&norma!=='9001'?norma:'9001';
+  if(!norma||norma==='9001') render();else if(norma==='27001'||norma==='42001') renderISO(norma);else if(normasCustom&&normasCustom[norma]) renderChecklistCustom(normasCustom[norma],normasCustom[norma].cor||'#ff8c00');else render();
   const systemISO=norma==='27001'
     ?'Você é auditor ISO 27001 especialista. Analise o documento e avalie se atende ao critério informado. Responda APENAS com JSON válido, sem markdown: {"aprovado":true,"conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}'
     :norma==='42001'
     ?'Você é auditor ISO 42001 especialista em IA responsável. Analise o documento e avalie se atende ao critério informado. Responda APENAS com JSON válido, sem markdown: {"aprovado":true,"conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}'
+    :normasCustom&&normasCustom[norma]
+    ?'Você é auditor de normas de gestão especialista. Analise o documento e avalie se atende ao critério informado. Responda APENAS com JSON válido, sem markdown: {"aprovado":true,"conformidade":"85%","pontos_atendidos":["item"],"pontos_faltando":["item"],"recomendacao":"texto"}'
     :SYSTEM_PROMPT;
   try{
     const fileDataUrl=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
@@ -1443,22 +1484,26 @@ document.getElementById('fileInput').addEventListener('change',async function(e)
     // Store file for viewing this session
     var docKey=(norma&&norma!=='9001')?(norma+'_'+id):id;
     docArquivos[docKey]={dataUrl:fileDataUrl,mime:file.type,filename:file.name};
-    const userText='Critério '+(norma||'ISO 9001')+' a validar: "'+label+'"\nArquivo: '+file.name+'\nAnalise e responda APENAS com JSON válido.';
+    const userText='Critério '+(normaDisplay||'ISO 9001')+' a validar: "'+label+'"\nArquivo: '+file.name+'\nAnalise e responda APENAS com JSON válido.';
     const raw=await callGemini(userText,systemISO,fileMime?base64:null,fileMime);
     const clean=raw.replace(/```json|```/g,'').trim();const json=JSON.parse(clean);
     // Upload to Supabase Storage for permanent access
-    var docKey2=(norma&&norma!=='9001')?(norma+'_'+id):id;
-    var storagePath = await uploadDocToStorage(base64, file.type||'application/pdf', file.name, docKey2);
+    var storagePath = await uploadDocToStorage(base64, file.type||'application/pdf', file.name, docKey);
+    // Store in multiDocs for multiple document support
+    var multiKey=getMultiDocsKey(norma,id);
+    if(!multiDocs[multiKey]) multiDocs[multiKey]=[];
+    multiDocs[multiKey].push({filename:file.name,aprovado:json.aprovado,conformidade:json.conformidade,storagePath:storagePath,dataUrl:fileDataUrl,mime:file.type,result:json});
     if(!norma||norma==='9001'){results[id]={...json,filename:file.name,storagePath:storagePath};if(json.aprovado){done[id]=true;await saveCriterio(id,true);}await saveResultadoIA(id,results[id]);registrarHistorico(id,file.name,json.aprovado?'aprovado':'insuficiente',norma||'9001');}
-    else{const rm=norma==='27001'?results27:results42;const dm=norma==='27001'?done27:done42;rm[id]={...json,filename:file.name,storagePath:storagePath};if(json.aprovado){dm[id]=true;await saveCriterio(norma+'_'+id,true);}await saveResultadoIA(norma+'_'+id,rm[id]);registrarHistorico(id,file.name,json.aprovado?'aprovado':'insuficiente',norma);}
+    else if(norma==='27001'||norma==='42001'){const rm=norma==='27001'?results27:results42;const dm=norma==='27001'?done27:done42;rm[id]={...json,filename:file.name,storagePath:storagePath};if(json.aprovado){dm[id]=true;await saveCriterio(norma+'_'+id,true);}await saveResultadoIA(norma+'_'+id,rm[id]);registrarHistorico(id,file.name,json.aprovado?'aprovado':'insuficiente',norma);}
+    else{if(json.aprovado&&window._doneCustom){window._doneCustom[id]=true;await saveCriterio('custom_'+norma+'_'+id,true);}}
   }catch(err){
     console.error('IA erro:',err);
     if(!norma||norma==='9001'){results[id]={erro:true,erroMsg:err.message,filename:file?.name};}
-    else{const rm=norma==='27001'?results27:results42;rm[id]={erro:true,erroMsg:err.message,filename:file?.name};}
+    else if(norma==='27001'||norma==='42001'){const rm=norma==='27001'?results27:results42;rm[id]={erro:true,erroMsg:err.message,filename:file?.name};}
   }
   uploading=null;
   esconderLoadingIA(id);
-  if(!norma||norma==='9001') render();else renderISO(norma);
+  if(!norma||norma==='9001') render();else if(norma==='27001'||norma==='42001') renderISO(norma);else if(normasCustom&&normasCustom[norma]) renderChecklistCustom(normasCustom[norma],normasCustom[norma].cor||'#ff8c00');else render();
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -4335,10 +4380,11 @@ async function gerarNormaPDF() {
     var jsonEnd = clean.lastIndexOf('}');
     if (jsonEnd > 0 && jsonEnd < clean.length - 1) clean = clean.substring(0, jsonEnd + 1);
     // Fix common IA JSON issues: single quotes, trailing commas
+    // More robust JSON cleaning
     clean = clean
-      .replace(/'/g, '"')
-      .replace(/,(\s*[}\]])/g, '$1')
-      .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
+      .replace(/,\s*([}\]])/g, '$1')   // remove trailing commas
+      .replace(/([{,]\s*)'(\w+)'\s*:/g, '$1"$2":')  // fix single-quote keys
+      .replace(/:\s*'([^']*)'/g, function(m, v) { return ': "' + v.replace(/"/g, '\\"') + '"'; }); // fix single-quote values
     var parsed;
     try {
       parsed = JSON.parse(clean);
@@ -4402,7 +4448,14 @@ async function gerarNormaPDF() {
     renderListaNormasCustom();
 
   } catch(err) {
-    resDiv.innerHTML = '<div style="background:rgba(255,82,82,.07);border:1px solid rgba(255,82,82,.2);border-radius:12px;padding:16px;font-size:13px;color:#ff5252">❌ Erro: ' + err.message + '<br><span style="font-size:11px;color:#607080">Verifique se o PDF é de uma norma e tente novamente.</span></div>';
+    resDiv.innerHTML = '<div style="background:rgba(255,82,82,.07);border:1px solid rgba(255,82,82,.2);border-radius:12px;padding:16px;font-size:13px;color:#ff5252">❌ Erro: ' + err.message + '</div>' +
+      '<div style="margin-top:10px;padding:12px;background:#111820;border:1px solid rgba(255,180,0,.2);border-radius:8px">' +
+        '<div style="font-size:12px;color:#ffb400;margin-bottom:8px">💡 Dicas para resolver:</div>' +
+        '<div style="font-size:12px;color:#607080;line-height:1.7">1. Certifique-se que o PDF não está protegido por senha<br>' +
+        '2. Tente com um PDF menor (até 10MB)<br>' +
+        '3. O PDF deve ser texto pesquisável (não escaneado)<br>' +
+        '4. Verifique sua conexão com a internet</div>' +
+      '</div>';
   }
 
   btn.disabled = false;
@@ -4648,12 +4701,34 @@ document.addEventListener('click', function(e) {
 // ══════════════════════════════════════════════════════════════
 // ★ VISUALIZAR DOCUMENTO — ABRE EM NOVA ABA
 // ══════════════════════════════════════════════════════════════
+function viewDocumentoFromData(key, idx) {
+  var multiKey = key;
+  var docsList = multiDocs[multiKey];
+  if (docsList && docsList[idx] && docsList[idx].dataUrl) {
+    var file = { dataUrl: docsList[idx].dataUrl, mime: docsList[idx].mime, filename: docsList[idx].filename };
+    _openDocWindow(file);
+    return;
+  }
+  // Fallback to docArquivos
+  viewDocumento(key);
+}
+
 function viewDocumento(key) {
   var file = docArquivos[key] || docArquivos['ab2l_' + key];
   if (!file || !file.dataUrl) {
+    // Try multiDocs first doc
+    var docs = multiDocs[key];
+    if (docs && docs.length && docs[0].dataUrl) {
+      _openDocWindow({ dataUrl: docs[0].dataUrl, mime: docs[0].mime, filename: docs[0].filename });
+      return;
+    }
     alert('Documento não disponível nesta sessão. Reenvie o arquivo para visualizar.');
     return;
   }
+  _openDocWindow(file);
+}
+
+function _openDocWindow(file) {
   var win = window.open('', '_blank');
   if (!win) { alert('Permita pop-ups para visualizar o documento.'); return; }
   if (file.mime === 'application/pdf') {
@@ -4661,17 +4736,21 @@ function viewDocumento(key) {
       '<body style="margin:0;padding:0;background:#000">' +
       '<iframe src="' + file.dataUrl + '" style="width:100%;height:100vh;border:none"></iframe>' +
       '</body></html>');
+    win.document.close();
   } else if (file.mime && file.mime.startsWith('image/')) {
     win.document.write('<html><head><title>' + (file.filename||'Imagem') + '</title></head>' +
       '<body style="margin:0;padding:0;background:#1a1a1a;display:flex;align-items:center;justify-content:center;min-height:100vh">' +
       '<img src="' + file.dataUrl + '" style="max-width:100%;max-height:100vh;object-fit:contain">' +
       '</body></html>');
+    win.document.close();
   } else {
-    // Other file types - try to open directly
+    // Other file types - download
     var a = document.createElement('a');
     a.href = file.dataUrl;
     a.download = file.filename || 'documento';
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     win.close();
   }
 }
@@ -5298,13 +5377,12 @@ ${barHtml('AB2L',statsAB2L.pct,'#cc6600')}
 <div class="footer">Gerado pelo SGQ-IA · ${empresa} · ${new Date().toLocaleString('pt-BR')} · Usuário: ${loggedUser?.nome||''}</div>
 </body></html>`;
 
-    resultDiv.innerHTML = `<div style="background:rgba(255,180,0,.07);border:1px solid rgba(255,180,0,.2);border-radius:12px;padding:16px">
-      <div style="font-size:12px;font-weight:700;color:#ffb400;margin-bottom:10px">✅ Relatório gerado com sucesso!</div>
-      <div style="display:flex;gap:8px">
-        <button onclick="window._relExecHtml=\`${winHtml.replace(/`/g,"\\`")}\`;var w=window.open('','_blank');w.document.write(window._relExecHtml);w.document.close();setTimeout(function(){w.print();},500)" style="padding:8px 20px;border-radius:7px;border:none;background:#ffb400;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer">🖨️ Imprimir / Salvar PDF</button>
-        <button onclick="var w=window.open('','_blank');w.document.write(window._relExecHtml||'');w.document.close()" style="padding:8px 16px;border-radius:7px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer">👁 Visualizar</button>
-      </div>
-    </div>`;
+    resultDiv.innerHTML = '<div style="background:rgba(255,180,0,.07);border:1px solid rgba(255,180,0,.2);border-radius:12px;padding:16px">' +
+      '<div style="font-size:12px;font-weight:700;color:#ffb400;margin-bottom:10px">&#x2705; Relat&#xF3;rio gerado!</div>' +
+      '<div style="display:flex;gap:8px">' +
+      '<button onclick="abrirRelExec(true)" style="padding:8px 20px;border-radius:7px;border:none;background:#ffb400;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer">&#x1F5A8; Imprimir PDF</button>' +
+      '<button onclick="abrirRelExec(false)" style="padding:8px 16px;border-radius:7px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer">&#x1F441; Visualizar</button>' +
+      '</div></div>';
     window._relExecHtml = winHtml;
   } catch(err) {
     resultDiv.innerHTML = '<div style="color:#ff5252;font-size:13px">❌ Erro: ' + err.message + '</div>';
@@ -5399,6 +5477,467 @@ showModule = function(id) {
     updateExtraNav(); return;
   }
   _origShowModuleFinal(id);
+};
+
+
+function abrirRelExec(print) {
+  var w = window.open('', '_blank');
+  if (!w) { alert('Permita pop-ups para visualizar.'); return; }
+  w.document.write(window._relExecHtml || '<p>Gere o relatório primeiro.</p>');
+  w.document.close();
+  if (print) setTimeout(function(){ w.print(); }, 500);
+}
+
+function abrirRelExec(doPrint) {
+  var w = window.open('', '_blank');
+  if (!w) { alert('Permita pop-ups para visualizar.'); return; }
+  w.document.write(window._relExecHtml || '<p>Gere o relatório primeiro.</p>');
+  w.document.close();
+  if (doPrint) setTimeout(function(){ w.print(); }, 500);
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// ★ 2FA TOTP — GOOGLE AUTHENTICATOR
+// Uses Supabase MFA API (built-in TOTP support)
+// ══════════════════════════════════════════════════════════════
+var _twoFAFactorId = null;
+var _twoFAChallengeId = null;
+var _pendingSession = null;
+
+async function check2FA(sessionData) {
+  _pendingSession = sessionData;
+  const modal = document.getElementById('twoFAModal');
+  modal.style.display = 'flex';
+  document.getElementById('twoFAInput').value = '';
+  document.getElementById('twoFAErr').textContent = '';
+
+  // Check if admin already has TOTP enrolled
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + sessionData.access_token
+      }
+    });
+    const text = await res.text();
+    console.log('[2FA] GET /factors status:', res.status, 'body:', text.slice(0,300));
+    const data = (text && res.ok) ? JSON.parse(text) : [];
+    const factors = Array.isArray(data) ? data : (data.all || data.totp || []);
+    // Find verified TOTP factor
+    const totpFactor = factors.find(f => f.factor_type === 'totp' && f.status === 'verified');
+    // Find unverified/pending TOTP factor
+    const pendingFactor = factors.find(f => f.factor_type === 'totp' && f.status !== 'verified');
+
+    if (totpFactor) {
+      // Already verified - just challenge
+      _twoFAFactorId = totpFactor.id;
+      document.getElementById('twoFASetup').style.display = 'none';
+      document.getElementById('twoFAVerify').style.display = 'block';
+      await criar2FAChallenge(sessionData.access_token);
+    } else if (pendingFactor) {
+      // Pending/unverified factor exists - use it directly (show QR via URI)
+      _twoFAFactorId = pendingFactor.id;
+      document.getElementById('twoFASetup').style.display = 'block';
+      document.getElementById('twoFAVerify').style.display = 'block';
+      // Try to delete and re-enroll to get fresh QR
+      await deletarEReenroll(sessionData.access_token, pendingFactor.id);
+    } else {
+      // No factor - fresh enrollment
+      document.getElementById('twoFASetup').style.display = 'block';
+      document.getElementById('twoFAVerify').style.display = 'block';
+      await enrollTOTP(sessionData.access_token);
+    }
+  } catch(e) {
+    console.error('[2FA] check2FA error:', e);
+    document.getElementById('twoFASetup').style.display = 'block';
+    document.getElementById('twoFAErr').textContent = 'Erro: ' + e.message;
+  }
+}
+
+async function deletarEReenroll(accessToken, factorId) {
+  try {
+    // Delete the pending/unverified factor
+    const delRes = await fetch(SUPABASE_URL + '/auth/v1/factors/' + factorId, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken }
+    });
+    console.log('[2FA] DELETE factor status:', delRes.status);
+  } catch(e) {
+    console.warn('[2FA] Could not delete factor:', e);
+  }
+  // Re-enroll fresh
+  await enrollTOTP(accessToken);
+}
+
+async function enrollTOTP(accessToken) {
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + accessToken
+      },
+      body: JSON.stringify({ factor_type: 'totp', friendly_name: 'SGQ-IA-' + Date.now(), issuer: 'SGQ-IA CCADV' })
+    });
+    const rawText = await res.text();
+    console.log('[2FA] POST /factors status:', res.status, 'body:', rawText.slice(0,300));
+    if (!rawText) throw new Error('Resposta vazia (status ' + res.status + '). Tente novamente.');
+    const data = JSON.parse(rawText);
+    if (!res.ok) throw new Error(data.message || data.error || data.msg || 'Erro HTTP ' + res.status + ': ' + rawText.slice(0,100));
+
+    _twoFAFactorId = data.id;
+
+    // Show QR code
+    document.getElementById('twoFASetup').style.display = 'block';
+    document.getElementById('twoFAVerify').style.display = 'block';
+
+    const qrDiv = document.getElementById('twoFAQR');
+    qrDiv.innerHTML = '';
+    if (data.totp && data.totp.qr_code) {
+      var qrCode = data.totp.qr_code;
+      qrDiv.style.cssText = 'width:200px;height:200px;margin:0 auto 14px;background:#fff;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box';
+      if (qrCode.includes('<svg') || qrCode.includes('<?xml')) {
+        // SVG inline - render directly
+        qrDiv.innerHTML = qrCode;
+        var svgEl = qrDiv.querySelector('svg');
+        if (svgEl) { svgEl.setAttribute('width','184'); svgEl.setAttribute('height','184'); }
+      } else {
+        qrDiv.innerHTML = '<img src="' + qrCode + '" style="width:184px;height:184px">';
+      }
+    } else if (data.totp && data.totp.uri) {
+      var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=184x184&data=' + encodeURIComponent(data.totp.uri);
+      qrDiv.innerHTML = '<img src="' + qrUrl + '" style="width:184px;height:184px">';
+    }
+    if (data.totp && data.totp.secret) {
+      document.getElementById('twoFASecretText').textContent = 'Chave manual: ' + data.totp.secret;
+    }
+
+    // Create challenge for verification
+    await criar2FAChallenge(accessToken);
+  } catch(e) {
+    document.getElementById('twoFAErr').textContent = 'Erro ao configurar 2FA: ' + e.message;
+  }
+}
+
+async function criar2FAChallenge(accessToken) {
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/factors/' + _twoFAFactorId + '/challenge', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + accessToken
+      }
+    });
+    const chalText = await res.text();
+    console.log('[2FA] challenge status:', res.status, 'body:', chalText.slice(0,200));
+    if (!chalText) throw new Error('Sem resposta ao criar desafio');
+    const data = JSON.parse(chalText);
+    if (!res.ok) throw new Error(data.message || data.error || 'Erro ao criar desafio 2FA');
+    _twoFAChallengeId = data.id;
+    setTimeout(function() { document.getElementById('twoFAInput').focus(); }, 200);
+  } catch(e) {
+    document.getElementById('twoFAErr').textContent = 'Erro: ' + e.message;
+  }
+}
+
+async function verificar2FA() {
+  const code = document.getElementById('twoFAInput').value.trim();
+  const btn = document.getElementById('twoFABtn');
+  const errEl = document.getElementById('twoFAErr');
+
+  if (!code || code.length !== 6) { errEl.textContent = 'Digite o código de 6 dígitos.'; return; }
+  if (!_twoFAChallengeId || !_twoFAFactorId) { errEl.textContent = 'Sessão expirada. Faça login novamente.'; return; }
+
+  btn.disabled = true; btn.textContent = '⏳ Verificando...'; errEl.textContent = '';
+
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/factors/' + _twoFAFactorId + '/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + _pendingSession.access_token
+      },
+      body: JSON.stringify({ challenge_id: _twoFAChallengeId, code: code })
+    });
+    const verText = await res.text();
+    console.log('[2FA] verify status:', res.status, 'body:', verText.slice(0,200));
+    const data = verText ? JSON.parse(verText) : {};
+    if (!res.ok) {
+      var msg = data.message || data.error || 'Código inválido';
+      if (msg.includes('expired') || msg.includes('expirou')) {
+        errEl.textContent = '⏰ Código expirado. Aguarde o próximo código no app.';
+        // Recreate challenge
+        await criar2FAChallenge(_pendingSession.access_token);
+      } else {
+        errEl.textContent = '❌ ' + (msg.includes('Invalid') ? 'Código incorreto. Tente novamente.' : msg);
+      }
+      btn.disabled = false; btn.textContent = 'VERIFICAR CÓDIGO';
+      document.getElementById('twoFAInput').value = '';
+      document.getElementById('twoFAInput').focus();
+      return;
+    }
+
+    // Success! Update session with MFA token if provided
+    if (data.access_token) {
+      _pendingSession.access_token = data.access_token;
+      sbSession = _pendingSession;
+      localStorage.setItem('sgq_session', JSON.stringify(_pendingSession));
+    }
+
+    fechar2FAModal();
+    await registrarAuditoria('2fa_success', 'Verificação 2FA aprovada', 'info');
+    await registrarLog('login', 'Acesso admin com 2FA verificado');
+    abrirSistema();
+  } catch(e) {
+    errEl.textContent = 'Erro: ' + e.message;
+    btn.disabled = false; btn.textContent = 'VERIFICAR CÓDIGO';
+  }
+}
+
+function cancelar2FA() {
+  fechar2FAModal();
+  loggedUser = null;
+  sbSession = null;
+  localStorage.removeItem('sgq_session');
+  document.getElementById('loginPass').value = '';
+}
+
+function fechar2FAModal() {
+  var modal = document.getElementById('twoFAModal');
+  if (modal) modal.style.display = 'none';
+  _twoFAFactorId = null;
+  _twoFAChallengeId = null;
+  _pendingSession = null;
+}
+
+// ── Add 2FA management to Usuários module ──
+// Admin can see 2FA status and reset for other admins
+async function render2FAStatus() {
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + sbSession.access_token }
+    });
+    const data = await res.json();
+    const factors = data.all || [];
+    const totp = factors.find(f => f.factor_type === 'totp' && f.status === 'verified');
+    return totp ? '✅ 2FA Ativo' : '⚠️ 2FA não configurado';
+  } catch(e) { return '—'; }
+}
+
+
+
+// ══════════════════════════════════════════════════════════════
+// ★ LOGO MANAGEMENT
+// ══════════════════════════════════════════════════════════════
+var globalLogoDataUrl = null;
+
+function handleGlobalLogo(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    globalLogoDataUrl = e.target.result;
+    localStorage.setItem('sgq_logo', globalLogoDataUrl);
+    updateLogoDisplay();
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function handleLogoUpload(input) {
+  handleGlobalLogo(input);
+}
+
+function updateLogoDisplay() {
+  var logo = globalLogoDataUrl || localStorage.getItem('sgq_logo');
+  var img = document.getElementById('sidebarLogo');
+  var btn = document.getElementById('btnUploadLogoSidebar');
+  var previewImg = document.getElementById('logoPreviewImg');
+  var previewIcon = document.getElementById('logoPreviewIcon');
+  var logoAtualBox = document.getElementById('logoAtualBox');
+  if (logo) {
+    if (img) { img.src = logo; img.style.display = 'block'; }
+    if (btn) btn.textContent = '🔄';
+    if (previewImg) { previewImg.src = logo; previewImg.style.display = 'block'; }
+    if (previewIcon) previewIcon.style.display = 'none';
+    if (logoAtualBox) logoAtualBox.style.display = 'block';
+    globalLogoDataUrl = logo;
+  }
+}
+
+// Load logo on startup
+document.addEventListener('DOMContentLoaded', function() {
+  updateLogoDisplay();
+});
+setTimeout(updateLogoDisplay, 500);
+
+// ══════════════════════════════════════════════════════════════
+// ★ GERENCIAR NORMAS (EXCLUIR) — inclui padrão e customizadas
+// ══════════════════════════════════════════════════════════════
+function abrirGerenciarNormas() {
+  var modal = document.getElementById('gerenciarNormasModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'gerenciarNormasModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+    modal.innerHTML = '<div style="background:#111820;border:1px solid #1e2d3d;border-radius:16px;width:500px;max-width:95vw;padding:24px;max-height:80vh;overflow-y:auto">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">' +
+        '<div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:700;color:#e8edf3">🗑 Gerenciar Normas</div>' +
+        '<button onclick="document.getElementById(\'gerenciarNormasModal\').style.display=\'none\'" style="background:transparent;border:1px solid #1e2d3d;border-radius:7px;color:#607080;padding:4px 10px;cursor:pointer">✕ Fechar</button>' +
+      '</div>' +
+      '<div style="margin-bottom:12px;padding:10px 12px;background:rgba(255,234,0,.04);border:1px solid rgba(255,234,0,.12);border-radius:8px;font-size:12px;color:#607080">⚠️ As normas padrão (ISO 9001, 27001, 42001, AB2L) não podem ser excluídas — apenas ocultadas da sua visualização. Normas customizadas podem ser excluídas permanentemente.</div>' +
+      '<div id="gerenciarNormasLista"></div>' +
+    '</div>';
+    document.body.appendChild(modal);
+  }
+  modal.style.display = 'flex';
+  renderGerenciarNormasLista();
+}
+
+function renderGerenciarNormasLista() {
+  var lista = document.getElementById('gerenciarNormasLista');
+  if (!lista) return;
+  var html = '';
+
+  // Standard normas
+  var normaPadrao = [
+    { id: '9001', nome: 'ISO 9001:2015', desc: 'Sistema de Gestão da Qualidade', cor: '#00c8ff', padrao: true },
+    { id: '27001', nome: 'ISO 27001:2022', desc: 'Segurança da Informação', cor: '#a050ff', padrao: true },
+    { id: '42001', nome: 'ISO 42001:2023', desc: 'Gestão de IA Responsável', cor: '#00e676', padrao: true },
+    { id: 'ab2l', nome: 'AB2L Infinite', desc: 'Certificação Inovação Jurídica', cor: '#ffb400', padrao: true }
+  ];
+
+  html += '<div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#607080;text-transform:uppercase;margin-bottom:8px">Normas Padrão (ocultar da aba)</div>';
+  normaPadrao.forEach(function(n) {
+    var tabId = 'isoTab' + (n.id === 'ab2l' ? 'AB2L' : n.id);
+    var tab = document.getElementById(tabId);
+    var isVisible = !tab || tab.style.display !== 'none';
+    html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#18222e;border:1px solid #1e2d3d;border-radius:9px;margin-bottom:8px">' +
+      '<div style="width:10px;height:10px;border-radius:50%;background:' + n.cor + ';flex-shrink:0"></div>' +
+      '<div style="flex:1"><div style="font-weight:600;font-size:13px">' + n.nome + '</div><div style="font-size:11px;color:#607080">' + n.desc + '</div></div>' +
+      '<button onclick="toggleNormaPadrao(\'' + n.id + '\')" style="padding:5px 12px;border-radius:7px;border:1px solid ' + (isVisible ? 'rgba(255,234,0,.3)' : 'rgba(0,230,118,.3)') + ';background:transparent;color:' + (isVisible ? '#ffea00' : '#00e676') + ';font-size:12px;cursor:pointer">' + (isVisible ? '👁 Ocultar' : '👁 Mostrar') + '</button>' +
+    '</div>';
+  });
+
+  // Custom normas
+  var customKeys = Object.keys(normasCustom);
+  if (customKeys.length > 0) {
+    html += '<div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#607080;text-transform:uppercase;margin:16px 0 8px">Normas Customizadas</div>';
+    customKeys.forEach(function(cod) {
+      var n = normasCustom[cod];
+      var totalReqs = Object.keys(n.checklist || {}).length;
+      html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#18222e;border:1px solid #1e2d3d;border-radius:9px;margin-bottom:8px">' +
+        '<div style="width:10px;height:10px;border-radius:50%;background:' + n.cor + ';flex-shrink:0"></div>' +
+        '<div style="flex:1"><div style="font-weight:600;font-size:13px">' + n.nome + '</div><div style="font-size:11px;color:#607080">' + totalReqs + ' requisitos</div></div>' +
+        '<button onclick="excluirNormaCustom(\'' + cod + '\');renderGerenciarNormasLista();" style="padding:5px 12px;border-radius:7px;border:1px solid rgba(255,82,82,.3);background:rgba(255,82,82,.06);color:#ff5252;font-size:12px;cursor:pointer">🗑 Excluir</button>' +
+      '</div>';
+    });
+  }
+
+  if (!customKeys.length && !normaPadrao.length) html = '<div style="text-align:center;color:#607080;padding:20px">Nenhuma norma cadastrada.</div>';
+  lista.innerHTML = html;
+}
+
+function toggleNormaPadrao(normaId) {
+  var tabId = 'isoTab' + (normaId === 'ab2l' ? 'AB2L' : normaId);
+  var tab = document.getElementById(tabId);
+  if (!tab) return;
+  if (tab.style.display === 'none') {
+    tab.style.display = '';
+  } else {
+    tab.style.display = 'none';
+    // Switch to 9001 if current norma is hidden
+    if (normaAtiva === normaId) trocarNorma('9001');
+  }
+  renderGerenciarNormasLista();
+}
+
+// ══════════════════════════════════════════════════════════════
+// ★ MULTI-DOC: removerDocCriterio melhorado para re-render
+// ══════════════════════════════════════════════════════════════
+var _origRemoverDoc = removerDocCriterio;
+removerDocCriterio = function(key, idx) {
+  if (!multiDocs[key]) return;
+  multiDocs[key].splice(idx, 1);
+  // Re-render appropriate norma
+  if (key.startsWith('27001_')) renderISO('27001');
+  else if (key.startsWith('42001_')) renderISO('42001');
+  else if (key.startsWith('ab2l_')) renderAB2L();
+  else if (normaAtiva && normasCustom && normasCustom[normaAtiva]) renderChecklistCustom(normasCustom[normaAtiva], normasCustom[normaAtiva].cor || '#ff8c00');
+  else render();
+};
+
+// ══════════════════════════════════════════════════════════════
+// ★ TEMPLATE VISUAL: Logo injection in generated docs
+// ══════════════════════════════════════════════════════════════
+var _origGerarComTemplateVisual = gerarComTemplateVisual;
+gerarComTemplateVisual = async function() {
+  var idx = parseInt(document.getElementById('tplSelectGen').value);
+  var prompt = document.getElementById('tplGenPrompt').value.trim();
+  var resultDiv = document.getElementById('tplGenResult');
+  if (!prompt) { alert('Descreva o que deve ser preenchido.'); return; }
+
+  var tpl = userTemplates[idx];
+  resultDiv.innerHTML = '<div style="color:#607080;font-size:12px">⏳ Gerando documento com base no template...</div>';
+
+  var logoB64 = '';
+  var logoSrc = globalLogoDataUrl || localStorage.getItem('sgq_logo') || '';
+  if (logoSrc && logoSrc.startsWith('data:image')) {
+    logoB64 = logoSrc;
+  }
+
+  var system = 'Você é especialista em documentação ISO para escritório CCADV Clayton Casal.' +
+    '\nO usuário forneceu um template PDF com layout gráfico específico. Analise e reproduza FIELMENTE.' +
+    '\nINSTRUÇÕES OBRIGATÓRIAS:' +
+    '\n1. Analise o template e identifique: cabeçalho, seções, rodapé e formatação' +
+    '\n2. Gere o documento em HTML COMPLETO com CSS inline, pronto para impressão em A4' +
+    (logoB64 ? '\n3. Cabeçalho: use o logo fornecido (tag <img src="' + logoB64.substring(0,50) + '..." style="max-height:50px;max-width:180px") à esquerda + tabela Número/Versão/Data à direita' : '\n3. Cabeçalho: texto "CCADV CLAYTON CASAL" estilizado à esquerda + tabela Número/Versão/Data à direita') +
+    '\n4. Corpo: mesmas seções numeradas do template, fonte Arial 11pt' +
+    '\n5. Rodapé: 3 colunas — (*) Elaborador | (*) Revisor | (*) Aprovador' +
+    '\n6. NÃO use markdown. Gere APENAS HTML válido começando com <!DOCTYPE html>' +
+    '\n7. CSS: body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;line-height:1.5}' +
+    '\n8. O resultado deve parecer IDÊNTICO ao template quando impresso';
+
+  var userText = 'Template: "' + tpl.nome + '" (' + tpl.tipo + '). Solicitação: ' + prompt +
+    '\nGere o documento em HTML respeitando exatamente o layout gráfico do template.';
+  if (logoB64) userText += '\n[Logo disponível: use a imagem base64 fornecida no cabeçalho]';
+
+  try {
+    var raw = await callGemini(userText, system,
+      (tpl.mime === 'application/pdf' || (tpl.mime && tpl.mime.startsWith('image/'))) ? tpl.conteudo_base64 : null,
+      (tpl.mime === 'application/pdf' || (tpl.mime && tpl.mime.startsWith('image/'))) ? tpl.mime : null
+    );
+
+    var htmlDoc = raw.replace(/```html|```/g,'').trim();
+    // Inject real logo if available
+    if (logoB64 && htmlDoc.includes('CCADV')) {
+      htmlDoc = htmlDoc.replace(
+        /(<div[^>]*>|<td[^>]*>)\s*(CCADV|CLAYTON CASAL)[^<]*/i,
+        '$1<img src="' + logoB64 + '" style="max-height:50px;max-width:180px;object-fit:contain" alt="Logo">'
+      );
+    }
+
+    var docId = 'tplvis_' + Date.now();
+    window._genDocs = window._genDocs || {};
+    window._genDocs[docId] = { titulo: prompt.slice(0,60), conteudo: raw, htmlDoc: htmlDoc };
+
+    resultDiv.innerHTML = '<div style="background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);border-radius:9px;padding:14px">' +
+      '<div style="font-size:11px;font-weight:700;color:#00e676;margin-bottom:10px">✅ Documento gerado! Escolha como visualizar:</div>' +
+      '<div style="display:flex;gap:8px;margin-bottom:12px">' +
+        '<button onclick="previewDocTemplate(\'' + docId + '\')" style="padding:7px 16px;border-radius:7px;border:none;background:#00c8ff;color:#0a0e14;font-size:12px;font-weight:700;cursor:pointer">👁 Pré-visualizar</button>' +
+        '<button onclick="imprimirDocTemplate(\'' + docId + '\')" style="padding:7px 14px;border-radius:7px;border:1px solid #00e676;background:transparent;color:#00e676;font-size:12px;cursor:pointer">🖨️ Imprimir</button>' +
+        '<button onclick="copiarGenDoc(\'' + docId + '\')" style="padding:7px 14px;border-radius:7px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:12px;cursor:pointer">📋 Copiar</button>' +
+      '</div>' +
+      '<div style="background:#0d1520;border-radius:7px;padding:10px;max-height:280px;overflow-y:auto;font-size:11px;color:#607080;font-family:monospace;white-space:pre-wrap">' + htmlDoc.replace(/</g,'&lt;').slice(0,1000) + (htmlDoc.length>1000?'...':'') + '</div>' +
+    '</div>';
+
+  } catch(err) {
+    resultDiv.innerHTML = '<div style="font-size:12px;color:#ff5252">❌ Erro: ' + err.message + '</div>';
+  }
 };
 
 </script>
