@@ -5447,6 +5447,8 @@ async function check2FA(sessionData) {
   modal.style.display = 'flex';
   document.getElementById('twoFAInput').value = '';
   document.getElementById('twoFAErr').textContent = '';
+  document.getElementById('twoFASetup').style.display = 'none';
+  document.getElementById('twoFAVerify').style.display = 'block';
 
   // Check if admin already has TOTP enrolled
   try {
@@ -5456,22 +5458,24 @@ async function check2FA(sessionData) {
         'Authorization': 'Bearer ' + sessionData.access_token
       }
     });
-    const data = await res.json();
-    const totpFactor = (data.all || []).find(f => f.factor_type === 'totp' && f.status === 'verified');
+    // Handle empty response
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : {};
+    // Supabase returns array or {all:[]} or {totp:[], phone:[]}
+    const factors = Array.isArray(data) ? data : (data.all || data.totp || []);
+    const totpFactor = factors.find(function(f){ return f.factor_type === 'totp' && f.status === 'verified'; });
 
     if (totpFactor) {
       // Already enrolled - just verify
       _twoFAFactorId = totpFactor.id;
-      document.getElementById('twoFASetup').style.display = 'none';
-      document.getElementById('twoFAVerify').style.display = 'block';
-      // Create challenge
       await criar2FAChallenge(sessionData.access_token);
     } else {
-      // First time - enroll TOTP
+      // First time - enroll TOTP and show QR
       await enrollTOTP(sessionData.access_token);
     }
   } catch(e) {
-    document.getElementById('twoFAErr').textContent = 'Erro ao verificar 2FA: ' + e.message;
+    // If can't check factors, try enrolling directly
+    await enrollTOTP(sessionData.access_token);
   }
 }
 
@@ -5486,30 +5490,38 @@ async function enrollTOTP(accessToken) {
       },
       body: JSON.stringify({ factor_type: 'totp', friendly_name: 'SGQ-IA Admin', issuer: 'SGQ-IA CCADV' })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || data.error || 'Erro ao configurar 2FA');
+    // Safe parse
+    const text = await res.text();
+    if (!text) throw new Error('Resposta vazia do servidor. Verifique se MFA está ativo no Supabase.');
+    const data = JSON.parse(text);
+    if (!res.ok) throw new Error(data.message || data.error || data.msg || 'Erro ao configurar 2FA');
+    if (!data.id) throw new Error('Fator não criado. ' + JSON.stringify(data).slice(0,100));
 
     _twoFAFactorId = data.id;
 
-    // Show QR code
+    // Show QR code and setup area
     document.getElementById('twoFASetup').style.display = 'block';
-    document.getElementById('twoFAVerify').style.display = 'block';
 
     const qrDiv = document.getElementById('twoFAQR');
+    qrDiv.innerHTML = '';
     if (data.totp && data.totp.qr_code) {
+      // Supabase returns SVG or base64 QR
       qrDiv.innerHTML = '<img src="' + data.totp.qr_code + '" style="width:180px;height:180px">';
     } else if (data.totp && data.totp.uri) {
-      // Generate QR as text fallback
-      qrDiv.innerHTML = '<div style="font-size:9px;color:#333;word-break:break-all;padding:8px">' + data.totp.uri + '</div>';
+      // Use Google Charts API to generate QR from URI
+      var qrUrl = 'https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=' + encodeURIComponent(data.totp.uri);
+      qrDiv.innerHTML = '<img src="' + qrUrl + '" style="width:180px;height:180px" onerror="this.style.display='none'">' +
+        '<div style="font-size:8px;color:#333;word-break:break-all;padding:4px;margin-top:4px">' + data.totp.uri.slice(0,80) + '...</div>';
     }
     if (data.totp && data.totp.secret) {
-      document.getElementById('twoFASecretText').textContent = 'Chave manual: ' + data.totp.secret;
+      document.getElementById('twoFASecretText').textContent = '🔑 Chave manual: ' + data.totp.secret;
     }
 
-    // Create challenge for verification
+    // Create challenge
     await criar2FAChallenge(accessToken);
   } catch(e) {
     document.getElementById('twoFAErr').textContent = 'Erro ao configurar 2FA: ' + e.message;
+    console.error('enrollTOTP error:', e);
   }
 }
 
@@ -5618,4 +5630,3 @@ async function render2FAStatus() {
 </script>
 </body>
 </html>
-
