@@ -291,7 +291,7 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
     <input class="login-input" id="loginPass" type="password" placeholder="Sua senha" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" id="loginBtn" onclick="doLogin()">ENTRAR NO SISTEMA</button>
     <div class="login-error" id="loginError"></div>
-    <div class="login-footer">🔒 Autenticação segura · 2FA</div>
+    <div class="login-footer">🔒 Autenticação segura</div>
   </div>
 </div>
 
@@ -1041,32 +1041,11 @@ async function doLogin(){
       btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
       document.getElementById('loginPass').value='';return;
     }
-    // SALVA SESSÃO
-sbSession = data;
-localStorage.setItem('sgq_session', JSON.stringify(data));
-
-// BUSCA PERFIL
-const perfis = await sb('/rest/v1/perfis?id=eq.' + data.user.id + '&select=*');
-
-const perfil = (perfis && perfis[0])
-  ? perfis[0]
-  : { nome: email, perfil: 'Colaborador', email };
-
-// VERIFICA SE ESTÁ ATIVO
-if (perfil.ativo === false) {
-  errEl.textContent = 'Conta desativada. Contate o administrador.';
-  localStorage.removeItem('sgq_session');
-  btn.textContent = 'ENTRAR NO SISTEMA';
-  btn.disabled = false;
-  return;
-}
-
-// DEFINE USUÁRIO
-loggedUser = { ...perfil, id: data.user.id };
-
-// LOGIN DIRETO (SEM 2FA)
-abrirSistema();
-return;
+    sbSession=data;localStorage.setItem('sgq_session',JSON.stringify(data));
+    const perfis=await sb('/rest/v1/perfis?id=eq.'+data.user.id+'&select=*');
+    const perfil=perfis&&perfis[0]?perfis[0]:{nome:email,perfil:'Colaborador',email};
+    if(perfil.ativo===false){errEl.textContent='Conta desativada. Contate o administrador.';localStorage.removeItem('sgq_session');btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;return;}
+    loggedUser={...perfil,id:data.user.id};
     await registrarLog('login','Acesso ao sistema SGQ');
     abrirSistema();
   }catch(e){errEl.textContent='Erro de conexão: '+e.message;document.getElementById('loginPass').value='';}
@@ -5319,12 +5298,13 @@ ${barHtml('AB2L',statsAB2L.pct,'#cc6600')}
 <div class="footer">Gerado pelo SGQ-IA · ${empresa} · ${new Date().toLocaleString('pt-BR')} · Usuário: ${loggedUser?.nome||''}</div>
 </body></html>`;
 
-    resultDiv.innerHTML = '<div style="background:rgba(255,180,0,.07);border:1px solid rgba(255,180,0,.2);border-radius:12px;padding:16px">' +
-      '<div style="font-size:12px;font-weight:700;color:#ffb400;margin-bottom:10px">&#x2705; Relat&#xF3;rio gerado!</div>' +
-      '<div style="display:flex;gap:8px">' +
-      '<button onclick="abrirRelExec(true)" style="padding:8px 20px;border-radius:7px;border:none;background:#ffb400;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer">&#x1F5A8; Imprimir PDF</button>' +
-      '<button onclick="abrirRelExec(false)" style="padding:8px 16px;border-radius:7px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer">&#x1F441; Visualizar</button>' +
-      '</div></div>';
+    resultDiv.innerHTML = `<div style="background:rgba(255,180,0,.07);border:1px solid rgba(255,180,0,.2);border-radius:12px;padding:16px">
+      <div style="font-size:12px;font-weight:700;color:#ffb400;margin-bottom:10px">✅ Relatório gerado com sucesso!</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="window._relExecHtml=\`${winHtml.replace(/`/g,"\\`")}\`;var w=window.open('','_blank');w.document.write(window._relExecHtml);w.document.close();setTimeout(function(){w.print();},500)" style="padding:8px 20px;border-radius:7px;border:none;background:#ffb400;color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer">🖨️ Imprimir / Salvar PDF</button>
+        <button onclick="var w=window.open('','_blank');w.document.write(window._relExecHtml||'');w.document.close()" style="padding:8px 16px;border-radius:7px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:13px;cursor:pointer">👁 Visualizar</button>
+      </div>
+    </div>`;
     window._relExecHtml = winHtml;
   } catch(err) {
     resultDiv.innerHTML = '<div style="color:#ff5252;font-size:13px">❌ Erro: ' + err.message + '</div>';
@@ -5420,23 +5400,6 @@ showModule = function(id) {
   }
   _origShowModuleFinal(id);
 };
-
-
-function abrirRelExec(print) {
-  var w = window.open('', '_blank');
-  if (!w) { alert('Permita pop-ups para visualizar.'); return; }
-  w.document.write(window._relExecHtml || '<p>Gere o relatório primeiro.</p>');
-  w.document.close();
-  if (print) setTimeout(function(){ w.print(); }, 500);
-}
-
-function abrirRelExec(doPrint) {
-  var w = window.open('', '_blank');
-  if (!w) { alert('Permita pop-ups para visualizar.'); return; }
-  w.document.write(window._relExecHtml || '<p>Gere o relatório primeiro.</p>');
-  w.document.close();
-  if (doPrint) setTimeout(function(){ w.print(); }, 500);
-}
 
 </script>
 </body>
