@@ -291,7 +291,32 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
     <input class="login-input" id="loginPass" type="password" placeholder="Sua senha" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" id="loginBtn" onclick="doLogin()">ENTRAR NO SISTEMA</button>
     <div class="login-error" id="loginError"></div>
-    <div class="login-footer">🔒 Autenticação segura</div>
+    <div class="login-footer">🔒 Autenticação segura · 2FA</div>
+  </div>
+</div>
+
+<!-- 2FA TOTP MODAL -->
+<div id="twoFAModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:10000;align-items:center;justify-content:center">
+  <div style="background:#111820;border:1px solid #1e2d3d;border-radius:20px;padding:36px 32px;width:360px;box-shadow:0 30px 80px rgba(0,0,0,.8)">
+    <!-- Setup QR -->
+    <div id="twoFASetup" style="display:none">
+      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;text-align:center;margin-bottom:6px">🔐 Ativar 2FA</div>
+      <div style="font-size:12px;color:#607080;text-align:center;margin-bottom:16px">Escaneie com Google Authenticator ou Authy</div>
+      <div id="twoFAQR" style="text-align:center;margin:0 auto 14px;width:200px;height:200px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden"></div>
+      <div id="twoFASecretText" style="font-size:10px;color:#607080;text-align:center;word-break:break-all;margin-bottom:12px;padding:6px;background:#18222e;border-radius:6px"></div>
+      <div style="font-size:12px;color:#a0b4c8;text-align:center;margin-bottom:12px">Após escanear, confirme inserindo o código:</div>
+    </div>
+    <!-- Verify code -->
+    <div id="twoFAVerify">
+      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;text-align:center;margin-bottom:6px">🔐 Verificação 2FA</div>
+      <div style="font-size:12px;color:#607080;text-align:center;margin-bottom:18px">Digite o código do seu autenticador</div>
+    </div>
+    <input id="twoFAInput" type="text" inputmode="numeric" maxlength="6" placeholder="● ● ● ● ● ●" autocomplete="one-time-code"
+      style="width:100%;text-align:center;letter-spacing:10px;font-size:26px;font-weight:800;background:#18222e;border:1px solid #1e2d3d;border-radius:12px;padding:14px 8px;color:#e8edf3;outline:none;box-sizing:border-box;margin-bottom:10px"
+      oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="if(event.key==='Enter')verificar2FA()">
+    <div id="twoFAErr" style="color:#ff5252;font-size:12px;text-align:center;margin-bottom:10px;min-height:16px"></div>
+    <button onclick="verificar2FA()" id="twoFABtn" style="width:100%;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,#00c8ff,#0070ff);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:1px">VERIFICAR CÓDIGO</button>
+    <button onclick="cancelar2FA()" style="width:100%;margin-top:8px;padding:9px;border-radius:9px;border:1px solid #1e2d3d;background:transparent;color:#607080;font-size:12px;cursor:pointer">Cancelar</button>
   </div>
 </div>
 
@@ -1046,6 +1071,12 @@ async function doLogin(){
     const perfil=perfis&&perfis[0]?perfis[0]:{nome:email,perfil:'Colaborador',email};
     if(perfil.ativo===false){errEl.textContent='Conta desativada. Contate o administrador.';localStorage.removeItem('sgq_session');btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;return;}
     loggedUser={...perfil,id:data.user.id};
+    // Check if admin needs 2FA
+    if (loggedUser.perfil === 'Administrador') {
+      btn.textContent='ENTRAR NO SISTEMA';btn.disabled=false;
+      await check2FA(data);
+      return;
+    }
     await registrarLog('login','Acesso ao sistema SGQ');
     abrirSistema();
   }catch(e){errEl.textContent='Erro de conexão: '+e.message;document.getElementById('loginPass').value='';}
@@ -5401,6 +5432,190 @@ showModule = function(id) {
   _origShowModuleFinal(id);
 };
 
+
+// ══════════════════════════════════════════════════════════════
+// ★ 2FA TOTP — GOOGLE AUTHENTICATOR
+// Uses Supabase MFA API (built-in TOTP support)
+// ══════════════════════════════════════════════════════════════
+var _twoFAFactorId = null;
+var _twoFAChallengeId = null;
+var _pendingSession = null;
+
+async function check2FA(sessionData) {
+  _pendingSession = sessionData;
+  const modal = document.getElementById('twoFAModal');
+  modal.style.display = 'flex';
+  document.getElementById('twoFAInput').value = '';
+  document.getElementById('twoFAErr').textContent = '';
+
+  // Check if admin already has TOTP enrolled
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + sessionData.access_token
+      }
+    });
+    const data = await res.json();
+    const totpFactor = (data.all || []).find(f => f.factor_type === 'totp' && f.status === 'verified');
+
+    if (totpFactor) {
+      // Already enrolled - just verify
+      _twoFAFactorId = totpFactor.id;
+      document.getElementById('twoFASetup').style.display = 'none';
+      document.getElementById('twoFAVerify').style.display = 'block';
+      // Create challenge
+      await criar2FAChallenge(sessionData.access_token);
+    } else {
+      // First time - enroll TOTP
+      await enrollTOTP(sessionData.access_token);
+    }
+  } catch(e) {
+    document.getElementById('twoFAErr').textContent = 'Erro ao verificar 2FA: ' + e.message;
+  }
+}
+
+async function enrollTOTP(accessToken) {
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + accessToken
+      },
+      body: JSON.stringify({ factor_type: 'totp', friendly_name: 'SGQ-IA Admin', issuer: 'SGQ-IA CCADV' })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || data.error || 'Erro ao configurar 2FA');
+
+    _twoFAFactorId = data.id;
+
+    // Show QR code
+    document.getElementById('twoFASetup').style.display = 'block';
+    document.getElementById('twoFAVerify').style.display = 'block';
+
+    const qrDiv = document.getElementById('twoFAQR');
+    if (data.totp && data.totp.qr_code) {
+      qrDiv.innerHTML = '<img src="' + data.totp.qr_code + '" style="width:180px;height:180px">';
+    } else if (data.totp && data.totp.uri) {
+      // Generate QR as text fallback
+      qrDiv.innerHTML = '<div style="font-size:9px;color:#333;word-break:break-all;padding:8px">' + data.totp.uri + '</div>';
+    }
+    if (data.totp && data.totp.secret) {
+      document.getElementById('twoFASecretText').textContent = 'Chave manual: ' + data.totp.secret;
+    }
+
+    // Create challenge for verification
+    await criar2FAChallenge(accessToken);
+  } catch(e) {
+    document.getElementById('twoFAErr').textContent = 'Erro ao configurar 2FA: ' + e.message;
+  }
+}
+
+async function criar2FAChallenge(accessToken) {
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/factors/' + _twoFAFactorId + '/challenge', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + accessToken
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Erro ao criar desafio 2FA');
+    _twoFAChallengeId = data.id;
+    setTimeout(function() { document.getElementById('twoFAInput').focus(); }, 200);
+  } catch(e) {
+    document.getElementById('twoFAErr').textContent = 'Erro: ' + e.message;
+  }
+}
+
+async function verificar2FA() {
+  const code = document.getElementById('twoFAInput').value.trim();
+  const btn = document.getElementById('twoFABtn');
+  const errEl = document.getElementById('twoFAErr');
+
+  if (!code || code.length !== 6) { errEl.textContent = 'Digite o código de 6 dígitos.'; return; }
+  if (!_twoFAChallengeId || !_twoFAFactorId) { errEl.textContent = 'Sessão expirada. Faça login novamente.'; return; }
+
+  btn.disabled = true; btn.textContent = '⏳ Verificando...'; errEl.textContent = '';
+
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/factors/' + _twoFAFactorId + '/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + _pendingSession.access_token
+      },
+      body: JSON.stringify({ challenge_id: _twoFAChallengeId, code: code })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      var msg = data.message || data.error || 'Código inválido';
+      if (msg.includes('expired') || msg.includes('expirou')) {
+        errEl.textContent = '⏰ Código expirado. Aguarde o próximo código no app.';
+        // Recreate challenge
+        await criar2FAChallenge(_pendingSession.access_token);
+      } else {
+        errEl.textContent = '❌ ' + (msg.includes('Invalid') ? 'Código incorreto. Tente novamente.' : msg);
+      }
+      btn.disabled = false; btn.textContent = 'VERIFICAR CÓDIGO';
+      document.getElementById('twoFAInput').value = '';
+      document.getElementById('twoFAInput').focus();
+      return;
+    }
+
+    // Success! Update session with MFA token if provided
+    if (data.access_token) {
+      _pendingSession.access_token = data.access_token;
+      sbSession = _pendingSession;
+      localStorage.setItem('sgq_session', JSON.stringify(_pendingSession));
+    }
+
+    fechar2FAModal();
+    await registrarAuditoria('2fa_success', 'Verificação 2FA aprovada', 'info');
+    await registrarLog('login', 'Acesso admin com 2FA verificado');
+    abrirSistema();
+  } catch(e) {
+    errEl.textContent = 'Erro: ' + e.message;
+    btn.disabled = false; btn.textContent = 'VERIFICAR CÓDIGO';
+  }
+}
+
+function cancelar2FA() {
+  fechar2FAModal();
+  loggedUser = null;
+  sbSession = null;
+  localStorage.removeItem('sgq_session');
+  document.getElementById('loginPass').value = '';
+}
+
+function fechar2FAModal() {
+  var modal = document.getElementById('twoFAModal');
+  if (modal) modal.style.display = 'none';
+  _twoFAFactorId = null;
+  _twoFAChallengeId = null;
+  _pendingSession = null;
+}
+
+// ── Add 2FA management to Usuários module ──
+// Admin can see 2FA status and reset for other admins
+async function render2FAStatus() {
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/factors', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + sbSession.access_token }
+    });
+    const data = await res.json();
+    const factors = data.all || [];
+    const totp = factors.find(f => f.factor_type === 'totp' && f.status === 'verified');
+    return totp ? '✅ 2FA Ativo' : '⚠️ 2FA não configurado';
+  } catch(e) { return '—'; }
+}
+
 </script>
 </body>
 </html>
+
