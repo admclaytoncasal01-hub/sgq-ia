@@ -1349,6 +1349,7 @@ async function carregarAno(ano){
     if(ck) ck.forEach(r=>{
       if(r.criterio_id.startsWith('27001_')) done27[r.criterio_id.replace('27001_','')]=r.feito;
       else if(r.criterio_id.startsWith('42001_')) done42[r.criterio_id.replace('42001_','')]=r.feito;
+      else if(r.criterio_id.startsWith('ab2l_')) doneAB2L[r.criterio_id.replace('ab2l_','')]=r.feito; // restore nivel string (excelente/bom/insuficiente)
       else anoData[ano].done[r.criterio_id]=r.feito;
     });
     const ri=await sb('/rest/v1/resultados_ia?ano=eq.'+ano+'&select=*&order=criado_em.asc');
@@ -1379,7 +1380,28 @@ async function carregarAno(ano){
       const obj={aprovado:r.aprovado,conformidade:r.conformidade,pontos_atendidos:r.pontos_atendidos||[],pontos_faltando:r.pontos_faltando||[],recomendacao:r.recomendacao,filename:r.filename,erro:r.erro,storagePath:r.storage_path||null};
       if(r.criterio_id.startsWith('27001_')) results27[r.criterio_id.replace('27001_','')]=obj;
       else if(r.criterio_id.startsWith('42001_')) results42[r.criterio_id.replace('42001_','')]=obj;
-      else if(!r.criterio_id.startsWith('arg_') && !r.criterio_id.startsWith('usertpl_')) anoData[ano].results[r.criterio_id]=obj;
+      else if(r.criterio_id.startsWith('ab2l_')) resultsAB2L[r.criterio_id.replace('ab2l_','')]=obj; // restore per-item and overall results
+      else if(r.criterio_id.startsWith('usertpl_')) {
+        // Restore user templates from Supabase
+        try {
+          var tplMeta = JSON.parse(r.recomendacao || '{}');
+          if (tplMeta.nome && !userTemplates.find(function(t){return t.id===r.criterio_id.replace('usertpl_','');})) {
+            userTemplates.push({
+              id: r.criterio_id.replace('usertpl_',''),
+              nome: tplMeta.nome,
+              tipo: tplMeta.tipo || (tplMeta.filename ? tplMeta.filename.split('.').pop().toUpperCase() : 'PDF'),
+              norma: tplMeta.norma || 'geral',
+              filename: tplMeta.filename || tplMeta.nome,
+              conteudo_base64: tplMeta.conteudo_base64 || null, // may be null if too large
+              mime: tplMeta.mime || 'application/pdf',
+              criado_em: tplMeta.criado_em || r.criado_em,
+              usuario: tplMeta.usuario || '',
+              storage_path: r.storage_path || null
+            });
+          }
+        } catch(eParse) {}
+      }
+      else if(!r.criterio_id.startsWith('arg_')) anoData[ano].results[r.criterio_id]=obj;
     });
     const docs=await sb('/rest/v1/documentos?ano=eq.'+ano+'&select=*&order=criado_em.asc');
     if(docs&&docs.length) anoData[ano].docList=docs.map(d=>({cod:d.codigo,titulo:d.titulo,tipo:d.tipo,req:d.requisito_iso,versao:d.versao,resp:d.responsavel,aprv:d.data_aprovacao,val:d.data_validade,status:d.status,desc:d.descricao,arquivo:d.arquivo||'',_id:d.id}));
@@ -4037,20 +4059,23 @@ async function handleTplUpload(input) {
       usuario: loggedUser?.nome || loggedUser?.email
     };
     userTemplates.push(tpl);
-    // Save to Supabase (best effort)
+    // Save to Supabase (best effort) — file to Storage, metadata to resultados_ia
     try {
+      var tplStoragePath = await uploadDocToStorage(base64, tpl.mime, tpl.filename, 'usertpl_' + tpl.id);
+      tpl.storage_path = tplStoragePath;
       await sb('/rest/v1/resultados_ia', {
         method: 'POST',
         headers: { 'Prefer': 'resolution=merge-duplicates' },
         body: JSON.stringify({
           ano: anoAtual,
           criterio_id: 'usertpl_' + tpl.id,
-          recomendacao: JSON.stringify({ nome: tpl.nome, filename: tpl.filename, mime: tpl.mime, usuario: tpl.usuario, criado_em: tpl.criado_em }),
+          recomendacao: JSON.stringify({ nome: tpl.nome, filename: tpl.filename, mime: tpl.mime, tipo: tpl.tipo, usuario: tpl.usuario, criado_em: tpl.criado_em }),
+          storage_path: tplStoragePath || null,
           usuario_id: loggedUser?.id,
           criado_em: tpl.criado_em
         })
       });
-    } catch(eErr) {}
+    } catch(eErr) { console.warn('Template save error:', eErr); }
     renderUserTemplates();
   };
   reader.readAsDataURL(file);
@@ -4096,7 +4121,9 @@ function renderUserTemplates() {
         <div class="tpl-item-name">${tpl.nome}</div>
         <div class="tpl-item-meta">${tpl.tipo} · Upload por ${tpl.usuario} · ${new Date(tpl.criado_em).toLocaleDateString('pt-BR')}</div>
       </div>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        ${tpl.storage_path ? '<span title="Salvo no servidor" style="font-size:10px;color:#00e676;padding:2px 7px;border:1px solid rgba(0,230,118,.2);border-radius:4px">☁ Salvo</span>' : '<span title="Apenas nesta sessão" style="font-size:10px;color:#ffea00;padding:2px 7px;border:1px solid rgba(255,234,0,.2);border-radius:4px">⚠ Sessão</span>'}
+        <button onclick="editarNomeTemplate(${i})" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(0,200,255,.2);background:transparent;color:#607080;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif" title="Renomear">✏️</button>
         <button onclick="usarTemplateNoChat(${i})" style="padding:5px 12px;border-radius:6px;border:1px solid rgba(0,200,255,.3);background:transparent;color:#00c8ff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">💬 Usar no Chat</button>
         <button onclick="removerTemplate(${i})" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(255,82,82,.2);background:transparent;color:#ff5252;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">🗑</button>
       </div>`;
@@ -4124,6 +4151,29 @@ function removerTemplate(i) {
     userTemplates.splice(i, 1);
     renderUserTemplates();
   }
+}
+
+function editarNomeTemplate(i) {
+  var tpl = userTemplates[i];
+  var novoNome = prompt('Novo nome para o template:', tpl.nome);
+  if (!novoNome || novoNome.trim() === '' || novoNome.trim() === tpl.nome) return;
+  userTemplates[i].nome = novoNome.trim();
+  // Update in Supabase
+  try {
+    sb('/rest/v1/resultados_ia', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({
+        ano: anoAtual,
+        criterio_id: 'usertpl_' + tpl.id,
+        recomendacao: JSON.stringify({ nome: novoNome.trim(), filename: tpl.filename, mime: tpl.mime, tipo: tpl.tipo, usuario: tpl.usuario, criado_em: tpl.criado_em }),
+        storage_path: tpl.storage_path || null,
+        usuario_id: loggedUser?.id,
+        criado_em: tpl.criado_em
+      })
+    });
+  } catch(e) {}
+  renderUserTemplates();
 }
 
 function usarTemplateNoChat(i) {
@@ -4304,6 +4354,10 @@ document.getElementById('fileInputAB2L').addEventListener('change', async functi
     }
     // Keep resultsAB2L[id] as latest overall for the general result block
     resultsAB2L[id] = resultData;
+    // Also persist per-item result to Supabase so it survives page reload
+    if (itemKeyPending && itemKeyPending !== id) {
+      await saveResultadoIA('ab2l_' + itemKeyPending, resultData);
+    }
 
     // Set classification based on IA result
     if (json.nivel === 'excelente' || json.nivel === 'bom') {
@@ -5068,9 +5122,29 @@ async function gerarComTemplateVisual() {
     '\nGere o documento em HTML respeitando exatamente o layout gráfico do template, pronto para impressão.';
 
   try {
+    // If template was restored from Supabase and base64 is missing, fetch from storage
+    var tplBase64 = tpl.conteudo_base64 || null;
+    var tplMime = tpl.mime || 'application/pdf';
+    if (!tplBase64 && tpl.storage_path) {
+      try {
+        var session = JSON.parse(localStorage.getItem('sgq_session') || 'null');
+        var token = session ? session.access_token : SUPABASE_KEY;
+        var fetchRes = await fetch(SUPABASE_URL + '/storage/v1/object/sgq-documentos/' + tpl.storage_path, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (fetchRes.ok) {
+          var blob = await fetchRes.blob();
+          var b64 = await new Promise(function(res) {
+            var r = new FileReader(); r.onload = function() { res(r.result.split(',')[1]); }; r.readAsDataURL(blob);
+          });
+          tplBase64 = b64;
+          tpl.conteudo_base64 = b64; // cache for this session
+        }
+      } catch(eFetch) { console.warn('Could not fetch template from storage:', eFetch); }
+    }
     var raw = await callGemini(userText, system,
-      (tpl.mime === 'application/pdf' || (tpl.mime && tpl.mime.startsWith('image/'))) ? tpl.conteudo_base64 : null,
-      (tpl.mime === 'application/pdf' || (tpl.mime && tpl.mime.startsWith('image/'))) ? tpl.mime : null
+      (tplMime === 'application/pdf' || (tplMime && tplMime.startsWith('image/'))) ? tplBase64 : null,
+      (tplMime === 'application/pdf' || (tplMime && tplMime.startsWith('image/'))) ? tplMime : null
     );
 
     // Clean HTML response
