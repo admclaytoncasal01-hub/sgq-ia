@@ -2809,6 +2809,26 @@ async function renderTemplates() {
   const intro = document.createElement('div');
   intro.style.cssText = 'margin-bottom:16px;padding:12px 16px;background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.15);border-radius:10px;font-size:13px;color:#a0b4c8';
   intro.innerHTML = `📋 <strong style="color:#00c8ff">Modelos de Documentos SGQ</strong> — Templates padrão ISO. Clique em <strong>✨ Gerar com IA</strong> para personalizar para sua empresa, ou <strong>🖨️ Imprimir</strong> para usar o modelo base.`;
+
+  // Logo section inside templates content
+  var logoSection = document.createElement('div');
+  var logoAtual = globalLogoDataUrl || localStorage.getItem('sgq_logo') || '';
+  logoSection.style.cssText = 'margin:0 0 18px 0;padding:14px 18px;background:#111820;border:1px solid #1e2d3d;border-radius:12px;display:flex;align-items:center;gap:16px';
+  logoSection.innerHTML =
+    '<div style="font-size:22px">🏢</div>' +
+    '<div style="flex:1">' +
+      '<div style="font-size:13px;font-weight:700;color:#e8edf3;margin-bottom:2px">Logo da Empresa</div>' +
+      '<div style="font-size:11px;color:#607080">Inserida automaticamente nos documentos gerados pela IA</div>' +
+    '</div>' +
+    (logoAtual ? '<img id="logoPreviewContent" src="'+logoAtual+'" style="max-height:44px;max-width:140px;object-fit:contain;border-radius:6px;border:1px solid #1e2d3d">' : '<div id="logoPreviewContent" style="width:80px;height:44px;border:1px dashed rgba(0,200,255,.25);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#607080">sem logo</div>') +
+    '<div>' +
+      '<input type="file" id="logoInputContent" accept="image/*" style="display:none" onchange="handleLogoFromContent(this)">' +
+      '<button onclick="document.getElementById(\'logoInputContent\').click()" style="padding:8px 18px;border-radius:8px;border:1px solid rgba(0,200,255,.4);background:rgba(0,200,255,.07);color:#00c8ff;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif">' +
+        (logoAtual ? '🔄 Alterar Logo' : '📁 Carregar Logo') +
+      '</button>' +
+      (logoAtual ? '<button onclick="removerLogo()" style="margin-left:8px;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,82,82,.3);background:transparent;color:#ff5252;font-size:12px;cursor:pointer;font-family:\'DM Sans\',sans-serif">✕ Remover</button>' : '') +
+    '</div>';
+  content.appendChild(logoSection);
   content.appendChild(intro);
 
   // Chat ask for doc
@@ -3583,7 +3603,7 @@ function renderAB2L() {
             <div class="nivel-detail" id="exc_${c.id}">
               <div style="font-size:11px;font-weight:700;color:#00c8ff;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Evidências esperadas — Nível EXCELENTE:</div>
               ${c.nivel_excelente.map((e, ei) => {
-                var itemKey = c.id + '_exc_item_' + ei;
+                var itemKey = c.id + '_excelente_item_' + ei;
                 var itemResult = resultsAB2L[itemKey];
                 var itemStatus = itemResult ? (itemResult.nivel === 'excelente' ? '\u2B50' : itemResult.nivel === 'bom' ? '\u2705' : '\u26A0\uFE0F') : '';
                 var itemColor = itemResult ? (itemResult.nivel === 'excelente' ? '#00c8ff' : itemResult.nivel === 'bom' ? '#00e676' : '#ffea00') : 'transparent';
@@ -5997,6 +6017,24 @@ async function render2FAStatus() {
 // ★ LOGO MANAGEMENT
 // ══════════════════════════════════════════════════════════════
 var globalLogoDataUrl = null;
+
+function handleLogoFromContent(input) {
+  handleGlobalLogo(input);
+  // Re-render templates to update the logo section
+  if (document.getElementById('mainTemplates').style.display !== 'none') {
+    renderTemplates();
+  }
+}
+
+function removerLogo() {
+  globalLogoDataUrl = null;
+  localStorage.removeItem('sgq_logo');
+  var topbarBox = document.getElementById('logoPreviewTopbar');
+  if (topbarBox) topbarBox.style.display = 'none';
+  var topbarLbl = document.getElementById('btnLogoTemplatesLabel');
+  if (topbarLbl) topbarLbl.textContent = 'Definir Logo';
+  renderTemplates();
+}
 
 function handleGlobalLogo(input) {
   var file = input.files[0];
