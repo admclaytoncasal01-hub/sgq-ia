@@ -305,11 +305,7 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
         <div class="logo-name">SGQ · IA</div>
         <div class="logo-sub">Gestão Integrada · CCADV</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-        <img id="sidebarLogo" src="" alt="" style="max-height:28px;max-width:80px;display:none;object-fit:contain;border-radius:4px">
-        <button onclick="document.getElementById('globalLogoInput').click()" title="Alterar Logo" style="background:transparent;border:1px dashed rgba(0,200,255,.25);border-radius:5px;color:#607080;font-size:9px;cursor:pointer;padding:2px 6px;font-family:'DM Sans',sans-serif" id="btnUploadLogoSidebar">🏢 Logo</button>
-        <input type="file" id="globalLogoInput" accept="image/*" style="display:none" onchange="handleGlobalLogo(this)">
-      </div>
+      <!-- Logo agora configurada no módulo Templates -->
       <button onclick="doLogout()" title="Sair" style="background:transparent;border:1px solid #1e2d3d;border-radius:7px;color:#607080;font-size:11px;cursor:pointer;padding:4px 9px;font-family:'DM Sans',sans-serif;margin-top:2px">Sair</button>
     </div>
     <div style="margin-top:8px;font-size:10px;color:#607080;font-weight:600;letter-spacing:2px;text-transform:uppercase">Usuário: <span id="sidebarUser" style="color:#00c8ff"></span></div>
@@ -3593,12 +3589,28 @@ function renderAB2L() {
                 var itemColor = itemResult ? (itemResult.nivel === 'excelente' ? '#00c8ff' : itemResult.nivel === 'bom' ? '#00e676' : '#ffea00') : 'transparent';
                 var itemDocKey = 'ab2l_' + itemKey;
                 var hasDoc = !!docArquivos[itemDocKey];
-                return '<div style="display:flex;gap:7px;margin-bottom:6px;align-items:flex-start;padding:5px 8px;border-radius:6px;background:rgba(0,200,255,.03);border:1px solid rgba(0,200,255,.08)">' +
+                var itemIA = resultsAB2L[itemKey];
+                var hasStoragePath = itemIA && itemIA.storagePath;
+                var canView = hasDoc || hasStoragePath;
+                var viewBtn = hasStoragePath
+                  ? '<button onclick="viewDocFromStorage(\''+itemIA.storagePath+'\',\''+( itemIA.filename||'doc')+'\')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">👁</button>'
+                  : hasDoc ? '<button onclick="viewDocumento(\'ab2l_' + itemKey + '\')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">👁</button>'
+                  : '';
+                var itemResultHTML = itemIA && !itemIA.erro
+                  ? '<div style="margin-top:4px;padding:5px 8px;border-radius:5px;background:rgba(0,200,255,.05);border:1px solid rgba(0,200,255,.12);font-size:11px;color:'+(itemIA.nivel==='excelente'?'#00c8ff':itemIA.nivel==='bom'?'#00e676':'#ffea00')+'">'+
+                    (itemIA.nivel==='excelente'?'⭐ EXCELENTE':itemIA.nivel==='bom'?'✅ BOM':'⚠️ INSUF.')+' · '+(itemIA.conformidade||'')+
+                    (itemIA.pontos_atendidos&&itemIA.pontos_atendidos.length?' <span style="color:#607080">· '+itemIA.pontos_atendidos[0]+'</span>':'')+
+                    '</div>'
+                  : '';
+                return '<div style="margin-bottom:6px">' +
+                  '<div style="display:flex;gap:7px;align-items:flex-start;padding:5px 8px;border-radius:6px;background:rgba(0,200,255,.03);border:1px solid rgba(0,200,255,.08)">' +
                   '<div style="width:5px;height:5px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:6px"></div>' +
                   '<span style="flex:1;font-size:12px">' + e + '</span>' +
                   (itemStatus ? '<span style="font-size:11px;font-weight:700;color:' + itemColor + ';flex-shrink:0;margin-right:4px">' + itemStatus + '</span>' : '') +
-                  (hasDoc ? '<button onclick="viewDocumento(\'ab2l_' + itemKey + '\')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">\u{1F441}</button>' : '') +
-                  '<button class="ab2l-item-upload-btn" data-critid="' + c.id + '" data-nivel="excelente" data-idx="' + ei + '" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(0,200,255,.3);background:transparent;color:#00c8ff;font-size:10px;cursor:pointer;flex-shrink:0">\u{1F4CE}</button>' +
+                  viewBtn +
+                  '<button class="ab2l-item-upload-btn" data-critid="' + c.id + '" data-nivel="excelente" data-idx="' + ei + '" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(0,200,255,.3);background:transparent;color:#00c8ff;font-size:10px;cursor:pointer;flex-shrink:0" title="Enviar documento para este item">📎</button>' +
+                  '</div>' +
+                  itemResultHTML +
                   '</div>';
               }).join('')}
               <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,200,255,.15);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -3621,12 +3633,28 @@ function renderAB2L() {
                 var itemColor = itemResult ? (itemResult.nivel === 'excelente' ? '#00c8ff' : itemResult.nivel === 'bom' ? '#00e676' : '#ffea00') : 'transparent';
                 var itemDocKey = 'ab2l_' + itemKey;
                 var hasDoc = !!docArquivos[itemDocKey];
-                return '<div style="display:flex;gap:7px;margin-bottom:6px;align-items:flex-start;padding:5px 8px;border-radius:6px;background:rgba(0,230,118,.03);border:1px solid rgba(0,230,118,.08)">' +
+                var itemIA = resultsAB2L[itemKey];
+                var hasStoragePath = itemIA && itemIA.storagePath;
+                var canView = hasDoc || hasStoragePath;
+                var viewBtn = hasStoragePath
+                  ? '<button onclick="viewDocFromStorage(\''+itemIA.storagePath+'\',\''+( itemIA.filename||'doc')+'\')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:#00e676;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">👁</button>'
+                  : hasDoc ? '<button onclick="viewDocumento(\'ab2l_' + itemKey + '\')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:#00e676;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">👁</button>'
+                  : '';
+                var itemResultHTML = itemIA && !itemIA.erro
+                  ? '<div style="margin-top:4px;padding:5px 8px;border-radius:5px;background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.12);font-size:11px;color:'+(itemIA.nivel==='excelente'?'#00c8ff':itemIA.nivel==='bom'?'#00e676':'#ffea00')+'">'+
+                    (itemIA.nivel==='excelente'?'⭐ EXCELENTE':itemIA.nivel==='bom'?'✅ BOM':'⚠️ INSUF.')+' · '+(itemIA.conformidade||'')+
+                    (itemIA.pontos_atendidos&&itemIA.pontos_atendidos.length?' <span style="color:#607080">· '+itemIA.pontos_atendidos[0]+'</span>':'')+
+                    '</div>'
+                  : '';
+                return '<div style="margin-bottom:6px">' +
+                  '<div style="display:flex;gap:7px;align-items:flex-start;padding:5px 8px;border-radius:6px;background:rgba(0,230,118,.03);border:1px solid rgba(0,230,118,.08)">' +
                   '<div style="width:5px;height:5px;border-radius:50%;background:#00e676;flex-shrink:0;margin-top:6px"></div>' +
                   '<span style="flex:1;font-size:12px">' + e + '</span>' +
                   (itemStatus ? '<span style="font-size:11px;font-weight:700;color:' + itemColor + ';flex-shrink:0;margin-right:4px">' + itemStatus + '</span>' : '') +
-                  (hasDoc ? '<button onclick="viewDocumento(\'ab2l_' + itemKey + '\')" style="padding:2px 7px;border-radius:4px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:#00e676;font-size:10px;cursor:pointer;flex-shrink:0;margin-right:3px">\u{1F441}</button>' : '') +
-                  '<button class="ab2l-item-upload-btn" data-critid="' + c.id + '" data-nivel="bom" data-idx="' + ei + '" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(0,230,118,.3);background:transparent;color:#00e676;font-size:10px;cursor:pointer;flex-shrink:0">\u{1F4CE}</button>' +
+                  viewBtn +
+                  '<button class="ab2l-item-upload-btn" data-critid="' + c.id + '" data-nivel="bom" data-idx="' + ei + '" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(0,230,118,.3);background:transparent;color:#00e676;font-size:10px;cursor:pointer;flex-shrink:0" title="Enviar documento para este item">📎</button>' +
+                  '</div>' +
+                  itemResultHTML +
                   '</div>';
               }).join('')}
               <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,230,118,.15);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -3650,7 +3678,7 @@ function renderAB2L() {
           ${result && !result.erro ? `<div class="ia-result ${result.nivel==='excelente'||result.nivel==='bom'?'ok':'warn'}" style="margin-bottom:10px">
             <div class="ia-result-header" style="color:${result.nivel==='excelente'?'#00c8ff':result.nivel==='bom'?'#00e676':'#ffea00'}">
               <span>${result.nivel==='excelente'?'⭐ EXCELENTE':result.nivel==='bom'?'✅ BOM':'⚠️ INSUFICIENTE'} · ${result.conformidade||''}</span>
-              <span class="ia-result-filename">📄 ${result.filename||''}</span>${docArquivos[c.id]?'<button onclick="viewDocumento(\''+c.id+'\')" style="padding:1px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;margin-left:6px">👁 Ver</button>':''}
+              <span class="ia-result-filename">📄 ${result.filename||''}</span>${result.storagePath?'<button onclick="viewDocFromStorage(\''+result.storagePath+'\',\''+(result.filename||'doc')+'\')" style="padding:1px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;margin-left:6px">👁 Ver</button>':docArquivos['ab2l_'+c.id]||docArquivos[c.id]?'<button onclick="viewDocumento(\'ab2l_'+c.id+'\')" style="padding:1px 7px;border-radius:4px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:10px;cursor:pointer;margin-left:6px">👁 Ver</button>':''}
             </div>
             ${(result.pontos_atendidos||[]).length?'<div class="ia-section-title" style="color:#00e676">✔ Pontos atendidos:</div>'+(result.pontos_atendidos||[]).map(p=>'<div class="ia-item">• '+p+'</div>').join(''):''}
             ${(result.pontos_faltando||[]).length?'<div class="ia-section-title" style="color:#ff5252;margin-top:4px">✗ O que falta:</div>'+(result.pontos_faltando||[]).map(p=>'<div class="ia-item">• '+p+'</div>').join(''):''}
@@ -4240,11 +4268,22 @@ document.getElementById('fileInputAB2L').addEventListener('change', async functi
     const clean = raw.replace(/```json|```/g,'').trim();
     const json = JSON.parse(clean);
 
-    // Store result - if item upload, store by itemKey; else store by id
+    // Upload to storage
+    var ab2lStoragePath = await uploadDocToStorage(base64, file.type||'application/pdf', file.name, 'ab2l_'+(itemKeyPending||id));
+    // Store result per item key (for sub-item display) and also per nivel key
     const resultKey = itemKeyPending || (nivel ? (id + '_' + nivel) : id);
-    if (!resultsAB2L[id]) resultsAB2L[id] = {};
-    resultsAB2L[resultKey] = { ...json, filename: file.name, nivel_enviado: nivel, storagePath: null };
-    resultsAB2L[id] = { ...json, filename: file.name, nivel_enviado: nivel };
+    const resultData = { ...json, filename: file.name, nivel_enviado: nivel, storagePath: ab2lStoragePath };
+    resultsAB2L[resultKey] = resultData;
+    // Also update the per-nivel key so the "Enviar evidência" button summary shows
+    if (nivel && itemKeyPending) {
+      resultsAB2L[id + '_' + nivel] = resultData;
+    }
+    // Update docArquivos for this specific item key
+    if (itemKeyPending) {
+      docArquivos['ab2l_' + itemKeyPending] = {dataUrl: fileDataUrl, mime: file.type, filename: file.name};
+    }
+    // Keep resultsAB2L[id] as latest overall for the general result block
+    resultsAB2L[id] = resultData;
 
     // Set classification based on IA result
     if (json.nivel === 'excelente' || json.nivel === 'bom') {
@@ -5990,14 +6029,10 @@ function atualizarLogoTopbar() {
 
 function updateLogoDisplay() {
   var logo = globalLogoDataUrl || localStorage.getItem('sgq_logo');
-  var img = document.getElementById('sidebarLogo');
-  var btn = document.getElementById('btnUploadLogoSidebar');
   var previewImg = document.getElementById('logoPreviewImg');
   var previewIcon = document.getElementById('logoPreviewIcon');
   var logoAtualBox = document.getElementById('logoAtualBox');
   if (logo) {
-    if (img) { img.src = logo; img.style.display = 'block'; }
-    if (btn) btn.textContent = '🔄';
     if (previewImg) { previewImg.src = logo; previewImg.style.display = 'block'; }
     if (previewIcon) previewIcon.style.display = 'none';
     if (logoAtualBox) logoAtualBox.style.display = 'block';
