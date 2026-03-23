@@ -4715,7 +4715,12 @@ function nn_fileSelected(input) {
   };
   reader.readAsDataURL(file);
 }
-
+async function corrigirJSONComIA(raw) {
+  return await callGemini(
+    "Corrija este JSON inválido. Retorne APENAS JSON válido:\n\n" + raw,
+    "Você é um corretor de JSON. Responda apenas com JSON válido, sem explicações."
+  );
+}  
 async function gerarNormaPDF() {
   var nome = document.getElementById('nn_nome').value.trim();
   var codigo = document.getElementById('nn_codigo').value.trim().replace(/\s/g,'');
