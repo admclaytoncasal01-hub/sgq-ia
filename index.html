@@ -889,23 +889,51 @@ body{background:#0a0e14;color:#e8edf3;font-family:'DM Sans',system-ui,sans-serif
 <div class="main" id="mainPlanoAcao" style="display:none">
   <div class="mod-topbar">
     <div class="mod-icon-badge" style="background:rgba(0,230,118,.1);border-color:rgba(0,230,118,.3)">📋</div>
-    <div style="flex:1"><div class="mod-title" style="color:#00e676">Plano de Ação IA</div><div class="mod-sub">A IA analisa seus critérios pendentes e gera um plano priorizado</div></div>
+    <div style="flex:1"><div class="mod-title" style="color:#00e676">Plano de Ação & Cronograma</div><div class="mod-sub">Defina a data da auditoria — a IA distribui as tarefas no tempo disponível</div></div>
   </div>
   <div class="mod-content" id="planoAcaoContent">
-    <div style="max-width:700px;margin:0 auto">
-      <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:12px;padding:16px;margin-bottom:16px">
-        <div style="font-size:13px;color:#a0b4c8;line-height:1.7">🤖 A IA irá analisar todos os critérios pendentes de todas as normas ativas e gerar um <strong>plano de ação priorizado</strong> com tarefas, prazos sugeridos e responsáveis. Você poderá adicionar cada tarefa diretamente ao Google Calendar.</div>
+    <div style="max-width:860px;margin:0 auto">
+
+      <!-- CONFIGURAÇÃO DA AUDITORIA -->
+      <div style="background:#111820;border:1px solid #1e2d3d;border-radius:14px;padding:20px;margin-bottom:18px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#00e676;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+          🎯 Data-alvo da Auditoria / Entrega
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+          <div>
+            <div style="font-size:11px;color:#607080;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Data da Auditoria</div>
+            <input type="date" id="planoDataAuditoria" style="width:100%;box-sizing:border-box;background:#18222e;border:1px solid rgba(0,230,118,.3);border-radius:8px;padding:9px 12px;color:#e8edf3;font-size:13px;outline:none;font-family:'DM Sans',sans-serif" oninput="calcularDiasRestantes()">
+          </div>
+          <div>
+            <div style="font-size:11px;color:#607080;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tipo de Evento</div>
+            <select id="planoTipoEvento" style="width:100%;box-sizing:border-box;background:#18222e;border:1px solid #1e2d3d;border-radius:8px;padding:9px 12px;color:#e8edf3;font-size:13px;outline:none;font-family:'DM Sans',sans-serif">
+              <option value="auditoria_externa">Auditoria Externa</option>
+              <option value="pre_auditoria">Pré-Auditoria</option>
+              <option value="auditoria_interna">Auditoria Interna</option>
+              <option value="certificacao">Certificação</option>
+              <option value="entrega_final">Entrega Final ao Cliente</option>
+              <option value="renovacao">Renovação de Certificado</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;color:#607080;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Normas</div>
+            <select id="planoNormaSelect" style="width:100%;box-sizing:border-box;background:#18222e;border:1px solid #1e2d3d;border-radius:8px;padding:9px 12px;color:#e8edf3;font-size:13px;outline:none;font-family:'DM Sans',sans-serif">
+              <option value="todas">Todas as normas</option>
+              <option value="9001">ISO 9001</option>
+              <option value="27001">ISO 27001</option>
+              <option value="42001">ISO 42001</option>
+              <option value="ab2l">AB2L</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div id="planoCountdown" style="padding:8px 16px;border-radius:8px;background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);font-size:13px;color:#00e676;font-weight:600;min-width:160px;text-align:center">📅 Selecione uma data</div>
+          <input id="planoResponsavel" placeholder="Responsável principal (ex: Dr. Clayton Casal)" style="flex:1;min-width:200px;background:#18222e;border:1px solid #1e2d3d;border-radius:8px;padding:9px 12px;color:#e8edf3;font-size:13px;outline:none;font-family:'DM Sans',sans-serif">
+          <button onclick="gerarPlanoAcao()" id="btnPlanoAcao" style="padding:10px 26px;border-radius:8px;border:none;background:linear-gradient(135deg,#00e676,#00c8ff);color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">🤖 Gerar Cronograma</button>
+        </div>
       </div>
-      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-        <select id="planoNormaSelect" style="background:#18222e;border:1px solid #1e2d3d;border-radius:7px;padding:8px 12px;color:#e8edf3;font-size:13px;outline:none">
-          <option value="todas">Todas as normas</option>
-          <option value="9001">ISO 9001</option>
-          <option value="27001">ISO 27001</option>
-          <option value="42001">ISO 42001</option>
-          <option value="ab2l">AB2L</option>
-        </select>
-        <button onclick="gerarPlanoAcao()" id="btnPlanoAcao" style="padding:9px 24px;border-radius:8px;border:none;background:linear-gradient(135deg,#00e676,#00c8ff);color:#0a0e14;font-size:13px;font-weight:700;cursor:pointer">🤖 Gerar Plano de Ação</button>
-      </div>
+
+      <!-- RESULTADO -->
       <div id="planoAcaoResult"></div>
     </div>
   </div>
@@ -5577,10 +5605,27 @@ async function gerarPlanoAcao() {
   const btn = document.getElementById('btnPlanoAcao');
   const resultDiv = document.getElementById('planoAcaoResult');
   const normaFiltro = document.getElementById('planoNormaSelect').value;
-  btn.disabled = true; btn.textContent = '⏳ Gerando plano...';
-  resultDiv.innerHTML = '<div style="color:#607080;text-align:center;padding:30px"><div class="typing"><div class="typing-dot" style="background:#00e676"></div><div class="typing-dot" style="background:#00e676"></div><div class="typing-dot" style="background:#00e676"></div></div><div style="margin-top:10px;font-size:13px">IA analisando critérios pendentes...</div></div>';
+  const dataAuditoria = document.getElementById('planoDataAuditoria').value;
+  const tipoEvento = document.getElementById('planoTipoEvento').value;
+  const responsavel = (document.getElementById('planoResponsavel').value || 'Gestor da Qualidade').trim();
 
-  // Collect pending criterios
+  if (!dataAuditoria) {
+    resultDiv.innerHTML = '<div style="background:rgba(255,82,82,.07);border:1px solid rgba(255,82,82,.2);border-radius:10px;padding:14px;color:#ff5252;font-size:13px">&#9888;&#65039; Defina a data da auditoria/entrega antes de gerar o cronograma.</div>';
+    return;
+  }
+
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const dataAlvo = new Date(dataAuditoria + 'T00:00:00');
+  const diasTotais = Math.round((dataAlvo - hoje) / 86400000);
+
+  if (diasTotais < 1) {
+    resultDiv.innerHTML = '<div style="background:rgba(255,82,82,.07);border:1px solid rgba(255,82,82,.2);border-radius:10px;padding:14px;color:#ff5252;font-size:13px">&#9888;&#65039; A data selecionada ja passou. Escolha uma data futura.</div>';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = '\u23F3 Gerando cronograma...';
+  resultDiv.innerHTML = '<div style="color:#607080;text-align:center;padding:40px"><div class="typing"><div class="typing-dot" style="background:#00e676"></div><div class="typing-dot" style="background:#00e676"></div><div class="typing-dot" style="background:#00e676"></div></div><div style="margin-top:12px;font-size:13px">IA montando cronograma com base na data-alvo...</div></div>';
+
   function getPendentes(checklist, doneMap, norma) {
     const pend = [];
     Object.entries(checklist).forEach(([reqNum, req]) => {
@@ -5601,69 +5646,189 @@ async function gerarPlanoAcao() {
     Object.values(CHECKLIST_AB2L).forEach(pilar => {
       pilar.criterios.forEach(c => {
         if (doneAB2L[c.id] !== 'excelente' && doneAB2L[c.id] !== 'bom') {
-          pendentes.push({ norma:'AB2L', req: pilar.titulo, sub: '', criterio: c.label, id: c.id });
+          pendentes.push({ norma:'AB2L', req: pilar.titulo, sub:'', criterio: c.label, id: c.id });
         }
       });
     });
   }
 
   if (!pendentes.length) {
-    resultDiv.innerHTML = '<div style="background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);border-radius:12px;padding:20px;text-align:center;color:#00e676;font-size:14px;font-weight:600">🎉 Parabéns! Todos os critérios estão atendidos!</div>';
-    btn.disabled = false; btn.textContent = '🤖 Gerar Plano de Ação';
-    return;
+    resultDiv.innerHTML = '<div style="background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);border-radius:12px;padding:20px;text-align:center;color:#00e676;font-size:14px;font-weight:600">\uD83C\uDF89 Todos os criterios estao atendidos! Pronto para a auditoria.</div>';
+    btn.disabled = false; btn.textContent = '\uD83E\uDD16 Gerar Cronograma'; return;
   }
 
-  const system = 'Você é consultor especialista em ISO 9001, 27001, 42001 e certificação AB2L. Gere um plano de ação priorizado. Responda APENAS com JSON válido: {"plano":[{"prioridade":"Alta|Media|Baixa","tarefa":"desc","criterios":["id"],"norma":"ISO X","prazo_dias":30,"responsavel_sugerido":"Cargo","evidencia_necessaria":"doc","dica":"texto"}]}';
-  const userText = 'Empresa: CCADV · Clayton Casal Sociedade de Advogados\nCritérios pendentes (' + pendentes.length + '):\n' + pendentes.slice(0,20).map(p => '['+p.norma+'] Req.'+p.req+' '+p.criterio.slice(0,60)).join('\n') + '\nGere plano com NO MÁXIMO 8 ações. Seja conciso em cada campo. JSON pequeno.';
+  const semanas = Math.max(1, Math.floor(diasTotais / 7));
+  const fases = diasTotais >= 60 ? 4 : diasTotais >= 30 ? 3 : diasTotais >= 14 ? 2 : 1;
+  const tipoMap = {auditoria_externa:'Auditoria Externa',pre_auditoria:'Pre-Auditoria',auditoria_interna:'Auditoria Interna',certificacao:'Certificacao',entrega_final:'Entrega Final',renovacao:'Renovacao'};
+  const tipoLabel = tipoMap[tipoEvento] || tipoEvento;
+
+  const system = 'Voce e consultor senior ISO especialista em planejamento de auditorias. Gere cronograma em FASES. Responda APENAS com JSON valido sem markdown: {"resumo":{"total_pendentes":0,"semanas":0,"risco":"Alto","mensagem":"texto"},"fases":[{"fase":1,"nome":"Nome","periodo":"Sem 1-2","objetivo":"obj","tarefas":[{"prioridade":"Alta","tarefa":"desc","norma":"ISO X","responsavel":"Cargo","evidencia":"doc","dica":"texto"}]}]}';
+  const userText = 'CONTEXTO:\n- Empresa: CCADV Clayton Casal\n- Responsavel: ' + responsavel + '\n- Evento: ' + tipoLabel + '\n- Data-alvo: ' + dataAuditoria + '\n- Dias: ' + diasTotais + ' (' + semanas + ' semanas)\n- Fases: ' + fases + '\n- Pendentes: ' + pendentes.length + '\n\nITENS PENDENTES (top 25):\n' + pendentes.slice(0,25).map(function(p){ return '['+p.norma+'] Req.'+p.req+' - '+p.criterio.slice(0,70); }).join('\n') + '\n\nDistribua nas ' + fases + ' fases. Fase 1=criticos. Ultima fase=revisao final. Max 5 tarefas/fase. JSON compacto.';
 
   try {
     const raw = await callGemini(userText, system);
     var cleanP = raw.replace(/```json|```/g,'').trim();
-    var jsonStartP = cleanP.indexOf('{');
-    if (jsonStartP > 0) cleanP = cleanP.substring(jsonStartP);
-    // Find last complete array item - fix truncated JSON
-    var lastBracket = cleanP.lastIndexOf(']');
-    var lastBrace = cleanP.lastIndexOf('}');
-    if (lastBracket > 0 && lastBrace > lastBracket) cleanP = cleanP.substring(0, lastBrace + 1);
-    else if (lastBracket > 0) cleanP = cleanP.substring(0, lastBracket + 1) + '}}';
+    var jStart = cleanP.indexOf('{');
+    if (jStart > 0) cleanP = cleanP.substring(jStart);
+    var lBrace = cleanP.lastIndexOf('}');
+    if (lBrace > 0) cleanP = cleanP.substring(0, lBrace + 1);
     const parsed = JSON.parse(cleanP);
-    const tarefas = parsed.plano || [];
+    const resumo = parsed.resumo || {};
+    const fasesList = parsed.fases || [];
+    const faseColors = ['#00c8ff','#00e676','#ffb400','#a050ff','#ff5252'];
+    const riscoColor = resumo.risco==='Alto'?'#ff5252':resumo.risco==='Medio'?'#ffea00':'#00e676';
+    const dataAlvoStr = dataAlvo.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
 
-    let html = `<div style="margin-bottom:12px;padding:10px 14px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:9px;font-size:13px;color:#a0b4c8">
-      🤖 Plano gerado com <strong>${tarefas.length} ações</strong> para ${pendentes.length} critérios pendentes. Clique em <strong>📅 Adicionar</strong> para enviar ao Google Calendar.
-    </div>`;
+    let html = '<div style="background:linear-gradient(135deg,rgba(0,230,118,.08),rgba(0,200,255,.05));border:1px solid rgba(0,230,118,.25);border-radius:14px;padding:18px 20px;margin-bottom:20px">' +
+      '<div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">' +
+        '<div style="text-align:center;min-width:110px">' +
+          '<div style="font-family:Syne,sans-serif;font-size:36px;font-weight:900;color:#00e676;line-height:1">' + diasTotais + '</div>' +
+          '<div style="font-size:11px;color:#607080;margin-top:2px">dias restantes</div>' +
+          '<div style="font-size:11px;color:#607080">' + semanas + ' semanas</div>' +
+        '</div>' +
+        '<div style="flex:1;min-width:200px">' +
+          '<div style="font-family:Syne,sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">' + tipoLabel + ' \u2014 <span style="color:#00e676">' + dataAlvoStr + '</span></div>' +
+          '<div style="font-size:12px;color:#607080;margin-bottom:8px">\uD83D\uDC64 ' + responsavel + '</div>' +
+          '<div style="font-size:13px;color:#a0b4c8;line-height:1.6">' + (resumo.mensagem||'') + '</div>' +
+        '</div>' +
+        '<div style="text-align:center">' +
+          '<div style="padding:6px 16px;border-radius:20px;background:'+riscoColor+'20;border:1px solid '+riscoColor+'40;color:'+riscoColor+';font-size:12px;font-weight:700">Risco: ' + (resumo.risco||'-') + '</div>' +
+          '<div style="font-size:11px;color:#607080;margin-top:6px">' + pendentes.length + ' criterios pendentes</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
 
-    const hoje = new Date();
-    tarefas.forEach((t, i) => {
-      const cor = t.prioridade==='Alta'?'#ff5252':t.prioridade==='Media'?'#ffea00':'#00e676';
-      const prazoDate = new Date(hoje); prazoDate.setDate(hoje.getDate() + (t.prazo_dias||30));
-      const prazoStr = prazoDate.toISOString().split('T')[0].replace(/-/g,'');
-      const calTitle = encodeURIComponent('[SGQ] ' + t.tarefa.slice(0,60));
-      const calDetails = encodeURIComponent('Norma: ' + t.norma + '\nEvidência: ' + (t.evidencia_necessaria||'') + '\nDica: ' + (t.dica||''));
-      const calUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + calTitle + '&dates=' + prazoStr + '/' + prazoStr + '&details=' + calDetails;
+    // Timeline
+    html += '<div style="display:flex;margin-bottom:24px;overflow-x:auto;padding-bottom:4px">';
+    fasesList.forEach(function(f, fi) {
+      var cor = faseColors[fi % faseColors.length];
+      html += '<div style="flex:1;min-width:100px;display:flex;flex-direction:column;align-items:center">' +
+        '<div style="width:30px;height:30px;border-radius:50%;background:'+cor+'20;border:2px solid '+cor+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+cor+'">'+(fi+1)+'</div>' +
+        '<div style="font-size:11px;color:'+cor+';font-weight:600;margin-top:6px;text-align:center">'+(f.nome||'Fase '+(fi+1))+'</div>' +
+        '<div style="font-size:10px;color:#607080;text-align:center">'+(f.periodo||'')+'</div>' +
+      '</div>';
+    });
+    html += '</div>';
 
-      html += `<div style="background:#111820;border:1px solid #1e2d3d;border-left:3px solid ${cor};border-radius:10px;padding:14px 16px;margin-bottom:10px">
-        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px">
-          <span style="padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${cor}20;color:${cor};flex-shrink:0">${t.prioridade}</span>
-          <div style="flex:1;font-size:13px;font-weight:600">${t.tarefa}</div>
-          <a href="${calUrl}" target="_blank" style="padding:4px 12px;border-radius:7px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:11px;text-decoration:none;flex-shrink:0">📅 Adicionar</a>
-        </div>
-        <div style="font-size:11px;color:#607080;display:flex;gap:12px;flex-wrap:wrap">
-          <span>📌 ${t.norma}</span>
-          <span>⏰ ${t.prazo_dias||30} dias</span>
-          <span>👤 ${t.responsavel_sugerido||'—'}</span>
-          <span>📄 ${t.evidencia_necessaria||'—'}</span>
-        </div>
-        ${t.dica?`<div style="margin-top:8px;font-size:12px;color:#607080;font-style:italic">💡 ${t.dica}</div>`:''}
-      </div>`;
+    // Phases
+    fasesList.forEach(function(f, fi) {
+      var cor = faseColors[fi % faseColors.length];
+      var diasPorFase = Math.floor(diasTotais / Math.max(1,fasesList.length));
+      var faseInicio = new Date(hoje); faseInicio.setDate(hoje.getDate() + fi * diasPorFase);
+      var faseFim = new Date(hoje); faseFim.setDate(hoje.getDate() + (fi+1) * diasPorFase - 1);
+      var fInicioStr = faseInicio.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+      var fFimStr = faseFim.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+
+      html += '<div style="margin-bottom:16px">' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px 16px;background:'+cor+'0d;border:1px solid '+cor+'30;border-radius:10px">' +
+          '<div style="width:26px;height:26px;border-radius:50%;background:'+cor+'20;border:2px solid '+cor+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+cor+';flex-shrink:0">'+(fi+1)+'</div>' +
+          '<div style="flex:1">' +
+            '<div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;color:'+cor+'">'+(f.nome||'Fase '+(fi+1))+'</div>' +
+            '<div style="font-size:11px;color:#607080">'+(f.objetivo||'')+' \u00B7 '+fInicioStr+' \u2192 '+fFimStr+'</div>' +
+          '</div>' +
+          '<div style="font-size:11px;color:#607080">'+(f.tarefas||[]).length+' acoes</div>' +
+        '</div>';
+
+      (f.tarefas||[]).forEach(function(t) {
+        var pCor = t.prioridade==='Alta'?'#ff5252':t.prioridade==='Media'?'#ffea00':'#00e676';
+        var gcI = faseInicio.toISOString().replace(/[-:]/g,'').substring(0,8);
+        var gcF = faseFim.toISOString().replace(/[-:]/g,'').substring(0,8);
+        var calTitle = encodeURIComponent('[SGQ] '+(t.tarefa||'').slice(0,60));
+        var calDet = encodeURIComponent('Norma: '+(t.norma||'')+'\nEvidencia: '+(t.evidencia||'')+'\nDica: '+(t.dica||'')+'\nResponsavel: '+(t.responsavel||responsavel));
+        var calUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+calTitle+'&dates='+gcI+'/'+gcF+'&details='+calDet;
+        html += '<div style="background:#111820;border:1px solid #1e2d3d;border-left:3px solid '+pCor+';border-radius:9px;padding:12px 14px;margin-bottom:8px;margin-left:16px">' +
+          '<div style="display:flex;align-items:flex-start;gap:10px">' +
+            '<span style="padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;background:'+pCor+'20;color:'+pCor+';flex-shrink:0">'+(t.prioridade||'-')+'</span>' +
+            '<div style="flex:1">' +
+              '<div style="font-size:13px;font-weight:600;margin-bottom:4px">'+(t.tarefa||'')+'</div>' +
+              '<div style="font-size:11px;color:#607080;display:flex;gap:10px;flex-wrap:wrap">' +
+                '<span>\uD83D\uDCCC '+(t.norma||'-')+'</span>' +
+                '<span>\uD83D\uDC64 '+(t.responsavel||responsavel)+'</span>' +
+                '<span>\uD83D\uDCC4 '+(t.evidencia||'-')+'</span>' +
+              '</div>' +
+              (t.dica?'<div style="margin-top:6px;font-size:11px;color:#607080;font-style:italic">\uD83D\uDCA1 '+t.dica+'</div>':'') +
+            '</div>' +
+            '<a href="'+calUrl+'" target="_blank" style="flex-shrink:0;padding:5px 11px;border-radius:7px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:11px;text-decoration:none">\uD83D\uDCC5 Agenda</a>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
     });
 
+    // Weekly grid
+    if (semanas <= 16) {
+      html += '<div style="margin-top:20px;background:#111820;border:1px solid #1e2d3d;border-radius:12px;padding:16px">' +
+        '<div style="font-family:Syne,sans-serif;font-size:13px;font-weight:700;margin-bottom:12px">\uD83D\uDCC6 Visao Semanal</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:6px">';
+      for (var s = 0; s < Math.min(semanas, 16); s++) {
+        var dS = new Date(hoje); dS.setDate(hoje.getDate() + s * 7);
+        var dFS = new Date(hoje); dFS.setDate(hoje.getDate() + s * 7 + 6);
+        var fIdx = Math.floor(s / Math.max(1, Math.ceil(semanas / fasesList.length)));
+        var cor = faseColors[Math.min(fIdx, faseColors.length-1) % faseColors.length];
+        var isUlt = (s === semanas - 1);
+        var lbl = isUlt ? '\uD83C\uDFC1' : (s === 0 ? '\uD83D\DDE0' : 'S'+(s+1));
+        html += '<div style="background:'+(isUlt?'rgba(255,82,82,.12)':cor+'12')+';border:1px solid '+(isUlt?'rgba(255,82,82,.4)':cor+'40')+';border-radius:7px;padding:7px;text-align:center">' +
+          '<div style="font-size:13px;margin-bottom:2px">'+lbl+'</div>' +
+          '<div style="font-size:10px;color:#607080">'+dS.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+'</div>' +
+          '<div style="font-size:9px;color:#607080;opacity:.7">-> '+dFS.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+'</div>' +
+          (isUlt?'<div style="font-size:9px;color:#ff5252;font-weight:700;margin-top:2px">AUDIT.</div>':'') +
+        '</div>';
+      }
+      html += '</div></div>';
+    }
+
+    html += '<div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">' +
+      '<button onclick="exportarCronogramaPDF()" style="padding:9px 20px;border-radius:8px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif">\uD83D\uDCE5 Exportar PDF</button>' +
+      '<button onclick="salvarDataAuditoria(\''+dataAuditoria+'\',\''+tipoEvento+'\')" style="padding:9px 20px;border-radius:8px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:#00e676;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif">\uD83D\uDCBE Salvar Data</button>' +
+    '</div>';
+
     resultDiv.innerHTML = html;
+    salvarDataAuditoria(dataAuditoria, tipoEvento, false);
+
   } catch(err) {
-    resultDiv.innerHTML = '<div style="color:#ff5252;font-size:13px">❌ Erro: ' + err.message + '</div>';
+    resultDiv.innerHTML = '<div style="color:#ff5252;font-size:13px;padding:16px;background:rgba(255,82,82,.06);border:1px solid rgba(255,82,82,.2);border-radius:10px">Erro: ' + err.message + '</div>';
   }
-  btn.disabled = false; btn.textContent = '🤖 Gerar Plano de Ação';
+  btn.disabled = false; btn.textContent = '\uD83E\uDD16 Gerar Cronograma';
 }
+
+function calcularDiasRestantes() {
+  var val = document.getElementById('planoDataAuditoria').value;
+  var el = document.getElementById('planoCountdown');
+  if (!el) return;
+  if (!val) { el.textContent = 'Selecione uma data'; el.style.color='#607080'; return; }
+  var hoje = new Date(); hoje.setHours(0,0,0,0);
+  var alvo = new Date(val+'T00:00:00');
+  var dias = Math.round((alvo-hoje)/86400000);
+  if (dias < 0) { el.textContent='Data no passado'; el.style.color='#ff5252'; return; }
+  var sem = Math.floor(dias/7);
+  el.textContent = '\u23F3 '+dias+' dias ('+sem+' sem.)';
+  el.style.color = dias<30?'#ff5252':dias<60?'#ffea00':'#00e676';
+}
+
+function salvarDataAuditoria(data, tipo, mostrarAlert) {
+  try {
+    localStorage.setItem('sgq_auditoria_data', data);
+    localStorage.setItem('sgq_auditoria_tipo', tipo);
+    if (mostrarAlert !== false) {
+      var s = document.createElement('div');
+      s.style.cssText='position:fixed;bottom:24px;right:24px;background:#00e676;color:#0a0e14;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;z-index:9999';
+      s.textContent='\u2705 Data da auditoria salva!';
+      document.body.appendChild(s);
+      setTimeout(function(){s.remove();},2500);
+    }
+  } catch(e) {}
+}
+
+function exportarCronogramaPDF() {
+  var el = document.getElementById('planoAcaoResult');
+  if (!el) return;
+  var win = window.open('','_blank');
+  if (!win) { alert('Permita pop-ups.'); return; }
+  win.document.write('<html><head><title>Cronograma SGQ</title><style>body{font-family:Arial,sans-serif;font-size:11pt;padding:20px;color:#111}*{box-sizing:border-box}</style></head><body>'+el.innerHTML+'</body></html>');
+  win.document.close();
+  setTimeout(function(){win.print();},500);
+}
+
 
 // ══════════════════════════════════════════════════════════════
 // ★ RELATÓRIO EXECUTIVO
@@ -5823,6 +5988,15 @@ showModule = function(id) {
   }
   if (id === 'planoAcao') {
     activeModule = 'planoAcao';
+    // Restore saved audit date
+    setTimeout(function() {
+      var savedData = localStorage.getItem('sgq_auditoria_data');
+      var savedTipo = localStorage.getItem('sgq_auditoria_tipo');
+      var inpData = document.getElementById('planoDataAuditoria');
+      var inpTipo = document.getElementById('planoTipoEvento');
+      if (savedData && inpData && !inpData.value) { inpData.value = savedData; calcularDiasRestantes(); }
+      if (savedTipo && inpTipo) inpTipo.value = savedTipo;
+    }, 50);
     document.querySelectorAll('.main').forEach(m => m.style.display = 'none');
     document.getElementById('mainPlanoAcao').style.display = 'flex';
     updateExtraNav(); return;
