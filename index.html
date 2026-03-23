@@ -4764,17 +4764,17 @@ try {
   console.warn("JSON inválido, tentando corrigir com IA...");
 
   try {
-    const corrigido = await corrigirJSONComIA(raw);
-    const clean2 = limparJSON(corrigido);
+  const corrigido = await corrigirJSONComIA(limparJSON(raw)); // 🔥 aqui muda
 
-    parsed = JSON.parse(clean2);
+  const clean2 = limparJSON(corrigido);
 
-  } catch (e2) {
-    console.error("ERRO TOTAL:");
-    console.error("RAW ORIGINAL:", raw);
+  parsed = JSON.parse(clean2);
 
-    throw new Error('A IA não conseguiu gerar JSON válido.');
-  }
+} catch (e2) {
+  console.error("ERRO TOTAL:");
+  console.error("RAW ORIGINAL:", raw);
+
+  throw new Error('A IA não conseguiu gerar JSON válido.');
 }
 
     // Build checklist object
