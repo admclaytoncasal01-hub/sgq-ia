@@ -4750,15 +4750,27 @@ async function gerarNormaPDF() {
       .replace(/,\s*([}\]])/g, '$1')   // remove trailing commas
       .replace(/([{,]\s*)'(\w+)'\s*:/g, '$1"$2":')  // fix single-quote keys
       .replace(/:\s*'([^']*)'/g, function(m, v) { return ': "' + v.replace(/"/g, '\\"') + '"'; }); // fix single-quote values
-    var parsed;
-    try {
-      parsed = JSON.parse(clean);
-    } catch(jsonErr) {
-      // Last resort: ask IA to fix the JSON
-      throw new Error('A IA retornou JSON inválido. Tente novamente ou simplifique o prompt.');
-    }
+    let parsed;
 
-    if (!parsed.requisitos || !parsed.requisitos.length) throw new Error('IA não retornou requisitos. Tente novamente.');
+try {
+  parsed = JSON.parse(clean);
+
+} catch (jsonErr) {
+  console.warn("JSON inválido, tentando corrigir com IA...");
+
+  try {
+    const corrigido = await corrigirJSONComIA(raw);
+    const clean2 = limparJSON(corrigido);
+
+    parsed = JSON.parse(clean2);
+
+  } catch (e2) {
+    console.error("ERRO TOTAL:");
+    console.error("RAW ORIGINAL:", raw);
+
+    throw new Error('A IA não conseguiu gerar JSON válido.');
+  }
+}
 
     // Build checklist object
     var checklist = {};
