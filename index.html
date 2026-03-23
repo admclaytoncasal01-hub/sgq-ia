@@ -4715,12 +4715,7 @@ function nn_fileSelected(input) {
   };
   reader.readAsDataURL(file);
 }
-async function corrigirJSONComIA(raw) {
-  return await callGemini(
-    "Corrija este JSON inválido. Retorne APENAS JSON válido:\n\n" + raw,
-    "Você é um corretor de JSON. Responda apenas com JSON válido, sem explicações."
-  );
-}  
+
 async function gerarNormaPDF() {
   var nome = document.getElementById('nn_nome').value.trim();
   var codigo = document.getElementById('nn_codigo').value.trim().replace(/\s/g,'');
@@ -4755,27 +4750,15 @@ async function gerarNormaPDF() {
       .replace(/,\s*([}\]])/g, '$1')   // remove trailing commas
       .replace(/([{,]\s*)'(\w+)'\s*:/g, '$1"$2":')  // fix single-quote keys
       .replace(/:\s*'([^']*)'/g, function(m, v) { return ': "' + v.replace(/"/g, '\\"') + '"'; }); // fix single-quote values
-    let parsed;
+    var parsed;
+    try {
+      parsed = JSON.parse(clean);
+    } catch(jsonErr) {
+      // Last resort: ask IA to fix the JSON
+      throw new Error('A IA retornou JSON inválido. Tente novamente ou simplifique o prompt.');
+    }
 
-try {
-  parsed = JSON.parse(clean);
-
-} catch (jsonErr) {
-  console.warn("JSON inválido, tentando corrigir com IA...");
-
-  try {
-  const corrigido = await corrigirJSONComIA(limparJSON(raw)); // 🔥 aqui muda
-
-  const clean2 = limparJSON(corrigido);
-
-  parsed = JSON.parse(clean2);
-
-} catch (e2) {
-  console.error("ERRO TOTAL:");
-  console.error("RAW ORIGINAL:", raw);
-
-  throw new Error('A IA não conseguiu gerar JSON válido.');
-}
+    if (!parsed.requisitos || !parsed.requisitos.length) throw new Error('IA não retornou requisitos. Tente novamente.');
 
     // Build checklist object
     var checklist = {};
