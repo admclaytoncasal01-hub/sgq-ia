@@ -4877,7 +4877,7 @@ async function excluirNormaCustom(codigo) {
 
 async function carregarNormasCustom() {
   try {
-    var rows = await sb('/rest/v1/resultados_ia?criterio_id=like.norma_custom_%&ano=eq.0&select=criterio_id,recomendacao');
+    var rows = await sb('/rest/v1/resultados_ia?criterio_id=like.norma_custom_%25&ano=eq.0&select=criterio_id,recomendacao', { headers: { 'Prefer': 'return=representation' } });
     if (rows && rows.length) {
       rows.forEach(function(row) {
         if (row.recomendacao) {
@@ -5662,8 +5662,8 @@ async function gerarPlanoAcao() {
   const tipoMap = {auditoria_externa:'Auditoria Externa',pre_auditoria:'Pre-Auditoria',auditoria_interna:'Auditoria Interna',certificacao:'Certificacao',entrega_final:'Entrega Final',renovacao:'Renovacao'};
   const tipoLabel = tipoMap[tipoEvento] || tipoEvento;
 
-  const system = 'Voce e consultor senior ISO especialista em planejamento de auditorias. Gere cronograma em FASES. Responda APENAS com JSON valido sem markdown: {"resumo":{"total_pendentes":0,"semanas":0,"risco":"Alto","mensagem":"texto"},"fases":[{"fase":1,"nome":"Nome","periodo":"Sem 1-2","objetivo":"obj","tarefas":[{"prioridade":"Alta","tarefa":"desc","norma":"ISO X","responsavel":"Cargo","evidencia":"doc","dica":"texto"}]}]}';
-  const userText = 'CONTEXTO:\n- Empresa: CCADV Clayton Casal\n- Responsavel: ' + responsavel + '\n- Evento: ' + tipoLabel + '\n- Data-alvo: ' + dataAuditoria + '\n- Dias: ' + diasTotais + ' (' + semanas + ' semanas)\n- Fases: ' + fases + '\n- Pendentes: ' + pendentes.length + '\n\nITENS PENDENTES (top 25):\n' + pendentes.slice(0,25).map(function(p){ return '['+p.norma+'] Req.'+p.req+' - '+p.criterio.slice(0,70); }).join('\n') + '\n\nDistribua nas ' + fases + ' fases. Fase 1=criticos. Ultima fase=revisao final. Max 5 tarefas/fase. JSON compacto.';
+  const system = 'Voce e consultor senior ISO. Gere plano de acao em fases. Responda SOMENTE com JSON minimo valido, sem markdown, sem comentarios, sem texto fora do JSON. Use apenas ASCII. Formato exato: {"resumo":{"total_pendentes":0,"semanas":0,"risco":"Alto","mensagem":"texto curto"},"fases":[{"fase":1,"nome":"Fase","periodo":"Sem 1-2","objetivo":"obj","tarefas":[{"prioridade":"Alta","tarefa":"desc","norma":"X","responsavel":"Cargo","evidencia":"doc","dica":"dica"}]}]}';
+  const userText = 'Empresa:CCADV Clayton Casal|Resp:' + responsavel + '|Evento:' + tipoLabel + '|Data:' + dataAuditoria + '|Dias:' + diasTotais + '|Semanas:' + semanas + '|Fases:' + fases + '|Pendentes:' + pendentes.length + '\nTop itens:' + pendentes.slice(0,15).map(function(p){ return p.norma+':'+p.criterio.replace(/[^\w\s]/g,'').slice(0,50); }).join(';') + '\nMAX 4 tarefas/fase. JSON compacto ASCII sem acentos.';
 
   try {
     const raw = await callGemini(userText, system);
@@ -5683,22 +5683,36 @@ async function gerarPlanoAcao() {
     try {
       parsed = JSON.parse(cleanP);
     } catch(parseErr) {
-      // Fallback: build a safe minimal structure so UI still renders
-      console.warn('JSON parse falhou, usando fallback. Detalhe:', parseErr.message, '\nRaw:', cleanP.slice(0,300));
-      parsed = {
-        resumo: { total_pendentes: pendentes.length, semanas: semanas, risco: diasTotais < 30 ? 'Alto' : diasTotais < 90 ? 'Medio' : 'Baixo', mensagem: 'Cronograma gerado com base nos critérios pendentes identificados.' },
-        fases: Array.from({ length: fases }, function(_, i) {
-          var chunk = Math.ceil(pendentes.length / fases);
-          var slice = pendentes.slice(i * chunk, (i+1) * chunk).slice(0,5);
-          return {
-            fase: i+1,
-            nome: ['Diagnóstico e Críticos','Documentação','Implementação','Revisão Final'][i] || ('Fase '+(i+1)),
-            periodo: 'Sem '+(i*(Math.floor(semanas/fases)+1)+1)+'-'+((i+1)*(Math.floor(semanas/fases)+1)),
-            objetivo: 'Atender requisitos pendentes da fase ' + (i+1),
-            tarefas: slice.map(function(p){ return { prioridade: i===0?'Alta':'Media', tarefa: p.criterio.slice(0,80), norma: p.norma, responsavel: responsavel, evidencia: 'Documento comprobatório', dica: 'Consulte a norma ' + p.norma + ' para detalhes.' }; })
-          };
-        })
-      };
+      // Retry once with an even simpler prompt
+      console.warn('1ª tentativa falhou, tentando retry simplificado. Erro:', parseErr.message);
+      try {
+        var retrySystem = 'Responda SOMENTE com JSON valido ASCII sem markdown. Formato: {"resumo":{"total_pendentes":' + pendentes.length + ',"semanas":' + semanas + ',"risco":"' + (diasTotais<30?'Alto':diasTotais<90?'Medio':'Baixo') + '","mensagem":"Plano gerado pela IA"},"fases":[{"fase":1,"nome":"Fase 1","periodo":"Sem 1-' + Math.ceil(semanas/fases) + '","objetivo":"Atender itens criticos","tarefas":[{"prioridade":"Alta","tarefa":"TAREFA","norma":"NORMA","responsavel":"RESP","evidencia":"Documento","dica":"Dica"}]}]}';
+        var retryText = 'Gere cronograma ISO com ' + fases + ' fases para ' + pendentes.length + ' itens pendentes em ' + semanas + ' semanas. Responsavel:' + responsavel + '. Use apenas ASCII. JSON minimo.';
+        var raw2 = await callGemini(retryText, retrySystem);
+        var cleanP2 = raw2.replace(/```json|```/g,'').trim();
+        var js2 = cleanP2.indexOf('{'); if (js2 > 0) cleanP2 = cleanP2.substring(js2);
+        var je2 = cleanP2.lastIndexOf('}'); if (je2 > 0) cleanP2 = cleanP2.substring(0, je2+1);
+        cleanP2 = cleanP2.replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/,\s*([\]}])/g,'$1');
+        parsed = JSON.parse(cleanP2);
+        console.log('Retry bem-sucedido.');
+      } catch(retryErr) {
+        // Final fallback: build cronograma locally from pendentes data
+        console.warn('Retry também falhou, usando fallback local. Erro:', retryErr.message);
+        parsed = {
+          resumo: { total_pendentes: pendentes.length, semanas: semanas, risco: diasTotais < 30 ? 'Alto' : diasTotais < 90 ? 'Medio' : 'Baixo', mensagem: 'Cronograma gerado localmente com base nos critérios pendentes identificados.' },
+          fases: Array.from({ length: fases }, function(_, i) {
+            var chunk = Math.ceil(pendentes.length / fases);
+            var slice = pendentes.slice(i * chunk, (i+1) * chunk).slice(0,4);
+            return {
+              fase: i+1,
+              nome: ['Diagnóstico e Críticos','Documentação e Evidências','Implementação','Revisão Final'][i] || ('Fase '+(i+1)),
+              periodo: 'Sem '+(i*(Math.floor(semanas/fases)+1)+1)+'-'+((i+1)*(Math.floor(semanas/fases)+1)),
+              objetivo: 'Atender requisitos pendentes da fase ' + (i+1),
+              tarefas: slice.map(function(p){ return { prioridade: i===0?'Alta':'Media', tarefa: p.criterio.slice(0,80), norma: p.norma, responsavel: responsavel, evidencia: 'Documento comprobatório', dica: 'Consulte a norma ' + p.norma + ' para detalhes.' }; })
+            };
+          })
+        };
+      }
     }
     const resumo = parsed.resumo || {};
     const fasesList = parsed.fases || [];
