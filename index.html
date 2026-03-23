@@ -1411,28 +1411,24 @@ async function carregarAno(ano){
       else if(r.criterio_id.startsWith('ab2l_')) resultsAB2L[r.criterio_id.replace('ab2l_','')]=obj; // restore per-item and overall results
       else if(r.criterio_id.startsWith('usertpl_')) {
         // Restore user templates from Supabase
-       let tplMeta = {};
-
-try {
-  tplMeta = JSON.parse((r.recomendacao || '{}').replace(/,\s*([}\]])/g, '$1'));
-} catch (e) {
-  tplMeta = {};
-}
-
-if (tplMeta.nome && !userTemplates.find(function(t){return t.id===r.criterio_id.replace('usertpl_','');})) {
-  userTemplates.push({
-    id: r.criterio_id.replace('usertpl_',''),
-    nome: tplMeta.nome,
-    tipo: tplMeta.tipo || (tplMeta.filename ? tplMeta.filename.split('.').pop().toUpperCase() : 'PDF'),
-    norma: tplMeta.norma || 'geral',
-    filename: tplMeta.filename || tplMeta.nome,
-    conteudo_base64: tplMeta.conteudo_base64 || null, // may be null if too large
-    mime: tplMeta.mime || 'application/pdf',
-    criado_em: tplMeta.criado_em || r.criado_em,
-    usuario: tplMeta.usuario || '',
-    storage_path: r.storage_path || null
-  });
-}
+        try {
+          var tplMeta = JSON.parse(r.recomendacao || '{}');
+          if (tplMeta.nome && !userTemplates.find(function(t){return t.id===r.criterio_id.replace('usertpl_','');})) {
+            userTemplates.push({
+              id: r.criterio_id.replace('usertpl_',''),
+              nome: tplMeta.nome,
+              tipo: tplMeta.tipo || (tplMeta.filename ? tplMeta.filename.split('.').pop().toUpperCase() : 'PDF'),
+              norma: tplMeta.norma || 'geral',
+              filename: tplMeta.filename || tplMeta.nome,
+              conteudo_base64: tplMeta.conteudo_base64 || null, // may be null if too large
+              mime: tplMeta.mime || 'application/pdf',
+              criado_em: tplMeta.criado_em || r.criado_em,
+              usuario: tplMeta.usuario || '',
+              storage_path: r.storage_path || null
+            });
+          }
+        } catch(eParse) {}
+      }
       else if(!r.criterio_id.startsWith('arg_')) anoData[ano].results[r.criterio_id]=obj;
     });
     const docs=await sb('/rest/v1/documentos?ano=eq.'+ano+'&select=*&order=criado_em.asc');
