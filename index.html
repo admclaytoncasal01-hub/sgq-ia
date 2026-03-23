@@ -5668,11 +5668,38 @@ async function gerarPlanoAcao() {
   try {
     const raw = await callGemini(userText, system);
     var cleanP = raw.replace(/```json|```/g,'').trim();
+    // Extract only the outermost JSON object
     var jStart = cleanP.indexOf('{');
     if (jStart > 0) cleanP = cleanP.substring(jStart);
     var lBrace = cleanP.lastIndexOf('}');
     if (lBrace > 0) cleanP = cleanP.substring(0, lBrace + 1);
-    const parsed = JSON.parse(cleanP);
+    // Sanitize common issues: smart quotes, control chars, trailing commas
+    cleanP = cleanP
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u0000-\u001F\u007F]/g, function(c){ return c==='\n'||c==='\r'||c==='\t'?c:''; })
+      .replace(/,\s*([\]}])/g, '$1');
+    var parsed;
+    try {
+      parsed = JSON.parse(cleanP);
+    } catch(parseErr) {
+      // Fallback: build a safe minimal structure so UI still renders
+      console.warn('JSON parse falhou, usando fallback. Detalhe:', parseErr.message, '\nRaw:', cleanP.slice(0,300));
+      parsed = {
+        resumo: { total_pendentes: pendentes.length, semanas: semanas, risco: diasTotais < 30 ? 'Alto' : diasTotais < 90 ? 'Medio' : 'Baixo', mensagem: 'Cronograma gerado com base nos critérios pendentes identificados.' },
+        fases: Array.from({ length: fases }, function(_, i) {
+          var chunk = Math.ceil(pendentes.length / fases);
+          var slice = pendentes.slice(i * chunk, (i+1) * chunk).slice(0,5);
+          return {
+            fase: i+1,
+            nome: ['Diagnóstico e Críticos','Documentação','Implementação','Revisão Final'][i] || ('Fase '+(i+1)),
+            periodo: 'Sem '+(i*(Math.floor(semanas/fases)+1)+1)+'-'+((i+1)*(Math.floor(semanas/fases)+1)),
+            objetivo: 'Atender requisitos pendentes da fase ' + (i+1),
+            tarefas: slice.map(function(p){ return { prioridade: i===0?'Alta':'Media', tarefa: p.criterio.slice(0,80), norma: p.norma, responsavel: responsavel, evidencia: 'Documento comprobatório', dica: 'Consulte a norma ' + p.norma + ' para detalhes.' }; })
+          };
+        })
+      };
+    }
     const resumo = parsed.resumo || {};
     const fasesList = parsed.fases || [];
     const faseColors = ['#00c8ff','#00e676','#ffb400','#a050ff','#ff5252'];
