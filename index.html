@@ -5662,53 +5662,39 @@ async function gerarPlanoAcao() {
   const tipoMap = {auditoria_externa:'Auditoria Externa',pre_auditoria:'Pre-Auditoria',auditoria_interna:'Auditoria Interna',certificacao:'Certificacao',entrega_final:'Entrega Final',renovacao:'Renovacao'};
   const tipoLabel = tipoMap[tipoEvento] || tipoEvento;
 
-  const system = 'Voce e consultor senior ISO. Gere plano de acao em fases. Responda SOMENTE com JSON minimo valido, sem markdown, sem comentarios, sem texto fora do JSON. Use apenas ASCII. Formato exato: {"resumo":{"total_pendentes":0,"semanas":0,"risco":"Alto","mensagem":"texto curto"},"fases":[{"fase":1,"nome":"Fase","periodo":"Sem 1-2","objetivo":"obj","tarefas":[{"prioridade":"Alta","tarefa":"desc","norma":"X","responsavel":"Cargo","evidencia":"doc","dica":"dica"}]}]}';
+  const system = 'Voce e consultor senior ISO. Responda SOMENTE com JSON minimo valido sem markdown sem comentarios. Use apenas ASCII. Formato: {"resumo":{"total_pendentes":0,"semanas":0,"risco":"Alto","mensagem":"texto"},"fases":[{"fase":1,"nome":"Fase","periodo":"Sem 1-2","objetivo":"obj","tarefas":[{"prioridade":"Alta","tarefa":"desc","norma":"X","responsavel":"Cargo","evidencia":"doc","dica":"dica"}]}]}';
   const userText = 'Empresa:CCADV Clayton Casal|Resp:' + responsavel + '|Evento:' + tipoLabel + '|Data:' + dataAuditoria + '|Dias:' + diasTotais + '|Semanas:' + semanas + '|Fases:' + fases + '|Pendentes:' + pendentes.length + '\nTop itens:' + pendentes.slice(0,15).map(function(p){ return p.norma+':'+p.criterio.replace(/[^\w\s]/g,'').slice(0,50); }).join(';') + '\nMAX 4 tarefas/fase. JSON compacto ASCII sem acentos.';
 
   try {
     const raw = await callGemini(userText, system);
     var cleanP = raw.replace(/```json|```/g,'').trim();
-    // Extract only the outermost JSON object
     var jStart = cleanP.indexOf('{');
     if (jStart > 0) cleanP = cleanP.substring(jStart);
     var lBrace = cleanP.lastIndexOf('}');
     if (lBrace > 0) cleanP = cleanP.substring(0, lBrace + 1);
-    // Sanitize common issues: smart quotes, control chars, trailing commas
-    cleanP = cleanP
-      .replace(/[\u2018\u2019]/g, "'")
-      .replace(/[\u201C\u201D]/g, '"')
-      .replace(/[\u0000-\u001F\u007F]/g, function(c){ return c==='\n'||c==='\r'||c==='\t'?c:''; })
-      .replace(/,\s*([\]}])/g, '$1');
     var parsed;
     try {
       parsed = JSON.parse(cleanP);
     } catch(parseErr) {
-      // Retry once with an even simpler prompt
-      console.warn('1ª tentativa falhou, tentando retry simplificado. Erro:', parseErr.message);
+      console.warn('1a tentativa falhou, retry. Erro:', parseErr.message);
       try {
-        var retrySystem = 'Responda SOMENTE com JSON valido ASCII sem markdown. Formato: {"resumo":{"total_pendentes":' + pendentes.length + ',"semanas":' + semanas + ',"risco":"' + (diasTotais<30?'Alto':diasTotais<90?'Medio':'Baixo') + '","mensagem":"Plano gerado pela IA"},"fases":[{"fase":1,"nome":"Fase 1","periodo":"Sem 1-' + Math.ceil(semanas/fases) + '","objetivo":"Atender itens criticos","tarefas":[{"prioridade":"Alta","tarefa":"TAREFA","norma":"NORMA","responsavel":"RESP","evidencia":"Documento","dica":"Dica"}]}]}';
-        var retryText = 'Gere cronograma ISO com ' + fases + ' fases para ' + pendentes.length + ' itens pendentes em ' + semanas + ' semanas. Responsavel:' + responsavel + '. Use apenas ASCII. JSON minimo.';
-        var raw2 = await callGemini(retryText, retrySystem);
-        var cleanP2 = raw2.replace(/```json|```/g,'').trim();
-        var js2 = cleanP2.indexOf('{'); if (js2 > 0) cleanP2 = cleanP2.substring(js2);
-        var je2 = cleanP2.lastIndexOf('}'); if (je2 > 0) cleanP2 = cleanP2.substring(0, je2+1);
-        cleanP2 = cleanP2.replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/,\s*([\]}])/g,'$1');
-        parsed = JSON.parse(cleanP2);
-        console.log('Retry bem-sucedido.');
-      } catch(retryErr) {
-        // Final fallback: build cronograma locally from pendentes data
-        console.warn('Retry também falhou, usando fallback local. Erro:', retryErr.message);
+        var rSys = 'Responda SOMENTE JSON ASCII valido sem markdown. Formato:{"resumo":{"total_pendentes":' + pendentes.length + ',"semanas":' + semanas + ',"risco":"' + (diasTotais<30?'Alto':diasTotais<90?'Medio':'Baixo') + '","mensagem":"Plano gerado"},"fases":[{"fase":1,"nome":"Fase 1","periodo":"Sem 1","objetivo":"Atender criticos","tarefas":[{"prioridade":"Alta","tarefa":"T","norma":"N","responsavel":"R","evidencia":"E","dica":"D"}]}]}';
+        var rTxt = 'Cronograma ISO ' + fases + ' fases ' + pendentes.length + ' pendentes ' + semanas + ' semanas. Resp:' + responsavel + '. ASCII JSON.';
+        var raw2 = await callGemini(rTxt, rSys);
+        var c2 = raw2.replace(/```json|```/g,'').trim();
+        var s2=c2.indexOf('{');if(s2>0)c2=c2.substring(s2);
+        var e2=c2.lastIndexOf('}');if(e2>0)c2=c2.substring(0,e2+1);
+        c2=c2.replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/,\s*([\]}])/g,'$1');
+        parsed = JSON.parse(c2);
+      } catch(e2) {
         parsed = {
-          resumo: { total_pendentes: pendentes.length, semanas: semanas, risco: diasTotais < 30 ? 'Alto' : diasTotais < 90 ? 'Medio' : 'Baixo', mensagem: 'Cronograma gerado localmente com base nos critérios pendentes identificados.' },
-          fases: Array.from({ length: fases }, function(_, i) {
-            var chunk = Math.ceil(pendentes.length / fases);
-            var slice = pendentes.slice(i * chunk, (i+1) * chunk).slice(0,4);
-            return {
-              fase: i+1,
-              nome: ['Diagnóstico e Críticos','Documentação e Evidências','Implementação','Revisão Final'][i] || ('Fase '+(i+1)),
-              periodo: 'Sem '+(i*(Math.floor(semanas/fases)+1)+1)+'-'+((i+1)*(Math.floor(semanas/fases)+1)),
-              objetivo: 'Atender requisitos pendentes da fase ' + (i+1),
-              tarefas: slice.map(function(p){ return { prioridade: i===0?'Alta':'Media', tarefa: p.criterio.slice(0,80), norma: p.norma, responsavel: responsavel, evidencia: 'Documento comprobatório', dica: 'Consulte a norma ' + p.norma + ' para detalhes.' }; })
+          resumo:{ total_pendentes:pendentes.length, semanas:semanas, risco:diasTotais<30?'Alto':diasTotais<90?'Medio':'Baixo', mensagem:'Cronograma gerado localmente com base nos criterios pendentes.' },
+          fases: Array.from({length:fases},function(_,i){
+            var ch=Math.ceil(pendentes.length/fases), sl=pendentes.slice(i*ch,(i+1)*ch).slice(0,4);
+            return { fase:i+1, nome:['Diagnostico Criticos','Documentacao','Implementacao','Revisao Final'][i]||'Fase '+(i+1),
+              periodo:'Sem '+(i*Math.ceil(semanas/fases)+1)+'-'+((i+1)*Math.ceil(semanas/fases)),
+              objetivo:'Atender requisitos da fase '+(i+1),
+              tarefas:sl.map(function(p){return{prioridade:i===0?'Alta':'Media',tarefa:p.criterio.slice(0,80),norma:p.norma,responsavel:responsavel,evidencia:'Documento comprobatorio',dica:'Consulte '+p.norma};})
             };
           })
         };
@@ -5820,9 +5806,11 @@ async function gerarPlanoAcao() {
 
     html += '<div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">' +
       '<button onclick="exportarCronogramaPDF()" style="padding:9px 20px;border-radius:8px;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.06);color:#00c8ff;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif">\uD83D\uDCE5 Exportar PDF</button>' +
+      '<button onclick="exportarCronogramaExcel()" style="padding:9px 20px;border-radius:8px;border:1px solid rgba(0,200,80,.35);background:rgba(0,200,80,.07);color:#00e676;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif">\uD83D\uDCCA Exportar Excel</button>' +
       '<button onclick="salvarDataAuditoria(\''+dataAuditoria+'\',\''+tipoEvento+'\')" style="padding:9px 20px;border-radius:8px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:#00e676;font-size:12px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif">\uD83D\uDCBE Salvar Data</button>' +
     '</div>';
 
+    window._cronogramaData = { parsed:parsed, dataAuditoria:dataAuditoria, tipoLabel:tipoLabel, responsavel:responsavel, diasTotais:diasTotais, semanas:semanas, hoje:hoje, fasesList:fasesList };
     resultDiv.innerHTML = html;
     salvarDataAuditoria(dataAuditoria, tipoEvento, false);
 
@@ -5858,6 +5846,94 @@ function salvarDataAuditoria(data, tipo, mostrarAlert) {
       setTimeout(function(){s.remove();},2500);
     }
   } catch(e) {}
+}
+
+
+// =====================================================================
+// EXPORTAR CRONOGRAMA EXCEL - FORMATO AGENDA
+// =====================================================================
+function exportarCronogramaExcel() {
+  var d = window._cronogramaData;
+  if (!d || !d.parsed) { alert('Gere o cronograma primeiro.'); return; }
+  var fasesList = d.parsed.fases || [];
+  var hoje = d.hoje || new Date();
+  var resumo = d.parsed.resumo || {};
+  var responsavel = d.responsavel || 'Gestor da Qualidade';
+  var fmtDate = function(dt) { return dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}); };
+
+  var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+  html += '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Cronograma SGQ</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>';
+  html += '<table border="1" style="border-collapse:collapse;font-family:Calibri,Arial,sans-serif;font-size:10pt">';
+
+  // Title
+  html += '<tr><td colspan="12" style="background:#1a3a5c;color:#fff;font-size:14pt;font-weight:bold;padding:10px 14px">PLANO DE ACAO &amp; CRONOGRAMA SGQ</td></tr>';
+  html += '<tr>';
+  html += '<td colspan="2" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Empresa</td><td colspan="2" style="padding:6px 10px">CCADV Clayton Casal</td>';
+  html += '<td colspan="2" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Evento</td><td colspan="2" style="padding:6px 10px">' + d.tipoLabel + '</td>';
+  html += '<td colspan="2" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Data Auditoria</td><td colspan="2" style="padding:6px 10px">' + d.dataAuditoria + '</td>';
+  html += '</tr><tr>';
+  html += '<td colspan="2" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Responsavel</td><td colspan="2" style="padding:6px 10px">' + responsavel + '</td>';
+  html += '<td colspan="2" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Dias Restantes</td><td colspan="2" style="padding:6px 10px">' + d.diasTotais + ' dias (' + d.semanas + ' sem.)</td>';
+  html += '<td colspan="2" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Risco</td>';
+  var riscoColor = resumo.risco==='Alto'?'#c0392b':resumo.risco==='Medio'?'#d4ac0d':'#1e8449';
+  html += '<td colspan="2" style="padding:6px 10px;color:' + riscoColor + ';font-weight:bold">' + (resumo.risco||'-') + '</td>';
+  html += '</tr><tr><td colspan="12" style="background:#f8f9fa;padding:6px 10px;color:#555;font-style:italic">' + (resumo.mensagem||'') + '</td></tr>';
+  html += '<tr><td colspan="12" style="height:8px;background:#fff"></td></tr>';
+
+  // Column headers
+  var headers = ['FASE','No.','PERIODO','DATA INICIO','DATA FIM','PRIORIDADE','TAREFA / ACAO','NORMA','RESPONSAVEL','EVIDENCIA','DICA / ORIENTACAO','STATUS'];
+  html += '<tr>';
+  headers.forEach(function(h){
+    html += '<td style="background:#1a3a5c;color:#fff;font-weight:bold;padding:7px 10px;text-align:center;white-space:nowrap">' + h + '</td>';
+  });
+  html += '</tr>';
+
+  // Data rows
+  var rowColors = ['#EBF5FB','#E8F8F5','#FEFCE8','#F5EEF8','#FDEDEC'];
+  fasesList.forEach(function(f, fi) {
+    var diasPorFase = Math.floor(d.diasTotais / Math.max(1, fasesList.length));
+    var faseInicio = new Date(hoje); faseInicio.setDate(hoje.getDate() + fi * diasPorFase);
+    var faseFim    = new Date(hoje); faseFim.setDate(hoje.getDate() + (fi+1) * diasPorFase - 1);
+    var bg = rowColors[fi % rowColors.length];
+
+    (f.tarefas || []).forEach(function(t) {
+      var pCor = t.prioridade==='Alta'?'#c0392b':t.prioridade==='Media'?'#d4ac0d':'#1e8449';
+      var esc = function(v){ return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+      html += '<tr>';
+      html += '<td style="background:'+bg+';padding:6px 10px;font-weight:600">' + esc(f.nome||'Fase '+(fi+1)) + '</td>';
+      html += '<td style="background:'+bg+';padding:6px 10px;text-align:center">' + (fi+1) + '</td>';
+      html += '<td style="background:'+bg+';padding:6px 10px;text-align:center">' + esc(f.periodo||'') + '</td>';
+      html += '<td style="background:'+bg+';padding:6px 10px;text-align:center">' + fmtDate(faseInicio) + '</td>';
+      html += '<td style="background:'+bg+';padding:6px 10px;text-align:center">' + fmtDate(faseFim) + '</td>';
+      html += '<td style="background:'+bg+';padding:6px 10px;text-align:center;color:'+pCor+';font-weight:bold">' + esc(t.prioridade||'-') + '</td>';
+      html += '<td style="background:'+bg+';padding:6px 10px">' + esc(t.tarefa||'-') + '</td>';
+      html += '<td style="background:'+bg+';padding:6px 10px;text-align:center">' + esc(t.norma||'-') + '</td>';
+      html += '<td style="background:'+bg+';padding:6px 10px">' + esc(t.responsavel||responsavel) + '</td>';
+      html += '<td style="background:'+bg+';padding:6px 10px">' + esc(t.evidencia||'-') + '</td>';
+      html += '<td style="background:'+bg+';padding:6px 10px;color:#607080;font-style:italic">' + esc(t.dica||'-') + '</td>';
+      html += '<td style="background:#fff3cd;padding:6px 10px;text-align:center;color:#856404;font-weight:bold">Pendente</td>';
+      html += '</tr>';
+    });
+  });
+
+  // Summary row
+  var total = fasesList.reduce(function(s,f){ return s+(f.tarefas||[]).length; },0);
+  html += '<tr><td colspan="6" style="background:#1a3a5c;color:#fff;font-weight:bold;padding:7px 10px;text-align:right">TOTAL DE ACOES:</td>';
+  html += '<td colspan="6" style="background:#1a3a5c;color:#fff;font-weight:bold;padding:7px 10px">' + total + ' tarefas em ' + fasesList.length + ' fases</td></tr>';
+
+  html += '</table></body></html>';
+
+  var blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'Cronograma_SGQ_' + (d.dataAuditoria||'agenda').replace(/-/g,'') + '.xls';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  var t = document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;right:24px;background:#00e676;color:#0a0e14;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;z-index:9999';
+  t.textContent='\u2705 Excel exportado com sucesso!';
+  document.body.appendChild(t); setTimeout(function(){ t.remove(); },2500);
 }
 
 function exportarCronogramaPDF() {
