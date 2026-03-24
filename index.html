@@ -3924,7 +3924,7 @@ async function renderAcessos() {
 
   // Load saved acessos from resultados_ia (stored with criterio_id = 'acesso_USERID')
   try {
-    const acessoRows = await sb('/rest/v1/resultados_ia?criterio_id=like.acesso_*&ano=eq.0&select=criterio_id,recomendacao,usuario_id') || [];
+    const acessoRows = await sb('/rest/v1/resultados_ia?criterio_id=like.acesso_%25&ano=eq.0&select=criterio_id,recomendacao,usuario_id', { headers: { 'Prefer': 'return=representation' } }) || [];
     acessoRows.forEach(row => {
       var uid = row.criterio_id ? row.criterio_id.replace('acesso_','') : row.usuario_id;
       if (uid && row.recomendacao) {
@@ -5492,7 +5492,7 @@ async function renderDashboard() {
   // Load historical data from Supabase
   let history = [];
   try {
-    const rows = await sb('/rest/v1/resultados_ia?criterio_id=like.dashboard_snap_%&order=criado_em.asc&select=recomendacao,criado_em') || [];
+    const rows = await sb('/rest/v1/resultados_ia?criterio_id=like.dashboard_snap_%25&order=criado_em.asc&select=recomendacao,criado_em', { headers: { 'Prefer': 'return=representation' } }) || [];
     history = rows.map(r => { try { return JSON.parse(r.recomendacao); } catch(e) { return null; } }).filter(Boolean);
   } catch(e) {}
 
@@ -5600,7 +5600,8 @@ async function renderDashboard() {
 
 // ══════════════════════════════════════════════════════════════
 // ★ PLANO DE AÇÃO IA + GOOGLE CALENDAR
-// ════════════════════════════════════════════ async function gerarPlanoAcao() {
+// ══════════════════════════════════════════════════════════════
+async function gerarPlanoAcao() {
   const btn = document.getElementById('btnPlanoAcao');
   const resultDiv = document.getElementById('planoAcaoResult');
   const normaFiltro = document.getElementById('planoNormaSelect').value;
@@ -5887,8 +5888,6 @@ async function renderDashboard() {
   }
   btn.disabled = false; btn.textContent = '\uD83E\uDD16 Gerar Cronograma';
 }
- btn.textContent = '\uD83E\uDD16 Gerar Cronograma';
-}
 
 function calcularDiasRestantes() {
   var val = document.getElementById('planoDataAuditoria').value;
@@ -5928,72 +5927,54 @@ function exportarCronogramaExcel() {
   var reqs = d.todosRequisitos;
   var allR = d.allResults || {};
   var responsavel = d.responsavel || 'Gestor da Qualidade';
-  var normaColors = {'ISO 9001':'#1E5EA8','ISO 27001':'#6A1B9A','ISO 42001':'#BF360C','AB2L':'#1B5E20'};
-
-  var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-  html += '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Cronograma 5W2H</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>';
-  html += '<table border="1" style="border-collapse:collapse;font-family:Calibri,Arial,sans-serif;font-size:10pt">';
-
-  // Title
-  html += '<tr><td colspan="14" style="background:#1a3a5c;color:#fff;font-size:14pt;font-weight:bold;padding:10px 14px">PLANO DE ACAO 5W2H &amp; CRONOGRAMA SGQ</td></tr>';
-  html += '<tr>';
-  html += '<td colspan="3" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Empresa</td><td colspan="3" style="padding:6px 10px">CCADV Clayton Casal</td>';
-  html += '<td colspan="2" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Evento</td><td colspan="2" style="padding:6px 10px">' + d.tipoLabel + '</td>';
-  html += '<td colspan="2" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Data Auditoria</td><td colspan="2" style="padding:6px 10px">' + d.dataAuditoria + '</td>';
-  html += '</tr><tr>';
-  html += '<td colspan="3" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Responsavel</td><td colspan="3" style="padding:6px 10px">' + responsavel + '</td>';
-  html += '<td colspan="2" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Dias Restantes</td><td colspan="2" style="padding:6px 10px">' + d.diasTotais + ' dias (' + d.semanas + ' sem.)</td>';
-  html += '<td colspan="2" style="background:#dce6f1;font-weight:bold;padding:6px 10px">Total Requisitos</td><td colspan="2" style="padding:6px 10px">' + reqs.length + '</td>';
-  html += '</tr><tr><td colspan="14" style="height:6px;background:#fff"></td></tr>';
-
-  // Column headers
-  var headers = ['NORMA','REQ','TITULO DO REQUISITO','PROGRESSO','PRAZO LIMITE','DIAS ATE PRAZO','PRIORIDADE','O QUE (WHAT)','POR QUE (WHY)','QUEM (WHO)','ONDE (WHERE)','QUANDO (WHEN)','COMO (HOW)','QUANTO (HOW MUCH)','RISCO SE NAO FEITO','STATUS'];
-  html += '<tr>';
-  headers.forEach(function(h){
-    html += '<td style="background:#1a3a5c;color:#fff;font-weight:bold;padding:7px 10px;text-align:center;white-space:nowrap;font-size:9pt">' + h + '</td>';
-  });
-  html += '</tr>';
-
+  var normaColors_hex = {'ISO 9001':'#1E5EA8','ISO 27001':'#6A1B9A','ISO 42001':'#BF360C','AB2L':'#1B5E20'};
   var rowBgs = {'ISO 9001':'#EBF5FB','ISO 27001':'#F5EEF8','ISO 42001':'#FFF3E0','AB2L':'#E8F8F5'};
   var esc = function(v){ return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+
+  var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+  html += '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Cronograma 5W2H</x:Name></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>';
+  html += '<table border="1" style="border-collapse:collapse;font-family:Calibri,Arial,sans-serif;font-size:10pt">';
+  html += '<tr><td colspan="16" style="background:#1a3a5c;color:#fff;font-size:14pt;font-weight:bold;padding:10px 14px">PLANO DE ACAO 5W2H &amp; CRONOGRAMA SGQ</td></tr>';
+  html += '<tr><td colspan="4" style="background:#dce6f1;font-weight:bold;padding:6px">Empresa</td><td colspan="4" style="padding:6px">CCADV Clayton Casal</td><td colspan="4" style="background:#dce6f1;font-weight:bold;padding:6px">Evento</td><td colspan="4" style="padding:6px">' + esc(d.tipoLabel) + '</td></tr>';
+  html += '<tr><td colspan="4" style="background:#dce6f1;font-weight:bold;padding:6px">Responsavel</td><td colspan="4" style="padding:6px">' + esc(responsavel) + '</td><td colspan="4" style="background:#dce6f1;font-weight:bold;padding:6px">Data Auditoria</td><td colspan="4" style="padding:6px;font-weight:bold;color:#c0392b">' + esc(d.dataAuditoria) + '</td></tr>';
+  html += '<tr><td colspan="16" style="height:4px"></td></tr>';
+  var headers = ['NORMA','REQ','TITULO','PROGRESSO','PRAZO LIMITE','DIAS','PRIORIDADE','O QUE (WHAT)','POR QUE (WHY)','QUEM (WHO)','ONDE (WHERE)','QUANDO (WHEN)','COMO (HOW)','QUANTO (HOW MUCH)','RISCO','STATUS'];
+  html += '<tr>' + headers.map(function(h){ return '<td style="background:#1a3a5c;color:#fff;font-weight:bold;padding:7px 8px;text-align:center;font-size:9pt;white-space:nowrap">' + h + '</td>'; }).join('') + '</tr>';
 
   reqs.forEach(function(r) {
     var w = allR[String(r.reqNum)] || {};
     var bg = rowBgs[r.norma] || '#f9f9f9';
     var pCor = w.prioridade==='Alta'?'#c0392b':w.prioridade==='Media'?'#d4ac0d':'#1e8449';
-    var statusTxt = r.pct===100 ? 'Concluido' : r.pct > 0 ? 'Em andamento' : 'Nao iniciado';
-    var statusBg = r.pct===100 ? '#d5f5e3' : r.pct > 0 ? '#fef9e7' : '#fdecea';
-
+    var statusTxt = r.pct===100?'Concluido':r.pct>0?'Em andamento':'Nao iniciado';
+    var statusBg = r.pct===100?'#d5f5e3':r.pct>0?'#fef9e7':'#fdecea';
     html += '<tr>';
-    html += '<td style="background:'+bg+';padding:6px 10px;font-weight:600;color:' + (normaColors[r.norma]||'#1a3a5c') + '">' + esc(r.norma) + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px;text-align:center;font-weight:700">' + esc(r.reqNum) + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px;font-weight:600">' + esc(r.title) + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px;text-align:center">' + r.doneC + '/' + r.totalC + ' (' + r.pct + '%)</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px;text-align:center;font-weight:700">' + esc(r.dataLimite) + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px;text-align:center">' + r.diasAte + ' dias</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px;text-align:center;color:'+pCor+';font-weight:bold">' + esc(w.prioridade||'-') + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px">' + esc(w.what||'-') + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px">' + esc(w.why||'-') + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px">' + esc(w.who||responsavel) + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px">' + esc(w.where||'-') + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px;font-weight:600">' + esc(w.when||r.dataLimite) + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px">' + esc(w.how||'-') + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px">' + esc(w.how_much||'-') + '</td>';
-    html += '<td style="background:'+bg+';padding:6px 10px;color:#c0392b;font-style:italic">' + esc(w.risco||'-') + '</td>';
-    html += '<td style="background:'+statusBg+';padding:6px 10px;text-align:center;font-weight:bold">' + statusTxt + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px;font-weight:600;color:'+(normaColors_hex[r.norma]||'#1a3a5c')+'">' + esc(r.norma) + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px;text-align:center;font-weight:700">' + esc(String(r.reqNum)) + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px;font-weight:600">' + esc(r.title) + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px;text-align:center">' + r.doneC + '/' + r.totalC + ' (' + r.pct + '%)</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px;text-align:center;font-weight:700">' + esc(r.dataLimite) + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px;text-align:center">' + r.diasAte + 'd</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px;text-align:center;color:'+pCor+';font-weight:bold">' + esc(w.prioridade||'-') + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px">' + esc(w.what||'-') + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px">' + esc(w.why||'-') + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px">' + esc(w.who||responsavel) + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px">' + esc(w.where||'-') + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px;font-weight:600">' + esc(w.when||r.dataLimite) + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px">' + esc(w.how||'-') + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px">' + esc(w.how_much||'-') + '</td>';
+    html += '<td style="background:'+bg+';padding:5px 8px;color:#c0392b;font-style:italic">' + esc(w.risco||'-') + '</td>';
+    html += '<td style="background:'+statusBg+';padding:5px 8px;text-align:center;font-weight:bold">' + statusTxt + '</td>';
     html += '</tr>';
   });
 
   var totalConc = reqs.filter(function(r){return r.pct===100;}).length;
-  html += '<tr><td colspan="3" style="background:#1a3a5c;color:#fff;font-weight:bold;padding:7px 10px">TOTAIS</td>';
-  html += '<td colspan="3" style="background:#1a3a5c;color:#fff;padding:7px 10px">' + totalConc + ' concluidos / ' + (reqs.length-totalConc) + ' pendentes</td>';
-  html += '<td colspan="10" style="background:#1a3a5c;color:#fff;padding:7px 10px">Data auditoria: ' + d.dataAuditoria + ' | Responsavel: ' + responsavel + '</td></tr>';
+  html += '<tr><td colspan="3" style="background:#1a3a5c;color:#fff;font-weight:bold;padding:7px">TOTAIS</td><td colspan="13" style="background:#1a3a5c;color:#fff;padding:7px">' + totalConc + ' concluidos / ' + (reqs.length-totalConc) + ' pendentes | Auditoria: ' + esc(d.dataAuditoria) + '</td></tr>';
   html += '</table></body></html>';
 
   var blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
-  a.href = url; a.download = 'Cronograma_5W2H_SGQ_' + (d.dataAuditoria||'').replace(/-/g,'') + '.xls';
+  a.href = url; a.download = 'Cronograma_5W2H_' + (d.dataAuditoria||'').replace(/-/g,'') + '.xls';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
   var t = document.createElement('div');
@@ -6104,7 +6085,7 @@ async function renderAuditoria() {
   content.innerHTML = '<div style="color:#607080;text-align:center;padding:30px">⏳ Carregando logs...</div>';
 
   try {
-    const rows = await sb('/rest/v1/resultados_ia?criterio_id=like.audit_*&order=criado_em.desc&limit=100&select=recomendacao,criado_em') || [];
+    const rows = await sb('/rest/v1/resultados_ia?criterio_id=like.audit_%25&order=criado_em.desc&limit=100&select=recomendacao,criado_em', { headers: { 'Prefer': 'return=representation' } }) || [];
     if (!rows.length) { content.innerHTML = '<div style="color:#607080;text-align:center;padding:40px">Nenhum log registrado ainda.</div>'; return; }
 
     let html = `<div style="background:#111820;border:1px solid #1e2d3d;border-radius:12px;overflow:hidden">
@@ -6139,7 +6120,7 @@ async function renderAuditoria() {
 
 async function exportarLog() {
   try {
-    const rows = await sb('/rest/v1/resultados_ia?criterio_id=like.audit_*&order=criado_em.desc&limit=500&select=recomendacao,criado_em') || [];
+    const rows = await sb('/rest/v1/resultados_ia?criterio_id=like.audit_%25&order=criado_em.desc&limit=500&select=recomendacao,criado_em', { headers: { 'Prefer': 'return=representation' } }) || [];
     let csv = 'Data/Hora,Usuário,Email,Perfil,Ação,Detalhe,Nível\n';
     rows.forEach(row => {
       let e = {};
