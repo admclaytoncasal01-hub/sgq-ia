@@ -5700,7 +5700,7 @@ async function gerarPlanoAcao() {
     batches.push(todosRequisitos.slice(i, i+batchSize));
   }
 
-  var system5w2h = 'Voce e consultor senior ISO. Para cada requisito fornecido, gere um 5W2H objetivo em JSON. Responda SOMENTE com JSON valido sem markdown, formato: {"requisitos":[{"reqNum":"X","what":"O que fazer","why":"Por que fazer","who":"Quem faz","where":"Onde sera feito","when":"Quando (data ou semana)","how":"Como executar","how_much":"Custo/esforco estimado","prioridade":"Alta|Media|Baixa","risco":"descricao do risco se nao feito"}]}';
+  var system5w2h = 'Voce e auditor senior ISO especialista em evidencias documentais. Para cada requisito fornecido, gere um plano de acao focado em DOCUMENTOS CONCRETOS que o auditor externo ira exigir ver. Responda SOMENTE com JSON valido sem markdown, formato: {"requisitos":[{"reqNum":"X","what":"Liste os documentos exatos a apresentar (ex: Politica da Qualidade assinada, Ata de reuniao datada, Matriz de riscos aprovada)","why":"Por que esse documento e exigido pela norma","who":"Quem e responsavel por preparar/assinar o documento","where":"Onde sera armazenado/apresentado (fisico ou sistema)","when":"Prazo para ter o documento pronto","how":"Como produzir o documento: modelo a usar, quem assina, onde arquivar","how_much":"Esforco estimado em horas ou dias para preparar","documentos":["Doc 1 especifico","Doc 2 especifico","Doc 3 especifico"],"prioridade":"Alta|Media|Baixa","risco":"O que o auditor vai questionar se esse documento nao estiver pronto"}]}';
 
   var allResults = {};
   var totalBatches = batches.length;
@@ -5714,7 +5714,7 @@ async function gerarPlanoAcao() {
     batch.forEach(function(r) {
       batchText += 'ReqNum:' + r.reqNum + '|Norma:' + r.norma + '|Titulo:' + r.title + '|DataLimite:' + r.dataLimite + '|Pendentes:' + r.pendentes.slice(0,5).map(function(p){return p.replace(/[^\w\s]/g,'').slice(0,50);}).join(';') + '\n';
     });
-    batchText += 'Use a DataLimite de cada req como referencia para o campo when. JSON compacto ASCII.';
+    batchText += 'Use a DataLimite de cada req como referencia para o campo when. Para cada criterio pendente, identifique o documento especifico que o auditor ira solicitar (ex: procedimento escrito, registro assinado, relatorio com data, ata, politica aprovada, evidencia de treinamento, lista documentada). JSON compacto ASCII sem caracteres especiais.';
 
     try {
       var raw = await callGemini(batchText, system5w2h);
@@ -5821,12 +5821,12 @@ async function gerarPlanoAcao() {
 
       // 5W2H grid
       var fields = [
-        {key:'what', label:'O QUE fazer', icon:'\uD83D\uDCCB', color:'#00c8ff'},
+        {key:'what', label:'O QUE (documentos exigidos)', icon:'\uD83D\uDCCB', color:'#00c8ff'},
         {key:'why',  label:'POR QUE fazer', icon:'\uD83C\uDFAF', color:'#a050ff'},
         {key:'who',  label:'QUEM faz', icon:'\uD83D\uDC64', color:'#00e676'},
         {key:'where',label:'ONDE', icon:'\uD83D\uDCCD', color:'#ffb400'},
         {key:'when', label:'QUANDO (prazo)', icon:'\uD83D\uDCC5', color:'#ff5252'},
-        {key:'how',  label:'COMO executar', icon:'\u2699\uFE0F', color:'#00c8ff'},
+        {key:'how',  label:'COMO preparar o documento', icon:'\u2699\uFE0F', color:'#00c8ff'},
         {key:'how_much', label:'QUANTO (esforco)', icon:'\u23F1\uFE0F', color:'#ffea00'}
       ];
 
@@ -5839,6 +5839,26 @@ async function gerarPlanoAcao() {
         html += '</div>';
       });
       html += '</div>';
+
+      // Documents to present — main addition
+      if (w.documentos && w.documentos.length) {
+        html += '<div style="background:rgba(0,200,255,.05);border:1px solid rgba(0,200,255,.2);border-radius:9px;padding:12px 14px;margin-bottom:10px">';
+        html += '<div style="font-size:11px;font-weight:700;color:#00c8ff;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">\uD83D\uDCC2 Documentos a Apresentar na Auditoria</div>';
+        html += '<div style="display:flex;flex-direction:column;gap:5px">';
+        w.documentos.forEach(function(doc, di) {
+          html += '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 10px;background:#111820;border-radius:6px;border-left:2px solid #00c8ff">';
+          html += '<span style="font-size:11px;font-weight:700;color:#00c8ff;flex-shrink:0;margin-top:1px">' + (di+1) + '</span>';
+          html += '<span style="font-size:12px;color:#e8edf3">' + doc + '</span>';
+          html += '</div>';
+        });
+        html += '</div></div>';
+      } else if (w.what && w.what.length > 10) {
+        // Fallback: parse what field as document list if no documentos array
+        html += '<div style="background:rgba(0,200,255,.05);border:1px solid rgba(0,200,255,.2);border-radius:9px;padding:12px 14px;margin-bottom:10px">';
+        html += '<div style="font-size:11px;font-weight:700;color:#00c8ff;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">\uD83D\uDCC2 Documentos a Apresentar na Auditoria</div>';
+        html += '<div style="font-size:12px;color:#e8edf3;line-height:1.7">' + w.what + '</div>';
+        html += '</div>';
+      }
 
       // Risk
       if (w.risco) {
